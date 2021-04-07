@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "779574096395",
+    "project_id": "shopist-4af0d",
+    "storage_bucket": "shopist-4af0d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:779574096395:android:73efca3af49b6121234d0e",
+        "android_client_info": {
+          "package_name": "pt.ulisboa.tecnico.cmov.shopist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "779574096395-k09ne6u8bq5h2nafdtcmf7oebai8ec2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsMkF1eonA8zHG8e9f14HpCLPfs9EmmI8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "779574096395-k09ne6u8bq5h2nafdtcmf7oebai8ec2i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
