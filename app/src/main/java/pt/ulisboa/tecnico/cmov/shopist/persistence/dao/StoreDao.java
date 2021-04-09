@@ -30,10 +30,10 @@ public interface StoreDao {
     void updateStoreList(StoreList p);
 
     @Query("SELECT * FROM StoreList")
-    Single<List<PantryList>> loadAllStoreLists();
+    Single<List<StoreList>> loadAllStoreLists();
 
     @Query("SELECT * FROM StoreList WHERE name = :name")
-    Single<List<PantryList>> loadStoreListByName(String name);
+    Single<List<StoreList>> loadStoreListByName(String name);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Completable insertCart(Cart c);
