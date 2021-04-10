@@ -8,9 +8,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -50,8 +52,7 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
         map.setOnMapClickListener(point -> {
             if (m != null) {
                 m.setPosition(point);
-            }
-            else {
+            } else {
                 m = map.addMarker(new MarkerOptions()
                         .position(point)
                         .title("Marker in Location")
@@ -61,12 +62,16 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-        else {
+        } else {
             if (map != null) {
                 map.setMyLocationEnabled(true);
             }
         }
+    }
+
+    public void onClickClearLocation(View view) {
+        m.remove();
+        m = null;
     }
 
     @Override
@@ -84,15 +89,15 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults){
-        switch (requestCode){
+                                           int[] grantResults) {
+        switch (requestCode) {
             case 1: {
-                if (grantResults.length>0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED){
+                            Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                         Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
                     }
-                }else{
+                } else {
                     Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
                 }
                 return;
