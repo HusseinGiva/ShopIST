@@ -19,7 +19,7 @@
         app:theme="@style/Theme.Toolbar"
         app:title="List Name" />
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
@@ -36,9 +36,22 @@
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp"
         android:onClick="onClickResetLocation"
-        android:text="Reset Location"
+        android:text="Recenter Location"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/map" />
+
+    <Button
+        android:id="@+id/sampleItemButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="100dp"
+        android:onClick="onClickSampleItem"
+        android:text="Sample Item"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listToolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

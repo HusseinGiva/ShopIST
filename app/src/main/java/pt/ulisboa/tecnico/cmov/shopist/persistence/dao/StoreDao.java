@@ -14,7 +14,6 @@ import io.reactivex.Single;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Cart;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.CartItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.CartWithItems;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreCart;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItemPrice;

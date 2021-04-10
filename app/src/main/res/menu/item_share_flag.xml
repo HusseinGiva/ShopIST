@@ -3,21 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/editList"
+        android:id="@+id/editItem"
         android:icon="@drawable/baseline_edit_24"
         android:title="Edit"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/shareList"
+        android:id="@+id/shareItem"
         android:icon="@drawable/baseline_share_24"
         android:title="Share"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/addProduct"
-        android:icon="@drawable/baseline_add_24"
-        android:title="+"
+        android:id="@+id/flagItem"
+        android:icon="@drawable/baseline_flag_24"
+        android:title="Flag"
         app:showAsAction="ifRoom" />
 
 </menu>

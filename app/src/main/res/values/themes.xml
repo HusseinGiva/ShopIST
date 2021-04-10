@@ -15,6 +15,7 @@
         <item name="titleTextColor">@android:color/white</item>
         <item name="subtitleTextColor">@android:color/white</item>
     </style>
+
     <style name="Theme.Toolbar" parent="Theme.ShopIST">
         <!--This line changes the color of text in Toolbar-->
         <item name="android:textColorPrimary">@color/white</item>

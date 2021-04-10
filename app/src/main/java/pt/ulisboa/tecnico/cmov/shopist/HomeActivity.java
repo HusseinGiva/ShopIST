@@ -1,14 +1,16 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -16,8 +18,36 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.homeToolbar);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(R.id.fragment_container_view, ListFragment.class, null)
+                    .commit();
+        }
+        Toolbar myToolbar = findViewById(R.id.homeToolbar);
         setSupportActionBar(myToolbar);
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.lists:
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container_view, ListFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .commit();
+                    break;
+                case R.id.cart:
+                    fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container_view, CartFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .commit();
+                    break;
+                case R.id.profile:
+                    break;
+            }
+            return true;
+        });
     }
 
     @Override
@@ -34,7 +64,6 @@ public class HomeActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, AddList.class);
                 startActivity(intent);
                 return true;
-
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -43,8 +72,4 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickSampleList(View view) {
-        Intent intent = new Intent(this, ListActivity.class);
-        startActivity(intent);
-    }
 }

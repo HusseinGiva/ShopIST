@@ -17,5 +17,6 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 @Database(entities = {PantryList.class, StoreList.class, Cart.class, Item.class, PantryItem.class, StoreItem.class, StoreItemPrice.class, CartItem.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract PantryDao pantryDao();
+
     public abstract StoreDao storeDao();
 }
