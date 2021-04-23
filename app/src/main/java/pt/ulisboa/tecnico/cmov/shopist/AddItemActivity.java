@@ -9,6 +9,8 @@ import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Size;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +41,8 @@ public class AddItemActivity extends AppCompatActivity {
 
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     PreviewView viewFinder;
+    EditText barcodeNumber;
+    Button clearBarcode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +54,19 @@ public class AddItemActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
         viewFinder = findViewById(R.id.viewFinder);
+        barcodeNumber = findViewById(R.id.barcodeNumber);
+        clearBarcode = findViewById(R.id.clearBarcodeNumber);
+        clearBarcode.setOnClickListener(v -> onClickClearBarcode());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA}, 1);
         } else {
             startCamera();
         }
+    }
+
+    void onClickClearBarcode() {
+        barcodeNumber.setText("");
     }
 
     void startCamera() {
@@ -98,9 +109,8 @@ public class AddItemActivity extends AppCompatActivity {
 
                                         String rawValue = barcode.getRawValue();
 
-                                        int valueType = barcode.getValueType();
                                         // See API reference for complete list of supported types
-                                        Toast.makeText(getApplicationContext(), rawValue, Toast.LENGTH_SHORT).show();
+                                        barcodeNumber.setText(rawValue);
                                     }
                                 })
                                 .addOnFailureListener(e -> {
@@ -108,7 +118,6 @@ public class AddItemActivity extends AppCompatActivity {
                                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                 })
                                 .addOnCompleteListener(task -> {
-                                    //mediaImage.close();
                                     image.close();
                                 });
                     }
