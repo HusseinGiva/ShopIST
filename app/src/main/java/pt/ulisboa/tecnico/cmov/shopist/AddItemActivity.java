@@ -1,18 +1,22 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.media.Image;
+import android.os.Bundle;
+import android.util.Log;
+import android.util.Size;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.widget.Toast;
-
-import androidx.camera.core.AspectRatio;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -20,14 +24,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.mlkit.vision.barcode.Barcode;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.common.InputImage;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class AddItemActivity extends AppCompatActivity {
 
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    //Preview preview = new Preview.Builder().build();
     PreviewView viewFinder;
 
     @Override
@@ -62,7 +72,48 @@ public class AddItemActivity extends AppCompatActivity {
 
                 preview.setSurfaceProvider(viewFinder.getSurfaceProvider());
 
-                Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
+                ImageAnalysis imageAnalysis =
+                        new ImageAnalysis.Builder()
+                                .setTargetResolution(new Size(1920, 1080))
+                                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                .build();
+
+                imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(getApplication()), image -> {
+                    BarcodeScannerOptions options =
+                            new BarcodeScannerOptions.Builder()
+                                    .setBarcodeFormats(
+                                            Barcode.FORMAT_CODE_128,
+                                            Barcode.FORMAT_UPC_A,
+                                            Barcode.FORMAT_UPC_E)
+                                    .build();
+                    BarcodeScanner scanner = BarcodeScanning.getClient(options);
+                    @SuppressLint("UnsafeOptInUsageError") Image mediaImage = image.getImage();
+                    if (image != null) {
+                        InputImage imageInput = InputImage.fromMediaImage(mediaImage, image.getImageInfo().getRotationDegrees());
+                        Task<List<Barcode>> result = scanner.process(imageInput)
+                                .addOnSuccessListener(barcodes -> {
+                                    for (Barcode barcode : barcodes) {
+                                        Rect bounds = barcode.getBoundingBox();
+                                        Point[] corners = barcode.getCornerPoints();
+
+                                        String rawValue = barcode.getRawValue();
+
+                                        int valueType = barcode.getValueType();
+                                        // See API reference for complete list of supported types
+                                        Toast.makeText(getApplicationContext(), rawValue, Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("MYAPP", "exception", e);
+                                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                })
+                                .addOnCompleteListener(task -> {
+                                    //mediaImage.close();
+                                    image.close();
+                                });
+                    }
+                });
+                cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future
                 // This should never be reached
