@@ -18,7 +18,11 @@ import android.provider.MediaStore;
 import android.widget.Button;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -26,7 +30,9 @@ import java.util.Date;
 public class AddPicturesActivity extends AppCompatActivity implements PicturesFragment.OnListFragmentInteractionListener {
 
     Button addNewPicture;
+    Button browsePicturesButton;
     ActivityResultLauncher<Intent> cameraResultLauncher;
+    ActivityResultLauncher<Intent> galleryResultLauncher;
     String currentPhotoPath;
     ArrayList<String> photoPaths = new ArrayList<>();
     private RecyclerView.Adapter recyclerViewAdapter;
@@ -58,6 +64,41 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                         recyclerViewAdapter.notifyItemInserted(0);
                     }
                 });
+        browsePicturesButton = findViewById(R.id.browsePicturesButton);
+        browsePicturesButton.setOnClickListener(v -> onClickBrowseButton());
+        galleryResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Uri selectedImageUri = result.getData().getData();
+                        try {
+                            String filePath = getApplicationContext().getApplicationInfo().dataDir + File.separator
+                                    + System.currentTimeMillis();
+                            File file = new File(filePath);
+                            InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(selectedImageUri);
+                            OutputStream outputStream = new FileOutputStream(file);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = inputStream.read(buf)) > 0)
+                                outputStream.write(buf, 0, len);
+                            outputStream.close();
+                            inputStream.close();
+                            photoPaths.add(file.getAbsolutePath());
+                            PictureContent.loadImage(file);
+                            recyclerViewAdapter.notifyItemInserted(0);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+    }
+
+    void onClickBrowseButton() {
+        Intent intent = new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        intent.setType("image/*");
+        galleryResultLauncher.launch(intent);
     }
 
     private File createImageFile() throws IOException {
