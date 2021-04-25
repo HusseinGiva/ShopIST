@@ -6,16 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ListActivity">
 
-    <TextView
-        android:id="@+id/selected_list_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@+id/sampleItemButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listToolbar"
-        android:text=""/>
-
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/listToolbar"
         android:layout_width="match_parent"
@@ -26,8 +16,7 @@
         android:theme="@style/Theme.ShopIST"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/list_share_menu"
-        app:theme="@style/Theme.Toolbar"
-        app:title="List Name" />
+        app:theme="@style/Theme.Toolbar" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"

@@ -59,12 +59,11 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             @Override
             public void run() {
                 if(globalVariable.getLoaded() == 0) {
-                    TextView v = findViewById(R.id.selected_list_name);
                     if(globalVariable.getTypeSelected().equals("PANTRY")) {
-                        v.setText(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
+                        getSupportActionBar().setTitle(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
                     }
                     else if(globalVariable.getTypeSelected().equals("SHOPPING")) {
-                        v.setText(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
+                        getSupportActionBar().setTitle(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
                     }
                     timerHandler.removeCallbacks(this);
                 }
@@ -86,6 +85,9 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();    //Call the back button's method
+                return true;
             case R.id.addProduct:
                 Intent intent = new Intent(this, AddItemActivity.class);
                 startActivity(intent);

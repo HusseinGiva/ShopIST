@@ -145,4 +145,11 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         intent.putExtra("URI", mItem.toString());
         startActivity(intent);
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent();
+        intent.putStringArrayListExtra("Paths", photoPaths);
+        setResult(5, intent);
+    }
 }

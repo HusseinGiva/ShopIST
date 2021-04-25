@@ -44,6 +44,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -54,7 +55,8 @@ public class AddItemActivity extends AppCompatActivity {
     EditText barcodeNumber;
     Button clearBarcode;
     Button addPictures;
-    ActivityResultLauncher<Intent> cameraResultLauncher;
+    Button saveItem;
+    ArrayList<String> photoPaths = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,8 @@ public class AddItemActivity extends AppCompatActivity {
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumber);
         addPictures = findViewById(R.id.addPictures);
+        saveItem = findViewById(R.id.saveItemButton);
+        saveItem.setOnClickListener(v -> onClickSaveItem(v));
         clearBarcode = findViewById(R.id.clearBarcodeNumber);
         clearBarcode.setOnClickListener(v -> onClickClearBarcode());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -76,6 +80,11 @@ public class AddItemActivity extends AppCompatActivity {
         } else {
             startCamera();
         }
+    }
+
+    public void onClickSaveItem(View view) {
+        Intent intent = new Intent(this, AddPicturesActivity.class);
+        startActivity(intent);
     }
 
     public void onClickAddPictures(View view) {

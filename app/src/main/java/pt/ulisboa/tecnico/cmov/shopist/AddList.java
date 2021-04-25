@@ -61,7 +61,7 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
-
+        m = null;
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "database-name").build();
     }
@@ -92,8 +92,10 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
     }
 
     public void onClickClearLocation(View view) {
-        m.remove();
-        m = null;
+        if (m != null) {
+            m.remove();
+            m = null;
+        }
     }
 
     public void onRadioButtonClicked(View view) {

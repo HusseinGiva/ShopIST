@@ -35,6 +35,8 @@ public class GlobalClass extends Application {
 
         if(this.loaded == 0) return;
 
+        typeSelected = "PANTRY";
+
         mDisposable.add(db.pantryDao().getPantryWithItems()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
