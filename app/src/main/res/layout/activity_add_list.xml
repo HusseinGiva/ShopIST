@@ -19,7 +19,7 @@
         app:title="New List" />
 
     <EditText
-        android:id="@+id/editTextTextPersonName"
+        android:id="@+id/listName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
@@ -35,16 +35,52 @@
         app:layout_constraintTop_toBottomOf="@+id/addListToolbar"
         android:autofillHints="Please Enter List Name" />
 
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/map"
+        app:layout_constraintTop_toBottomOf="@+id/listName">
+
+        <RadioButton
+            android:id="@+id/radio_pantry"
+            android:layout_width="168dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="75dp"
+            android:onClick="onRadioButtonClicked"
+            android:text="pantry"
+            android:textSize="22sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <RadioButton
+            android:id="@+id/radio_store"
+            android:layout_width="168dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="50dp"
+            android:onClick="onRadioButtonClicked"
+            android:text="store"
+            android:textSize="22sp"/>
+    </RadioGroup>
+
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        android:layout_marginBottom="250dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="150dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
 
     <Button
         android:id="@+id/addListClearLocationButton"
@@ -64,8 +100,9 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="35dp"
         android:background="#FF1687CE"
+        android:onClick="onClickSaveList"
         android:text="Save List"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,10 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.room.Room;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,6 +24,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -29,6 +41,12 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
     private GoogleMap map;
 
     private Marker m;
+
+    private String list_type = "";
+
+    private AppDatabase db;
+
+    private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +61,9 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database-name").build();
     }
 
     @Override
@@ -73,6 +94,57 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
     public void onClickClearLocation(View view) {
         m.remove();
         m = null;
+    }
+
+    public void onRadioButtonClicked(View view) {
+        boolean checked = ((RadioButton) view).isChecked();
+        switch(view.getId()) {
+            case R.id.radio_pantry:
+                if (checked) {
+                    this.list_type = "pantry";
+                    break;
+                }
+            case R.id.radio_store:
+                if (checked) {
+                    this.list_type = "store";
+                    break;
+                }
+        }
+    }
+
+    public void onClickSaveList(View view) {
+        EditText e = (EditText) findViewById(R.id.listName);
+        if(e.getText().toString().equals("")) {
+            Toast.makeText(this, "Please insert a list name.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(this.list_type.equals("")) {
+            Toast.makeText(this, "Please select a list type.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
+
+        if(this.list_type.equals("pantry")) {
+            PantryList l = new PantryList(e.getText().toString(), "Paradise");
+            globalVariable.addPantry(l);
+            mDisposable.add(db.pantryDao().insertPantryList(l)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe());
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+        }
+        else if(this.list_type.equals("store")) {
+            StoreList l = new StoreList(e.getText().toString(), "Hell");
+            globalVariable.addStore(l);
+            mDisposable.add(db.storeDao().insertStoreList(l)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe());
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override

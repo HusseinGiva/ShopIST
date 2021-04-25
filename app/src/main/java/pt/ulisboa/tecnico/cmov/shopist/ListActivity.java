@@ -4,10 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,12 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+
+import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
 
 public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
@@ -43,6 +51,29 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 .findFragmentById(R.id.map);
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
+        Handler timerHandler = new Handler();
+        Runnable timerRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if(globalVariable.getLoaded() == 0) {
+                    TextView v = findViewById(R.id.selected_list_name);
+                    if(globalVariable.getTypeSelected().equals("PANTRY")) {
+                        v.setText(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
+                    }
+                    else if(globalVariable.getTypeSelected().equals("SHOPPING")) {
+                        v.setText(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
+                    }
+                    timerHandler.removeCallbacks(this);
+                }
+                else {
+                    timerHandler.postDelayed(this, 500);
+                }
+            }
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
     }
 
     @Override

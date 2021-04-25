@@ -12,4 +12,11 @@ public class StoreList {
     public long number_of_items;
     public String location;
     public long queue_time;
+
+    public StoreList(String name, String location) {
+        this.name = name;
+        this. location = location;
+        this.number_of_items = 0;
+        this.queue_time = -1;
+    }
 }

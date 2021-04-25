@@ -12,4 +12,11 @@ public class PantryList {
     public long number_of_items;
     public String location;
     public boolean created;
+
+    public PantryList(String name, String location) {
+        this.name = name;
+        this. location = location;
+        this.number_of_items = 0;
+        this.created = true;
+    }
 }

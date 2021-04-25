@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ListFragment">
+    tools:context=".ListFragment"
+    android:orientation="vertical">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
@@ -26,16 +27,9 @@
 
     </com.google.android.material.tabs.TabLayout>
 
-    <Button
-        android:id="@+id/buttonSampleList"
+    <ListView
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="75dp"
-        android:layout_marginEnd="100dp"
-        android:text="Sample List"
-        app:layout_constraintEnd_toEndOf="@id/tabLayout"
-        app:layout_constraintStart_toStartOf="@id/tabLayout"
-        app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+        android:layout_height="wrap_content" />
 
-</FrameLayout>
+</LinearLayout>

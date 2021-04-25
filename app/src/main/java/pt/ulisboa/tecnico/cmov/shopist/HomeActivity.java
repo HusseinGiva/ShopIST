@@ -2,15 +2,26 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
+import androidx.room.Room;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import java.util.List;
+
+import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -48,6 +59,11 @@ public class HomeActivity extends AppCompatActivity {
             }
             return true;
         });
+
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
+                AppDatabase.class, "database-name").build();
+        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
+        globalVariable.setUp(db);
     }
 
     @Override

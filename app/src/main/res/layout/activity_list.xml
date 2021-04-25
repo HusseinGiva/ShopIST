@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".ListActivity">
 
+    <TextView
+        android:id="@+id/selected_list_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/sampleItemButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/listToolbar"
+        android:text=""/>
+
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/listToolbar"
         android:layout_width="match_parent"
@@ -45,13 +55,10 @@
         android:id="@+id/sampleItemButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="100dp"
         android:onClick="onClickSampleItem"
         android:text="Sample Item"
+        app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/listToolbar" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
