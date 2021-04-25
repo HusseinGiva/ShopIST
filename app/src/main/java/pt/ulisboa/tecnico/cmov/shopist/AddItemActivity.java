@@ -2,17 +2,27 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,6 +53,8 @@ public class AddItemActivity extends AppCompatActivity {
     PreviewView viewFinder;
     EditText barcodeNumber;
     Button clearBarcode;
+    Button addPictures;
+    ActivityResultLauncher<Intent> cameraResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +67,7 @@ public class AddItemActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumber);
+        addPictures = findViewById(R.id.addPictures);
         clearBarcode = findViewById(R.id.clearBarcodeNumber);
         clearBarcode.setOnClickListener(v -> onClickClearBarcode());
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -63,6 +76,11 @@ public class AddItemActivity extends AppCompatActivity {
         } else {
             startCamera();
         }
+    }
+
+    public void onClickAddPictures(View view) {
+        Intent intent = new Intent(this, AddPicturesActivity.class);
+        startActivity(intent);
     }
 
     void onClickClearBarcode() {

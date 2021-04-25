@@ -5,7 +5,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <uses-feature android:name="android.hardware.camera.any" />
+
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
@@ -16,7 +18,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:replace="android:icon,android:theme">
-        <activity android:name=".AddItemActivity" android:parentActivityName=".ListActivity"></activity>
+        <activity android:name=".ViewPicturesActivity" android:parentActivityName=".AddPicturesActivity"></activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="pt.ulisboa.tecnico.cmov.shopist"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <activity
+            android:name=".AddPicturesActivity"
+            android:parentActivityName=".AddItemActivity" />
+        <activity
+            android:name=".AddItemActivity"
+            android:parentActivityName=".ListActivity" />
         <activity
             android:name=".ItemActivity"
             android:parentActivityName=".ListActivity" />
