@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CartFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingLeft="40sp"
+        android:paddingRight="40sp"
+        android:paddingTop="100sp">
+
+        <TextView
+            android:id="@+id/textViewFirstName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="36sp" />
+
+        <TextView
+            android:id="@+id/textViewLastName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewFirstName"
+            android:textSize="60sp" />
+
+        <Button
+            android:id="@+id/buttonCreateAccount"
+            android:layout_width="254dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewLastName"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="100sp"
+            android:foregroundGravity="center_horizontal"
+            android:text="Create Account"
+            android:textAlignment="center" />
+
+        <Button
+            android:id="@+id/buttonLogOut"
+            android:layout_width="254dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonCreateAccount"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20sp"
+            android:background="#F44336"
+            android:text="Log Out"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
+</FrameLayout>

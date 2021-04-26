@@ -115,4 +115,9 @@ public class GlobalClass extends Application {
             }
         }
     }
+
+    public void clearData(){
+        pantryWithItems.clear();
+        storeWithItems.clear();
+    }
 }

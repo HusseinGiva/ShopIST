@@ -55,6 +55,11 @@ public class HomeActivity extends AppCompatActivity {
                             .commit();
                     break;
                 case R.id.profile:
+                    fragmentManager = getSupportFragmentManager();
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.fragment_container_view, ProfileFragment.class, null)
+                            .setReorderingAllowed(true)
+                            .commit();
                     break;
             }
             return true;
