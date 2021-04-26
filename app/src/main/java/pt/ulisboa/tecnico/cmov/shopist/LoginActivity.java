@@ -22,7 +22,7 @@ import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;*/
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "MAIN" ;
     private FirebaseAuth mAuth;
@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_login);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.mainToolbar);
         setSupportActionBar(myToolbar);
 
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Something went wrong. Please make sure you have Internet Connection.",
+                            Toast.makeText(LoginActivity.this, "Something went wrong. Please make sure you have Internet Connection.",
                                     Toast.LENGTH_SHORT).show();
                             updateUI(null);
                         }
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed",
+                            Toast.makeText(LoginActivity.this, "Authentication failed",
                                     Toast.LENGTH_SHORT).show();
                             updateUI(null);
                         }

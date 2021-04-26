@@ -75,7 +75,7 @@ public class HomeActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.addList:
-                Intent intent = new Intent(this, AddList.class);
+                Intent intent = new Intent(this, AddListActivity.class);
                 startActivity(intent);
                 return true;
             default:

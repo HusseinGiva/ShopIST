@@ -124,7 +124,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 }).start();
 
 
-                                Intent intent1 = new Intent(getActivity(), MainActivity.class);
+                                Intent intent1 = new Intent(getActivity(), LoginActivity.class);
                                 intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent1);
                             });
@@ -137,7 +137,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 } else {
                     FirebaseAuth.getInstance().signOut();
 
-                    intent = new Intent(getActivity(), MainActivity.class);
+                    intent = new Intent(getActivity(), LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 }

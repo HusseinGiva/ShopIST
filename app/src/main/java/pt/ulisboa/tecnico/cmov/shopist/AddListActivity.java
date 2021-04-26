@@ -33,7 +33,7 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
-public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
+public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {

@@ -52,17 +52,17 @@
             android:value="${mapsApiKey}" />
 
         <activity
-            android:name=".AddList"
+            android:name=".AddListActivity"
             android:parentActivityName=".HomeActivity" />
         <activity android:name=".HomeActivity" />
         <activity
             android:name=".RegisterActivity"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".LoginActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".LoginActivity" />
         </activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
