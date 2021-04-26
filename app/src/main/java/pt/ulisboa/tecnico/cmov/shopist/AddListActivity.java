@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -18,12 +20,16 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.room.Room;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -44,9 +50,13 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
     private String list_type = "";
 
+    private Location lastKnownLocation = null;
+
     private AppDatabase db;
 
     private final CompositeDisposable mDisposable = new CompositeDisposable();
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +74,8 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         m = null;
         db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "database-name").build();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
     @Override
@@ -88,6 +100,21 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             if (map != null) {
                 map.setMyLocationEnabled(true);
             }
+            Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+            locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
+                    if (task.isSuccessful()) {
+                        lastKnownLocation = task.getResult();
+                        if (lastKnownLocation != null) {
+                            Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                    lastKnownLocation.getLongitude());
+                        }
+                    } else {
+                        Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                    }
+                }
+            });
         }
     }
 
@@ -124,28 +151,96 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             Toast.makeText(this, "Please select a list type.", Toast.LENGTH_SHORT).show();
             return;
         }
+        if(this.m == null) {
+            Toast.makeText(this, "Please select a list location on the map.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(lastKnownLocation == null) {
+            Toast.makeText(this, "Retrying to get current location.", Toast.LENGTH_SHORT).show();
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (map != null) {
+                    map.setMyLocationEnabled(true);
+                }
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                        lastKnownLocation.getLongitude());
+                                onClickSaveList(findViewById(R.id.saveListButton));
+                            }
+                        } else {
+                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                        }
+                    }
+                });
+            }
+            return;
+        }
+
+        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                lastKnownLocation.getLongitude() + "&destinations=" + m.getPosition().latitude + "," + m.getPosition().longitude +
+                "&key=AIzaSyATItFqioRqPJqHdbrH8wDddm_LqKBCpBk";
 
         GlobalClass globalVariable = (GlobalClass) getApplicationContext();
 
         if(this.list_type.equals("pantry")) {
-            PantryList l = new PantryList(e.getText().toString(), "Paradise");
+            PantryList l = new PantryList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude);
             globalVariable.addPantry(l);
-            mDisposable.add(db.pantryDao().insertPantryList(l)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe());
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
+
+            Object[] dataTransfer = new Object[] { l , url };
+            new DownloadUrl().execute(dataTransfer);
+
+            Handler timerHandler = new Handler();
+            Runnable timerRunnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    if (l.driveTime != null) {
+                        mDisposable.add(db.pantryDao().insertPantryList(l)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe());
+                        Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        timerHandler.removeCallbacks(this);
+                    } else {
+                        timerHandler.postDelayed(this, 500);
+                    }
+                }
+            };
+            timerHandler.postDelayed(timerRunnable, 0);
         }
         else if(this.list_type.equals("store")) {
-            StoreList l = new StoreList(e.getText().toString(), "Hell");
+            StoreList l = new StoreList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude);
             globalVariable.addStore(l);
-            mDisposable.add(db.storeDao().insertStoreList(l)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe());
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
+
+            Object[] dataTransfer = new Object[] { l , url };
+            new DownloadUrl().execute(dataTransfer);
+
+            Handler timerHandler = new Handler();
+            Runnable timerRunnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    if (l.driveTime != null) {
+                        mDisposable.add(db.storeDao().insertStoreList(l)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe());
+                        Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+                        startActivity(intent);
+                        timerHandler.removeCallbacks(this);
+                    } else {
+                        timerHandler.postDelayed(this, 500);
+                    }
+                }
+            };
+            timerHandler.postDelayed(timerRunnable, 0);
         }
     }
 
@@ -177,7 +272,24 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    map.setMyLocationEnabled(true);
+                    if (map != null) {
+                        map.setMyLocationEnabled(true);
+                    }
+                    Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                    locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful()) {
+                                lastKnownLocation = task.getResult();
+                                if (lastKnownLocation != null) {
+                                    Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                            lastKnownLocation.getLongitude());
+                                }
+                            } else {
+                                Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                            }
+                        }
+                    });
                 }
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();

@@ -10,12 +10,15 @@ public class PantryList {
     public long pantryId;
     public String name;
     public long number_of_items;
-    public String location;
+    public double latitude;
+    public double longitude;
+    public String driveTime = null;
     public boolean created;
 
-    public PantryList(String name, String location) {
+    public PantryList(String name, double latitude, double longitude) {
         this.name = name;
-        this. location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.number_of_items = 0;
         this.created = true;
     }

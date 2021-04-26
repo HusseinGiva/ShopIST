@@ -10,12 +10,15 @@ public class StoreList {
     public long storeId;
     public String name;
     public long number_of_items;
-    public String location;
+    public double latitude;
+    public double longitude;
+    public String driveTime = null;
     public long queue_time;
 
-    public StoreList(String name, String location) {
+    public StoreList(String name, double latitude, double longitude) {
         this.name = name;
-        this. location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
         this.number_of_items = 0;
         this.queue_time = -1;
     }

@@ -31,6 +31,7 @@ public class ListFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private List<String> names = new ArrayList<>();
+    List<String> drive_times = new ArrayList<>();
     private List<Integer> n_items = new ArrayList<>();
     private ListView list;
 
@@ -85,20 +86,23 @@ public class ListFragment extends Fragment {
                     public void run() {
                         if (globalVariable.getLoaded() == 0) {
                             names.clear();
+                            drive_times.clear();
                             n_items.clear();
                             if (tab.getText().equals("PANTRY")) {
                                 globalVariable.setTypeSelected("PANTRY");
                                 List<PantryWithItems> p = globalVariable.getPantryWithItems();
                                 for (PantryWithItems pi : p) {
                                     names.add(pi.pantry.name);
+                                    drive_times.add(pi.pantry.driveTime);
                                     n_items.add((int) pi.pantry.number_of_items);
                                 }
                             } else if (tab.getText().equals("SHOPPING")) {
                                 globalVariable.setTypeSelected("SHOPPING");
                                 List<StoreWithItems> p = globalVariable.getStoreWithItems();
-                                for (StoreWithItems pi : p) {
-                                    names.add(pi.store.name);
-                                    n_items.add((int) pi.store.number_of_items);
+                                for (StoreWithItems si : p) {
+                                    names.add(si.store.name);
+                                    drive_times.add(si.store.driveTime);
+                                    n_items.add((int) si.store.number_of_items);
                                 }
                             }
                             list.invalidateViews();
@@ -131,14 +135,16 @@ public class ListFragment extends Fragment {
             public void run() {
                 if (globalVariable.getLoaded() == 0) {
                     List<PantryWithItems> p = globalVariable.getPantryWithItems();
-                    names = new ArrayList<>();
-                    n_items = new ArrayList<>();
-                    for (PantryWithItems pi : p) {
+                    names.clear();
+                    drive_times.clear();
+                    n_items.clear();
+                    for(PantryWithItems pi : p) {
                         names.add(pi.pantry.name);
+                        drive_times.add(pi.pantry.driveTime);
                         n_items.add((int) pi.pantry.number_of_items);
                     }
                     list = view.findViewById(R.id.list);
-                    ListsListAdapter a = new ListsListAdapter(getContext(), names, n_items);
+                    ListsListAdapter a = new ListsListAdapter(getContext(), names, drive_times, n_items);
                     list.setAdapter(a);
                     timerHandler.removeCallbacks(this);
                 } else {

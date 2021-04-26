@@ -15,12 +15,14 @@ public class ListsListAdapter extends ArrayAdapter<String> {
 
     Context context;
     List<String> names;
+    List<String> drive_times;
     List<Integer> n_items;
 
-    public ListsListAdapter(Context context, List<String> names, List<Integer> n_items) {
+    public ListsListAdapter(Context context, List<String> names, List<String> drive_times, List<Integer> n_items) {
         super(context, R.layout.list_item, R.id.list_name, names);
         this.context = context;
         this.names = names;
+        this.drive_times = drive_times;
         this.n_items = n_items;
     }
 
@@ -39,7 +41,7 @@ public class ListsListAdapter extends ArrayAdapter<String> {
             holder = (ListsListViewHolder) view.getTag();
         }
         holder.listName.setText(names.get(position));
-        holder.driveTime.setText("Drive time: 5 min");
+        holder.driveTime.setText("Drive time: " + drive_times.get(position));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
 
         view.setOnClickListener(new View.OnClickListener() {

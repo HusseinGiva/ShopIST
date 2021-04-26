@@ -43,7 +43,6 @@ public class GlobalClass extends Application {
                 .subscribe(pantryWithItems -> {
                     this.pantryWithItems = pantryWithItems;
                     loaded--;
-                    Toast.makeText(this, "LOADED PANTRIES WITH ITEMS" + loaded, Toast.LENGTH_SHORT).show();
                 }));
 
         mDisposable.add(db.storeDao().getStoreWithItems()
@@ -52,7 +51,6 @@ public class GlobalClass extends Application {
                 .subscribe(storeWithItems -> {
                     this.storeWithItems = storeWithItems;
                     loaded--;
-                    Toast.makeText(this, "LOADED STORES WITH ITEMS" + loaded, Toast.LENGTH_SHORT).show();
                 }));
     }
 
