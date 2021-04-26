@@ -14,6 +14,10 @@ public class PictureContent {
         addItem(uri);
     }
 
+    public static void emptyList() {
+        PATHS.clear();
+    }
+
     private static void addItem(Uri uri) {
         PATHS.add(0, uri);
     }

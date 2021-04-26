@@ -44,6 +44,7 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -56,7 +57,10 @@ public class AddItemActivity extends AppCompatActivity {
     Button clearBarcode;
     Button addPictures;
     Button saveItem;
+    EditText name;
+    EditText quantity;
     ArrayList<String> photoPaths = new ArrayList<>();
+    ActivityResultLauncher<Intent> picturesResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +73,16 @@ public class AddItemActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumber);
+        name = findViewById(R.id.productName);
+        quantity = findViewById(R.id.productQuantity);
         addPictures = findViewById(R.id.addPictures);
+        picturesResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        photoPaths = result.getData().getStringArrayListExtra("PATHS");
+                    }
+                });
         saveItem = findViewById(R.id.saveItemButton);
         saveItem.setOnClickListener(v -> onClickSaveItem(v));
         clearBarcode = findViewById(R.id.clearBarcodeNumber);
@@ -82,6 +95,11 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     public void onClickSaveItem(View view) {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         startActivity(intent);
@@ -89,7 +107,8 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickAddPictures(View view) {
         Intent intent = new Intent(this, AddPicturesActivity.class);
-        startActivity(intent);
+        intent.putStringArrayListExtra("PATHS", photoPaths);
+        picturesResultLauncher.launch(intent);
     }
 
     void onClickClearBarcode() {
@@ -137,7 +156,9 @@ public class AddItemActivity extends AppCompatActivity {
                                         String rawValue = barcode.getRawValue();
 
                                         // See API reference for complete list of supported types
-                                        barcodeNumber.setText(rawValue);
+                                        if (barcodeNumber.getText().toString().matches("")) {
+                                            barcodeNumber.setText(rawValue);
+                                        }
                                     }
                                 })
                                 .addOnFailureListener(e -> {

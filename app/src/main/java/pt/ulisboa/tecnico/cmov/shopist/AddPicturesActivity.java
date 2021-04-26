@@ -15,7 +15,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -41,6 +43,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Toast.makeText(getApplicationContext(), Boolean.toString(photoPaths.isEmpty()), Toast.LENGTH_SHORT).show();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_pictures);
         Toolbar myToolbar = findViewById(R.id.addPicturesToolbar);
@@ -48,10 +51,19 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
+        photoPaths = getIntent().getStringArrayListExtra("PATHS");
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.picturesFragment);
             recyclerView = (RecyclerView) currentFragment.getView();
             recyclerViewAdapter = ((RecyclerView) currentFragment.getView()).getAdapter();
+        }
+        PictureContent.emptyList();
+        recyclerViewAdapter.notifyDataSetChanged();
+        if (!photoPaths.isEmpty()) {
+            for (String s: photoPaths) {
+                PictureContent.loadImage(new File(s));
+                recyclerViewAdapter.notifyItemInserted(0);
+            }
         }
         addNewPicture = findViewById(R.id.addNewPicture);
         addNewPicture.setOnClickListener(v -> dispatchTakePictureIntent());
@@ -93,6 +105,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                         }
                     }
                 });
+        Toast.makeText(getApplicationContext(), Boolean.toString(photoPaths.isEmpty()), Toast.LENGTH_SHORT).show();
     }
 
     void onClickBrowseButton() {
@@ -147,9 +160,23 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();    //Call the back button's method
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onBackPressed() {
         Intent intent = new Intent();
-        intent.putStringArrayListExtra("Paths", photoPaths);
-        setResult(5, intent);
+        intent.putStringArrayListExtra("PATHS", photoPaths);
+        setResult(Activity.RESULT_OK, intent);
+        finish();
     }
 }
