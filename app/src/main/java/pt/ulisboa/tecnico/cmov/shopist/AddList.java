@@ -177,7 +177,7 @@ public class AddList extends AppCompatActivity implements GoogleMap.OnMyLocation
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                    map.setMyLocationEnabled(true);
                 }
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();

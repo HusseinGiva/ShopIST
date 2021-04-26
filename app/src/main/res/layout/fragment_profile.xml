@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingLeft="40sp"
-        android:paddingRight="40sp"
-        android:paddingTop="100sp">
+        android:paddingTop="100sp"
+        android:paddingRight="40sp">
 
         <TextView
             android:id="@+id/textViewFirstName"

@@ -27,13 +27,13 @@
         android:layout_marginTop="50dp"
         android:layout_marginEnd="100dp"
         android:layout_marginRight="100dp"
+        android:autofillHints="Please Enter List Name"
         android:ems="10"
         android:hint="List Name"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addListToolbar"
-        android:autofillHints="Please Enter List Name" />
+        app:layout_constraintTop_toBottomOf="@+id/addListToolbar" />
 
     <RadioGroup
         android:id="@+id/radioGroup"

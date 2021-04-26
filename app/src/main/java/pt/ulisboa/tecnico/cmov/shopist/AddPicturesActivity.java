@@ -1,14 +1,5 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -17,7 +8,15 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -43,7 +42,6 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Toast.makeText(getApplicationContext(), Boolean.toString(photoPaths.isEmpty()), Toast.LENGTH_SHORT).show();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_pictures);
         Toolbar myToolbar = findViewById(R.id.addPicturesToolbar);
@@ -60,7 +58,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         PictureContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
         if (!photoPaths.isEmpty()) {
-            for (String s: photoPaths) {
+            for (String s : photoPaths) {
                 PictureContent.loadImage(new File(s));
                 recyclerViewAdapter.notifyItemInserted(0);
             }
@@ -105,11 +103,10 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                         }
                     }
                 });
-        Toast.makeText(getApplicationContext(), Boolean.toString(photoPaths.isEmpty()), Toast.LENGTH_SHORT).show();
     }
 
     void onClickBrowseButton() {
-        Intent intent = new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         intent.setType("image/*");
         galleryResultLauncher.launch(intent);
     }

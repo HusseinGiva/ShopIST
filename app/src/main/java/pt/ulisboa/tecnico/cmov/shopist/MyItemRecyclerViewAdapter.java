@@ -1,17 +1,16 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 /**
- *
  * TODO: Replace the implementation with code for your data type.
  */
 public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {

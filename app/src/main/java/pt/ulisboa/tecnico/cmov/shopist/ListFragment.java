@@ -1,14 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -18,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
 
@@ -87,29 +83,27 @@ public class ListFragment extends Fragment {
 
                     @Override
                     public void run() {
-                        if(globalVariable.getLoaded() == 0) {
+                        if (globalVariable.getLoaded() == 0) {
                             names.clear();
                             n_items.clear();
-                            if(tab.getText().equals("PANTRY")) {
+                            if (tab.getText().equals("PANTRY")) {
                                 globalVariable.setTypeSelected("PANTRY");
                                 List<PantryWithItems> p = globalVariable.getPantryWithItems();
-                                for(PantryWithItems pi : p) {
+                                for (PantryWithItems pi : p) {
                                     names.add(pi.pantry.name);
                                     n_items.add((int) pi.pantry.number_of_items);
                                 }
-                            }
-                            else if(tab.getText().equals("SHOPPING")) {
+                            } else if (tab.getText().equals("SHOPPING")) {
                                 globalVariable.setTypeSelected("SHOPPING");
                                 List<StoreWithItems> p = globalVariable.getStoreWithItems();
-                                for(StoreWithItems pi : p) {
+                                for (StoreWithItems pi : p) {
                                     names.add(pi.store.name);
                                     n_items.add((int) pi.store.number_of_items);
                                 }
                             }
                             list.invalidateViews();
                             timerHandler.removeCallbacks(this);
-                        }
-                        else {
+                        } else {
                             timerHandler.postDelayed(this, 500);
                         }
                     }
@@ -135,11 +129,11 @@ public class ListFragment extends Fragment {
 
             @Override
             public void run() {
-                if(globalVariable.getLoaded() == 0) {
+                if (globalVariable.getLoaded() == 0) {
                     List<PantryWithItems> p = globalVariable.getPantryWithItems();
                     names = new ArrayList<>();
                     n_items = new ArrayList<>();
-                    for(PantryWithItems pi : p) {
+                    for (PantryWithItems pi : p) {
                         names.add(pi.pantry.name);
                         n_items.add((int) pi.pantry.number_of_items);
                     }
@@ -147,8 +141,7 @@ public class ListFragment extends Fragment {
                     ListsListAdapter a = new ListsListAdapter(getContext(), names, n_items);
                     list.setAdapter(a);
                     timerHandler.removeCallbacks(this);
-                }
-                else {
+                } else {
                     timerHandler.postDelayed(this, 500);
                 }
             }

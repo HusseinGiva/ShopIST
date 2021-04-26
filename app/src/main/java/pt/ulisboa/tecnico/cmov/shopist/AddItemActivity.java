@@ -3,15 +3,12 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.media.Image;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
 import android.view.View;
@@ -19,8 +16,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -34,7 +29,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.LifecycleOwner;
 
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -44,14 +38,12 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class AddItemActivity extends AppCompatActivity {
 
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     PreviewView viewFinder;
     EditText barcodeNumber;
     Button clearBarcode;
@@ -61,6 +53,7 @@ public class AddItemActivity extends AppCompatActivity {
     EditText quantity;
     ArrayList<String> photoPaths = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +155,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     }
                                 })
                                 .addOnFailureListener(e -> {
-                                    Log.e("MYAPP", "exception", e);
+                                    Log.e("Error", "exception", e);
                                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                                 })
                                 .addOnCompleteListener(task -> {
@@ -170,7 +163,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 });
                     }
                 });
-                cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
+                cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future
                 // This should never be reached

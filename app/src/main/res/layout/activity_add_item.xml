@@ -21,109 +21,94 @@
         app:theme="@style/Theme.Toolbar"
         app:title="New Item" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <EditText
+        android:id="@+id/productName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="100dp"
+        android:ems="10"
+        android:hint="Name"
+        android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="83dp">
+        app:layout_constraintTop_toBottomOf="@+id/addItemToolbar" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+    <EditText
+        android:id="@+id/productQuantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="100dp"
+        android:ems="10"
+        android:hint="Quantity"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productName" />
 
-            <Button
-                android:id="@+id/saveItemButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="100dp"
-                android:layout_marginEnd="100dp"
-                android:layout_marginBottom="10dp"
-                android:background="#FF1687CE"
-                android:text="Save Item"
-                android:textColor="#FFFFFF"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.495"
-                app:layout_constraintStart_toStartOf="parent" />
+    <Button
+        android:id="@+id/clearBarcodeNumber"
+        android:layout_width="140dp"
+        android:layout_height="46dp"
+        android:elevation="2dp"
+        android:scaleType="fitCenter"
+        android:text="Clear Barcode"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewFinder" />
 
-            <EditText
-                android:id="@+id/productQuantity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="100dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="100dp"
-                android:ems="10"
-                android:hint="Quantity"
-                android:inputType="number"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/productName" />
+    <Button
+        android:id="@+id/addPictures"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:onClick="onClickAddPictures"
+        android:text="Add Pictures"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clearBarcodeNumber" />
 
-            <EditText
-                android:id="@+id/productName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="100dp"
-                android:layout_marginTop="100dp"
-                android:layout_marginEnd="100dp"
-                android:ems="10"
-                android:hint="Name"
-                android:inputType="textPersonName"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+    <EditText
+        android:id="@+id/barcodeNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:duplicateParentState="false"
+        android:ems="10"
+        android:hint="Barcode Number"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewFinder" />
 
-            <Button
-                android:id="@+id/clearBarcodeNumber"
-                android:layout_width="140dp"
-                android:layout_height="46dp"
-                android:layout_marginBottom="112dp"
-                android:elevation="2dp"
-                android:scaleType="fitCenter"
-                android:text="Clear Barcode"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Add Stores"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addPictures" />
 
-            <androidx.camera.view.PreviewView
-                android:id="@+id/viewFinder"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_marginTop="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/clearBarcodeNumber"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/productQuantity" />
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/productQuantity" />
 
-            <EditText
-                android:id="@+id/barcodeNumber"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="52dp"
-                android:duplicateParentState="false"
-                android:ems="10"
-                android:hint="Barcode Number"
-                android:inputType="number"
-                app:layout_constraintBottom_toTopOf="@+id/saveItemButton"
-                app:layout_constraintEnd_toEndOf="parent" />
-
-            <Button
-                android:id="@+id/addPictures"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onClickAddPictures"
-                android:text="Add Pictures"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clearBarcodeNumber" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+    <Button
+        android:id="@+id/saveItemButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        android:background="#FF1687CE"
+        android:text="Save Item"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

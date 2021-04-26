@@ -7,9 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
@@ -33,13 +30,12 @@ public class ListsListAdapter extends ArrayAdapter<String> {
         View view = convertView;
         ListsListViewHolder holder = null;
 
-        if(view == null) {
+        if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.list_item, parent, false);
             holder = new ListsListViewHolder(view);
             view.setTag(holder);
-        }
-        else {
+        } else {
             holder = (ListsListViewHolder) view.getTag();
         }
         holder.listName.setText(names.get(position));

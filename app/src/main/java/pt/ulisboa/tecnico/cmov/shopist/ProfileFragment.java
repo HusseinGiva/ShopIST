@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,15 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.room.Room;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -27,7 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 
-public class ProfileFragment extends Fragment implements View.OnClickListener{
+public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "PROFILE";
     private FirebaseAuth mAuth;
@@ -57,7 +52,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
 
-
         firstName = view.findViewById(R.id.textViewFirstName);
         lastName = view.findViewById(R.id.textViewLastName);
         btnCreateAccount = view.findViewById(R.id.buttonCreateAccount);
@@ -65,7 +59,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
 
         btnCreateAccount.setOnClickListener((View.OnClickListener) this);
         btnLogout.setOnClickListener((View.OnClickListener) this);
-
 
 
         return view;
@@ -77,7 +70,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if(!currentUser.isAnonymous()){
+        if (!currentUser.isAnonymous()) {
 
             DocumentReference docRef = db.collection("user").document(currentUser.getUid());
             docRef.get().addOnCompleteListener(task -> {
@@ -111,11 +104,11 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
 
                 FirebaseUser currentUser = mAuth.getCurrentUser();
 
-                if(currentUser.isAnonymous()){
+                if (currentUser.isAnonymous()) {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setCancelable(true);
-                    builder.setTitle(new String(Character.toChars(0x26A0)) +  " WARNING");
+                    builder.setTitle(new String(Character.toChars(0x26A0)) + " WARNING");
                     builder.setMessage("If you confirm this action, all your lists and items will be permanently deleted! Are you sure you want to continue?");
                     builder.setPositiveButton("Confirm",
                             (dialog, which) -> {
@@ -131,7 +124,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
                                 }).start();
 
 
-
                                 Intent intent1 = new Intent(getActivity(), MainActivity.class);
                                 intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent1);
@@ -142,7 +134,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener{
                     AlertDialog dialog = builder.create();
                     dialog.show();
 
-                }else{
+                } else {
                     FirebaseAuth.getInstance().signOut();
 
                     intent = new Intent(getActivity(), MainActivity.class);

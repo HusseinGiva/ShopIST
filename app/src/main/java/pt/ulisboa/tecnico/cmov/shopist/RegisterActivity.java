@@ -7,17 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -50,11 +44,11 @@ public class RegisterActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
 
-        email =  (EditText) findViewById(R.id.registerEmailTextBox);
-        firstName =  (EditText) findViewById(R.id.firstNameTextBox);
-        lastName =  (EditText) findViewById(R.id.lastNameTextBox);
-        password =  (EditText) findViewById(R.id.registerPasswordTextBox);
-        confirmPassword =  (EditText) findViewById(R.id.confirmPasswordTextBox);
+        email = findViewById(R.id.registerEmailTextBox);
+        firstName = findViewById(R.id.firstNameTextBox);
+        lastName = findViewById(R.id.lastNameTextBox);
+        password = findViewById(R.id.registerPasswordTextBox);
+        confirmPassword = findViewById(R.id.confirmPasswordTextBox);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -77,25 +71,25 @@ public class RegisterActivity extends AppCompatActivity {
         String confirmPasswordText = confirmPassword.getText().toString();
 
         //Check if name fields are empty
-        if(firstNameText.trim().isEmpty() || lastNameText.trim().isEmpty()){
+        if (firstNameText.trim().isEmpty() || lastNameText.trim().isEmpty()) {
             Toast.makeText(this, "Invalid name", Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if email is valid
-        if(!isValidEmail(emailText)){
+        if (!isValidEmail(emailText)) {
             Toast.makeText(this, "Invalid email", Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if password field is empty
-        if(passwordText.trim().isEmpty()){
+        if (passwordText.trim().isEmpty()) {
             Toast.makeText(this, "Invalid password", Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if passwords match
-        if(!passwordText.equals(confirmPasswordText)){
+        if (!passwordText.equals(confirmPasswordText)) {
             Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -103,7 +97,7 @@ public class RegisterActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         //Brand new user
-        if(currentUser == null){
+        if (currentUser == null) {
             mAuth.createUserWithEmailAndPassword(emailText, passwordText)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
@@ -111,18 +105,18 @@ public class RegisterActivity extends AppCompatActivity {
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             addUserToFirestore(user, firstNameText, lastNameText);
-                            updateUI(user,false);
+                            updateUI(user, false);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(RegisterActivity.this, task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null,false);
+                            updateUI(null, false);
                         }
                     });
         }
         //Connect anonymous account to account with credentials
-        else{
+        else {
             AuthCredential credential = EmailAuthProvider.getCredential(emailText, passwordText);
 
             mAuth.getCurrentUser().linkWithCredential(credential)
@@ -142,7 +136,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
 
-
     }
 
     private void addUserToFirestore(FirebaseUser user, String firstNameText, String lastNameText) {
@@ -159,11 +152,11 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void updateUI(FirebaseUser user, boolean isAnonymousConnect) {
-        if(user != null){
+        if (user != null) {
 
-            if(isAnonymousConnect){
+            if (isAnonymousConnect) {
                 finish();
-            }else{
+            } else {
                 Intent intent = new Intent(this, HomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

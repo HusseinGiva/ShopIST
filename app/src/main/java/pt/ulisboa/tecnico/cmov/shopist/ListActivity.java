@@ -9,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,11 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.List;
-
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
 
 public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
@@ -58,16 +53,14 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
             @Override
             public void run() {
-                if(globalVariable.getLoaded() == 0) {
-                    if(globalVariable.getTypeSelected().equals("PANTRY")) {
+                if (globalVariable.getLoaded() == 0) {
+                    if (globalVariable.getTypeSelected().equals("PANTRY")) {
                         getSupportActionBar().setTitle(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
-                    }
-                    else if(globalVariable.getTypeSelected().equals("SHOPPING")) {
+                    } else if (globalVariable.getTypeSelected().equals("SHOPPING")) {
                         getSupportActionBar().setTitle(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
                     }
                     timerHandler.removeCallbacks(this);
-                }
-                else {
+                } else {
                     timerHandler.postDelayed(this, 500);
                 }
             }
@@ -142,7 +135,7 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+                    map.setMyLocationEnabled(true);
                 }
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
