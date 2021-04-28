@@ -48,11 +48,14 @@ public class AddItemActivity extends AppCompatActivity {
     EditText barcodeNumber;
     Button clearBarcode;
     Button addPictures;
+    Button addStores;
     Button saveItem;
     EditText name;
     EditText quantity;
     ArrayList<String> photoPaths = new ArrayList<>();
+    ArrayList<String> stores = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
+    ActivityResultLauncher<Intent> storesResultLauncher;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
     @Override
@@ -70,6 +73,14 @@ public class AddItemActivity extends AppCompatActivity {
         quantity = findViewById(R.id.productQuantity);
         addPictures = findViewById(R.id.addPictures);
         picturesResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        photoPaths = result.getData().getStringArrayListExtra("PATHS");
+                    }
+                });
+        addStores = findViewById(R.id.addStoresButton);
+        storesResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
@@ -102,6 +113,12 @@ public class AddItemActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         intent.putStringArrayListExtra("PATHS", photoPaths);
         picturesResultLauncher.launch(intent);
+    }
+
+    public void onClickAddStores(View view) {
+        Intent intent = new Intent(this, AddStoresActivity.class);
+        intent.putStringArrayListExtra("PATHS", photoPaths);
+        storesResultLauncher.launch(intent);
     }
 
     void onClickClearBarcode() {

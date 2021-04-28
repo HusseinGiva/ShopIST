@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name="pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass"
+        android:name=".persistence.GlobalClass"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -19,7 +19,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:replace="android:icon,android:theme">
-        <activity android:name=".ViewPicturesActivity" android:parentActivityName=".AddPicturesActivity"></activity>
+        <activity android:name=".AddStoresActivity" android:parentActivityName=".AddItemActivity"></activity>
+        <activity
+            android:name=".ViewPicturesActivity"
+            android:parentActivityName=".AddPicturesActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

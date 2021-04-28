@@ -20,8 +20,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.room.Room;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -38,6 +40,16 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
+
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Arrays;
 
 public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -76,6 +88,37 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 AppDatabase.class, "database-name").build();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyATItFqioRqPJqHdbrH8wDddm_LqKBCpBk");
+        }
+        //PlacesClient placesClient = Places.createClient(this);
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.LAT_LNG));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(@NotNull Place place) {
+                if (m != null) {
+                    m.setPosition(place.getLatLng());
+                } else {
+                    m = map.addMarker(new MarkerOptions()
+                            .position(place.getLatLng())
+                            .title("Marker in Location")
+                            .draggable(true));
+                }
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
+            }
+            @Override
+            public void onError(@NotNull Status status) {
+                // TODO: Handle the error.
+                //Log.i(TAG, "An error occurred: " + status);
+            }
+        });
     }
 
     @Override
