@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey;
 public class PantryList {
     @PrimaryKey(autoGenerate = true)
     public long pantryId;
+    public String pantryIdServer;
     public String name;
     public long number_of_items;
     public double latitude;

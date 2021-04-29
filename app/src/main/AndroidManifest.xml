@@ -19,6 +19,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:replace="android:icon,android:theme">
+        <activity android:name=".ShareListActivity" android:parentActivityName=".ListActivity"></activity>
         <activity android:name=".AddStoresActivity" android:parentActivityName=".AddItemActivity"></activity>
         <activity
             android:name=".ViewPicturesActivity"
@@ -72,6 +73,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

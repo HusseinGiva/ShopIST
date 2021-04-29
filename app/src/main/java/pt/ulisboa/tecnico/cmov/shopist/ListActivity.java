@@ -85,6 +85,10 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 Intent intent = new Intent(this, AddItemActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.shareList:
+                intent = new Intent(this, ShareListActivity.class);
+                startActivity(intent);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey;
 public class StoreList {
     @PrimaryKey(autoGenerate = true)
     public long storeId;
+    public String storeIdServer;
     public String name;
     public long number_of_items;
     public double latitude;

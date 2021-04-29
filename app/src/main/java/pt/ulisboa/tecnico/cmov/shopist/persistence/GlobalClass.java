@@ -52,6 +52,8 @@ public class GlobalClass extends Application {
                     this.storeWithItems = storeWithItems;
                     loaded--;
                 }));
+
+
     }
 
     public int getLoaded() {

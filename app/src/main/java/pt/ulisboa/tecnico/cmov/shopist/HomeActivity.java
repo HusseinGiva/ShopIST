@@ -58,10 +58,7 @@ public class HomeActivity extends AppCompatActivity {
             return true;
         });
 
-        AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database-name").build();
-        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
-        globalVariable.setUp(db);
+
     }
 
     @Override
