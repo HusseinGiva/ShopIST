@@ -30,8 +30,10 @@ public class ListFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    public static final String LIST = "LIST";
+
     private List<String> names = new ArrayList<>();
-    List<String> drive_times = new ArrayList<>();
+    private List<String> drive_times = new ArrayList<>();
     private List<Integer> n_items = new ArrayList<>();
     private ListView list;
 
@@ -144,7 +146,7 @@ public class ListFragment extends Fragment {
                         n_items.add((int) pi.pantry.number_of_items);
                     }
                     list = view.findViewById(R.id.list);
-                    ListsListAdapter a = new ListsListAdapter(getContext(), names, drive_times, n_items);
+                    ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, null, null);
                     list.setAdapter(a);
                     timerHandler.removeCallbacks(this);
                 } else {

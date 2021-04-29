@@ -9,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,13 +26,22 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
 
 public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
     private GoogleMap map;
+
+    private ListView list;
+
+    public static final String PANTRY = "PANTRY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +64,24 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             @Override
             public void run() {
                 if (globalVariable.getLoaded() == 0) {
+
                     if (globalVariable.getTypeSelected().equals("PANTRY")) {
                         getSupportActionBar().setTitle(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
                     } else if (globalVariable.getTypeSelected().equals("SHOPPING")) {
                         getSupportActionBar().setTitle(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
                     }
+
+                    PantryWithItems pi = globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected());
+
+                    List<String> pantry_item_names = new ArrayList<>();
+                    List<Long> pantry_item_quantities = new ArrayList<>();
+                    for(Item i : pi.items) {
+                        pantry_item_names.add(i.name);
+                        pantry_item_quantities.add(globalVariable.getPantryItem(pi.pantry.pantryId, i.itemId).idealQuantity);
+                    }
+                    list = findViewById(R.id.pantry_list);
+                    ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities);
+                    list.setAdapter(a);
                     timerHandler.removeCallbacks(this);
                 } else {
                     timerHandler.postDelayed(this, 500);
@@ -66,6 +89,7 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
             }
         };
         timerHandler.postDelayed(timerRunnable, 0);
+
     }
 
     @Override

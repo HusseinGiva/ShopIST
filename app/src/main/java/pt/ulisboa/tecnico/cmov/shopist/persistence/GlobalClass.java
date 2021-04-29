@@ -13,6 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -22,12 +23,13 @@ public class GlobalClass extends Application {
 
     private List<PantryWithItems> pantryWithItems = new ArrayList<>();
     private List<StoreWithItems> storeWithItems = new ArrayList<>();
+    private List<PantryItem> pantryItems = new ArrayList<>();
 
     // PANTRY OR SHOPPING
     private String typeSelected = "";
     private Integer positionSelected = 0;
 
-    private int loaded = 2;
+    private int loaded = 3;
 
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 
@@ -53,7 +55,13 @@ public class GlobalClass extends Application {
                     loaded--;
                 }));
 
-
+        mDisposable.add(db.pantryDao().loadAllPantryItems()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(pantryItems -> {
+                    this.pantryItems = pantryItems;
+                    loaded--;
+                }));
     }
 
     public int getLoaded() {
@@ -116,8 +124,18 @@ public class GlobalClass extends Application {
         }
     }
 
+    public PantryItem getPantryItem(long pantryId, long itemId) {
+        for(PantryItem p : this.pantryItems) {
+            if(p.pantryId == pantryId && p.itemId == itemId) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     public void clearData(){
         pantryWithItems.clear();
         storeWithItems.clear();
+        pantryItems.clear();
     }
 }
