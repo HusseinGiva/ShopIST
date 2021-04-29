@@ -4,7 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,23 +25,30 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 
 public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private GoogleMap map;
-
-    private ListView list;
-
     public static final String PANTRY = "PANTRY";
+    private GoogleMap map;
+    private ListView list;
+    private String listType;
+    private String id;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,38 +64,87 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
 
-        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
-        Handler timerHandler = new Handler();
-        Runnable timerRunnable = new Runnable() {
+        db = FirebaseFirestore.getInstance();
 
-            @Override
-            public void run() {
-                if (globalVariable.getLoaded() == 0) {
+        listType = getIntent().getStringExtra("TAB");
+        id = getIntent().getStringExtra("ID");
 
-                    if (globalVariable.getTypeSelected().equals("PANTRY")) {
-                        getSupportActionBar().setTitle(globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected()).pantry.name);
-                    } else if (globalVariable.getTypeSelected().equals("SHOPPING")) {
-                        getSupportActionBar().setTitle(globalVariable.getStoreWithItems().get(globalVariable.getPositionSelected()).store.name);
-                    }
 
-                    PantryWithItems pi = globalVariable.getPantryWithItems().get(globalVariable.getPositionSelected());
+        if (listType.equals("PANTRY")) {
 
-                    List<String> pantry_item_names = new ArrayList<>();
-                    List<Long> pantry_item_quantities = new ArrayList<>();
-                    for(Item i : pi.items) {
-                        pantry_item_names.add(i.name);
-                        pantry_item_quantities.add(globalVariable.getPantryItem(pi.pantry.pantryId, i.itemId).idealQuantity);
-                    }
-                    list = findViewById(R.id.pantry_list);
-                    ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities);
-                    list.setAdapter(a);
-                    timerHandler.removeCallbacks(this);
-                } else {
-                    timerHandler.postDelayed(this, 500);
-                }
-            }
-        };
-        timerHandler.postDelayed(timerRunnable, 0);
+            db.collection("PantryList").document(id)
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d("TAG", "DocumentSnapshot data: " + document.getData());
+                                    PantryList pantry = document.toObject(PantryList.class);
+                                    getSupportActionBar().setTitle(pantry.name);
+
+
+                                    db.collection("PantryItem").whereEqualTo("pantryId", id).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+
+                                            if (task.isSuccessful()) {
+                                                ArrayList<String> itemIds = new ArrayList<String>();
+                                                List<String> pantry_item_names = new ArrayList<>();
+                                                List<Long> pantry_item_quantities = new ArrayList<>();
+
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    PantryItem pi = document.toObject(PantryItem.class);
+                                                    itemIds.add(pi.itemId);
+                                                    db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                            if (task.isSuccessful()) {
+                                                                DocumentSnapshot document = task.getResult();
+                                                                if (document.exists()) {
+                                                                    Item i = document.toObject(Item.class);
+                                                                    pantry_item_names.add(i.name);
+                                                                    pantry_item_quantities.add(pi.idealQuantity);
+                                                                    list.invalidateViews();
+                                                                } else {
+                                                                    Log.d("TAG", "No such document");
+                                                                }
+
+
+                                                            } else {
+                                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                list = findViewById(R.id.pantry_list);
+                                                ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
+                                                list.setAdapter(a);
+
+
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+
+                                        }
+                                    });
+
+
+                                } else {
+                                    Log.d("TAG", "No such document");
+                                }
+
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+        } else if (listType.equals("SHOPPING")) {
+
+
+        }
+
 
     }
 
@@ -97,6 +153,14 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_share_menu, menu);
         return true;
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     @Override

@@ -18,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.room.Room;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -32,43 +31,35 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.schedulers.Schedulers;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
-
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+
+import io.reactivex.disposables.CompositeDisposable;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private GoogleMap map;
-
-    private Marker m;
-
-    private String list_type = "";
-
-    private Location lastKnownLocation = null;
-
-    private AppDatabase db;
-
     private final CompositeDisposable mDisposable = new CompositeDisposable();
-
+    private GoogleMap map;
+    private Marker m;
+    private String list_type = "";
+    private Location lastKnownLocation = null;
+    private FirebaseFirestore db;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private FirebaseAuth mAuth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,13 +75,13 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
         m = null;
-        db = Room.databaseBuilder(getApplicationContext(),
-                AppDatabase.class, "database-name").build();
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), "AIzaSyATItFqioRqPJqHdbrH8wDddm_LqKBCpBk");
+            Places.initialize(getApplicationContext(), "AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8");
         }
         //PlacesClient placesClient = Places.createClient(this);
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
@@ -113,6 +104,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 }
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
             }
+
             @Override
             public void onError(@NotNull Status status) {
                 // TODO: Handle the error.
@@ -170,7 +162,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
     public void onRadioButtonClicked(View view) {
         boolean checked = ((RadioButton) view).isChecked();
-        switch(view.getId()) {
+        switch (view.getId()) {
             case R.id.radio_pantry:
                 if (checked) {
                     this.list_type = "pantry";
@@ -186,19 +178,19 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
     public void onClickSaveList(View view) {
         EditText e = (EditText) findViewById(R.id.listName);
-        if(e.getText().toString().equals("")) {
+        if (e.getText().toString().equals("")) {
             Toast.makeText(this, "Please insert a list name.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(this.list_type.equals("")) {
+        if (this.list_type.equals("")) {
             Toast.makeText(this, "Please select a list type.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(this.m == null) {
+        if (this.m == null) {
             Toast.makeText(this, "Please select a list location on the map.", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(lastKnownLocation == null) {
+        if (lastKnownLocation == null) {
             Toast.makeText(this, "Retrying to get current location.", Toast.LENGTH_SHORT).show();
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -229,13 +221,11 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 lastKnownLocation.getLongitude() + "&destinations=" + m.getPosition().latitude + "," + m.getPosition().longitude +
                 "&key=AIzaSyATItFqioRqPJqHdbrH8wDddm_LqKBCpBk";
 
-        GlobalClass globalVariable = (GlobalClass) getApplicationContext();
 
-        if(this.list_type.equals("pantry")) {
-            PantryList l = new PantryList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude);
-            globalVariable.addPantry(l);
+        if (this.list_type.equals("pantry")) {
+            PantryList l = new PantryList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
-            Object[] dataTransfer = new Object[] { l , url };
+            Object[] dataTransfer = new Object[]{l, url};
             new DownloadUrl().execute(dataTransfer);
 
             Handler timerHandler = new Handler();
@@ -244,10 +234,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 @Override
                 public void run() {
                     if (l.driveTime != null) {
-                        mDisposable.add(db.pantryDao().insertPantryList(l)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe());
+                        db.collection("PantryList").add(l);
                         Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
                         startActivity(intent);
                         timerHandler.removeCallbacks(this);
@@ -257,12 +244,10 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 }
             };
             timerHandler.postDelayed(timerRunnable, 0);
-        }
-        else if(this.list_type.equals("store")) {
-            StoreList l = new StoreList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude);
-            globalVariable.addStore(l);
+        } else if (this.list_type.equals("store")) {
+            StoreList l = new StoreList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
-            Object[] dataTransfer = new Object[] { l , url };
+            Object[] dataTransfer = new Object[]{l, url};
             new DownloadUrl().execute(dataTransfer);
 
             Handler timerHandler = new Handler();
@@ -271,10 +256,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 @Override
                 public void run() {
                     if (l.driveTime != null) {
-                        mDisposable.add(db.storeDao().insertStoreList(l)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe());
+                        db.collection("StoreList").add(l);
                         Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
                         startActivity(intent);
                         timerHandler.removeCallbacks(this);

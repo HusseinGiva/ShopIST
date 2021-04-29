@@ -9,12 +9,9 @@ import android.view.MenuItem;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
-import androidx.room.Room;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 
 public class HomeActivity extends AppCompatActivity {
 

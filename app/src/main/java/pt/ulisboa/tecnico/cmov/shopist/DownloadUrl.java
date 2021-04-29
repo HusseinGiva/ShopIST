@@ -24,10 +24,9 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
     @Override
     protected String doInBackground(Object... objects) {
 
-        if(objects[0] instanceof PantryList) {
+        if (objects[0] instanceof PantryList) {
             pantryList = (PantryList) objects[0];
-        }
-        else if(objects[0] instanceof StoreList) {
+        } else if (objects[0] instanceof StoreList) {
             storeList = (StoreList) objects[0];
         }
 
@@ -46,23 +45,23 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
             StringBuffer sb = new StringBuffer();
 
             String line = "";
-            while((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
 
-            data  = sb.toString();
+            data = sb.toString();
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if(inputStream != null) {
+            if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            if(urlConnection != null)
+            if (urlConnection != null)
                 urlConnection.disconnect();
         }
         return data;
@@ -80,9 +79,9 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
             e.printStackTrace();
         }
 
-        if(pantryList == null) storeList.driveTime = driveTime;
-        else if(storeList == null) pantryList.driveTime = driveTime;
-        if(driveTime != null)
+        if (pantryList == null) storeList.driveTime = driveTime;
+        else if (storeList == null) pantryList.driveTime = driveTime;
+        if (driveTime != null)
             Log.d("SHIT", driveTime);
         else
             Log.d("SHIT", "driveTime is NULL");

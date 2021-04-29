@@ -1,26 +1,29 @@
 package pt.ulisboa.tecnico.cmov.shopist.persistence.domain;
 
-import androidx.room.Entity;
-import androidx.room.Index;
-import androidx.room.PrimaryKey;
+import java.util.ArrayList;
+import java.util.List;
 
-@Entity(indices = {@Index(value = {"name"}, unique = true)})
 public class StoreList {
-    @PrimaryKey(autoGenerate = true)
-    public long storeId;
-    public String storeIdServer;
+    public String storeId;
     public String name;
     public long number_of_items;
     public double latitude;
     public double longitude;
     public String driveTime = null;
     public long queue_time;
+    public List<String> users;
 
-    public StoreList(String name, double latitude, double longitude) {
+    public StoreList() {
+
+    }
+
+    public StoreList(String name, double latitude, double longitude, String userId) {
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.number_of_items = 0;
         this.queue_time = -1;
+        users = new ArrayList<>();
+        users.add(userId);
     }
 }

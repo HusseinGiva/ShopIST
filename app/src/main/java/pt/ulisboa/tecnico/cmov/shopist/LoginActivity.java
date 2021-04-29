@@ -15,24 +15,22 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.room.Room;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.DecimalFormat;
+import java.util.ArrayList;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 /*import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
@@ -41,7 +39,7 @@ import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;*/
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = "MAIN" ;
+    private static final String TAG = "MAIN";
     private FirebaseAuth mAuth;
 
     private Location lastKnownLocation = null;
@@ -49,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText email;
     private EditText password;
+    private FirebaseFirestore db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         //Termite Test - DELETE LATER
         /*SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
@@ -67,8 +68,8 @@ public class LoginActivity extends AppCompatActivity {
         SimWifiP2pSocketServer mSrvSocket = null;
         SimWifiP2pSocket mCliSocket = null;*/
 
-        email =  (EditText) findViewById(R.id.emailTextBox);
-        password =  (EditText) findViewById(R.id.passwordTextBox);
+        email = (EditText) findViewById(R.id.emailTextBox);
+        password = (EditText) findViewById(R.id.passwordTextBox);
     }
 
     @Override
@@ -111,7 +112,7 @@ public class LoginActivity extends AppCompatActivity {
         String passwordText = password.getText().toString();
 
         //Check if fields are empty
-        if(emailText.trim().isEmpty() || passwordText.trim().isEmpty()){
+        if (emailText.trim().isEmpty() || passwordText.trim().isEmpty()) {
             Toast.makeText(this, "Please fill in the required fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -138,12 +139,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUI(FirebaseUser user) {
-        if(user != null){
-
-            AppDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    AppDatabase.class, "database-name").build();
-            GlobalClass globalVariable = (GlobalClass) getApplicationContext();
-            globalVariable.setUp(db);
+        if (user != null) {
 
             fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -161,7 +157,68 @@ public class LoginActivity extends AppCompatActivity {
                                 Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
                                         lastKnownLocation.getLongitude());
 
+                                final boolean[] found = {false};
+                                final int[] loaded = {2};
 
+
+                                ArrayList<String> pantries = new ArrayList<>();
+                                ArrayList<String> stores = new ArrayList<>();
+
+                                db.collection("PantryList")
+                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                        PantryList p = document.toObject(PantryList.class);
+
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(p.latitude, p.longitude, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
+                                                                results);
+
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
+
+                                                            pantries.add(document.getId());
+
+
+                                                        }
+                                                    }
+                                                } else {
+                                                    Log.d("TAG", "Error getting documents: ", task.getException());
+                                                }
+                                                loaded[0]--;
+                                            }
+                                        });
+
+                                db.collection("StoreList")
+                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .get()
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                                        StoreList s = document.toObject(StoreList.class);
+
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(s.latitude, s.longitude, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
+                                                                results);
+
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
+                                                            stores.add(document.getId());
+
+                                                        }
+                                                    }
+                                                } else {
+                                                    Log.d("TAG", "Error getting documents: ", task.getException());
+                                                }
+                                                loaded[0]--;
+                                            }
+                                        });
 
 
                                 Handler timerHandler = new Handler();
@@ -169,74 +226,63 @@ public class LoginActivity extends AppCompatActivity {
 
                                     @Override
                                     public void run() {
-                                        if (globalVariable.getLoaded() == 0) {
+                                        if (loaded[0] == 0) {
 
-                                            boolean found = false;
-                                            int i = 0;
-                                            for(PantryWithItems p : globalVariable.getPantryWithItems()){
-                                                float[] results = new float[1];
-                                                Location.distanceBetween(p.pantry.latitude, p.pantry.longitude,lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                                                        results);
+                                            if (pantries.size() + stores.size() == 1) {
 
+                                                if (pantries.size() == 1) {
 
-                                                //Less than 20 meters
-                                                if(results[0] < 20f){
-                                                    found = true;
-                                                    globalVariable.setTypeSelected("PANTRY");
-                                                    globalVariable.setPositionSelected(i);
 
                                                     LoginActivity.this.runOnUiThread(new Runnable() {
                                                         @Override
                                                         public void run() {
 
                                                             Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                            intent.putExtra("TAB", "PANTRY");
+                                                            intent.putExtra("ID", pantries.get(0));
                                                             startActivity(intent);
                                                             finish();
                                                         }
                                                     });
 
-                                                    break;
+
+                                                } else if (stores.size() == 1) {
+
+                                                    LoginActivity.this.runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+
+                                                            Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                            intent.putExtra("TAB", "STORE");
+                                                            intent.putExtra("ID", stores.get(0));
+                                                            startActivity(intent);
+                                                            finish();
+                                                        }
+                                                    });
+
                                                 }
 
-                                                i++;
-                                            }
+                                            } else {
+                                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
 
-                                            i = 0;
-
-                                            if(!found){
-                                                for(StoreWithItems s : globalVariable.getStoreWithItems()){
-                                                    float[] results = new float[1];
-                                                    Location.distanceBetween(s.store.latitude, s.store.longitude,lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                                                            results);
-
-                                                    //Less than 20 meters
-                                                    if(results[0] < 20f){
-                                                        found = true;
-                                                        globalVariable.setTypeSelected("SHOPPING");
-                                                        globalVariable.setPositionSelected(i);
-                                                        LoginActivity.this.runOnUiThread(new Runnable() {
-                                                            @Override
-                                                            public void run() {
-
-                                                                Intent intent = new Intent(LoginActivity.this, ListActivity.class);
-                                                                startActivity(intent);
-                                                                finish();
-                                                            }
-                                                        });
-
-                                                        break;
+                                                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                        startActivity(intent);
+                                                        finish();
                                                     }
-                                                    i++;
-                                                }
+                                                });
+
                                             }
 
                                             timerHandler.removeCallbacks(this);
                                         } else {
-                                            timerHandler.postDelayed(this, 500);
+                                            timerHandler.postDelayed(this, 100);
                                         }
                                     }
                                 };
                                 timerHandler.postDelayed(timerRunnable, 0);
+
 
                             }
                         } else {
@@ -246,9 +292,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
 
-            Intent intent = new Intent(this, HomeActivity.class);
-            startActivity(intent);
-            finish();
+
         }
     }
 }

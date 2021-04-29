@@ -1,22 +1,28 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryWithItems;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,17 +31,23 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
  */
 public class ListFragment extends Fragment {
 
+    public static final String LIST = "LIST";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private String typeSelected = "PANTRY";
 
-    public static final String LIST = "LIST";
-
+    private List<String> pantryIds = new ArrayList<>();
+    private List<String> storeIds = new ArrayList<>();
     private List<String> names = new ArrayList<>();
     private List<String> drive_times = new ArrayList<>();
     private List<Integer> n_items = new ArrayList<>();
     private ListView list;
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+
 
     public ListFragment() {
         // Required empty public constructor
@@ -67,6 +79,9 @@ public class ListFragment extends Fragment {
             String mParam1 = getArguments().getString(ARG_PARAM1);
             String mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -79,42 +94,62 @@ public class ListFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                GlobalClass globalVariable = (GlobalClass) getActivity().getApplicationContext();
 
-                Handler timerHandler = new Handler();
-                Runnable timerRunnable = new Runnable() {
+                typeSelected = tab.getText().toString();
 
-                    @Override
-                    public void run() {
-                        if (globalVariable.getLoaded() == 0) {
-                            names.clear();
-                            drive_times.clear();
-                            n_items.clear();
-                            if (tab.getText().equals("PANTRY")) {
-                                globalVariable.setTypeSelected("PANTRY");
-                                List<PantryWithItems> p = globalVariable.getPantryWithItems();
-                                for (PantryWithItems pi : p) {
-                                    names.add(pi.pantry.name);
-                                    drive_times.add(pi.pantry.driveTime);
-                                    n_items.add((int) pi.pantry.number_of_items);
+                names.clear();
+                drive_times.clear();
+                n_items.clear();
+                pantryIds.clear();
+                storeIds.clear();
+                if (tab.getText().equals("PANTRY")) {
+
+                    db.collection("PantryList")
+                            .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            PantryList pantry = document.toObject(PantryList.class);
+                                            names.add(pantry.name);
+                                            drive_times.add(pantry.driveTime);
+                                            n_items.add((int) pantry.number_of_items);
+                                            pantryIds.add(document.getId());
+                                        }
+                                        list.invalidateViews();
+                                    } else {
+                                        Log.d("TAG", "Error getting documents: ", task.getException());
+                                    }
                                 }
-                            } else if (tab.getText().equals("SHOPPING")) {
-                                globalVariable.setTypeSelected("SHOPPING");
-                                List<StoreWithItems> p = globalVariable.getStoreWithItems();
-                                for (StoreWithItems si : p) {
-                                    names.add(si.store.name);
-                                    drive_times.add(si.store.driveTime);
-                                    n_items.add((int) si.store.number_of_items);
+                            });
+                } else if (tab.getText().equals("SHOPPING")) {
+
+                    db.collection("StoreList")
+                            .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            StoreList store = document.toObject(StoreList.class);
+                                            names.add(store.name);
+                                            drive_times.add(store.driveTime);
+                                            n_items.add((int) store.number_of_items);
+                                            storeIds.add(document.getId());
+                                        }
+                                        list.invalidateViews();
+                                    } else {
+                                        Log.d("TAG", "Error getting documents: ", task.getException());
+                                    }
                                 }
-                            }
-                            list.invalidateViews();
-                            timerHandler.removeCallbacks(this);
-                        } else {
-                            timerHandler.postDelayed(this, 500);
-                        }
-                    }
-                };
-                timerHandler.postDelayed(timerRunnable, 0);
+                            });
+
+                }
+
+
             }
 
             @Override
@@ -128,33 +163,29 @@ public class ListFragment extends Fragment {
             }
         });
 
-        GlobalClass globalVariable = (GlobalClass) getActivity().getApplicationContext();
+        db.collection("PantryList")
+                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                PantryList pantry = document.toObject(PantryList.class);
+                                names.add(pantry.name);
+                                drive_times.add(pantry.driveTime);
+                                n_items.add((int) pantry.number_of_items);
+                                pantryIds.add(document.getId());
+                            }
 
-        Handler timerHandler = new Handler();
-        Runnable timerRunnable = new Runnable() {
-
-            @Override
-            public void run() {
-                if (globalVariable.getLoaded() == 0) {
-                    List<PantryWithItems> p = globalVariable.getPantryWithItems();
-                    names.clear();
-                    drive_times.clear();
-                    n_items.clear();
-                    for(PantryWithItems pi : p) {
-                        names.add(pi.pantry.name);
-                        drive_times.add(pi.pantry.driveTime);
-                        n_items.add((int) pi.pantry.number_of_items);
+                            list = view.findViewById(R.id.list);
+                            ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, null, null, typeSelected, pantryIds, storeIds);
+                            list.setAdapter(a);
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                    list = view.findViewById(R.id.list);
-                    ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, null, null);
-                    list.setAdapter(a);
-                    timerHandler.removeCallbacks(this);
-                } else {
-                    timerHandler.postDelayed(this, 500);
-                }
-            }
-        };
-        timerHandler.postDelayed(timerRunnable, 0);
+                });
 
         return view;
     }

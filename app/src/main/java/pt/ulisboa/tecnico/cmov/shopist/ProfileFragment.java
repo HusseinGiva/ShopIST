@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-import androidx.room.Room;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,8 +18,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.AppDatabase;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
@@ -115,12 +112,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 FirebaseAuth.getInstance().signOut();
 
                                 new Thread(() -> {
-                                    AppDatabase db_phone = Room.databaseBuilder(getActivity().getApplicationContext(),
-                                            AppDatabase.class, "database-name").build();
-                                    db_phone.clearAllTables();
 
-                                    GlobalClass globalVariable = (GlobalClass) getActivity().getApplicationContext();
-                                    globalVariable.clearData();
+                                    //TODO - Delete user data
                                 }).start();
 
 

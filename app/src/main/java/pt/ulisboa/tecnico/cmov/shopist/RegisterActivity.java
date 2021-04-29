@@ -33,6 +33,9 @@ public class RegisterActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
+    public static boolean isValidEmail(CharSequence target) {
+        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,11 +167,6 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         }
-    }
-
-
-    public static boolean isValidEmail(CharSequence target) {
-        return target != null && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
 

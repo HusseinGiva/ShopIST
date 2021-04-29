@@ -1,31 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MenuItem;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import pt.ulisboa.tecnico.cmov.shopist.persistence.GlobalClass;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreWithItems;
 
 public class ShareListActivity extends AppCompatActivity {
 
