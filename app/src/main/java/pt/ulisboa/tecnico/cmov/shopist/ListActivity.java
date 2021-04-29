@@ -118,9 +118,9 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                                                         }
                                                     });
                                                 }
-                                                list = findViewById(R.id.pantry_list);
-                                                ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
-                                                list.setAdapter(a);
+                                                //list = findViewById(R.id.pantry_list);
+                                                //ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
+                                                //list.setAdapter(a);
 
 
                                             } else {

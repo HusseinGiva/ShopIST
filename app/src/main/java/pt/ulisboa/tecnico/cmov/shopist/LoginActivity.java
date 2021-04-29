@@ -41,9 +41,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "MAIN";
     private FirebaseAuth mAuth;
-
-    private Location lastKnownLocation = null;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private FusedLocationProviderClient fusedLocationClient;
 
     private EditText email;
     private EditText password;
@@ -54,8 +52,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.mainToolbar);
+        Toolbar myToolbar = findViewById(R.id.mainToolbar);
         setSupportActionBar(myToolbar);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -68,16 +67,12 @@ public class LoginActivity extends AppCompatActivity {
         SimWifiP2pSocketServer mSrvSocket = null;
         SimWifiP2pSocket mCliSocket = null;*/
 
-        email = (EditText) findViewById(R.id.emailTextBox);
-        password = (EditText) findViewById(R.id.passwordTextBox);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        if (currentUser != null) {
+            updateUI();
+        }
+        email = findViewById(R.id.emailTextBox);
+        password = findViewById(R.id.passwordTextBox);
     }
 
     public void onClickSignUp(View view) {
@@ -93,14 +88,12 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
+                            updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Something went wrong. Please make sure you have Internet Connection.",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
                         }
                     }
                 });
@@ -124,150 +117,128 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
+                            updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed",
                                     Toast.LENGTH_SHORT).show();
-                            updateUI(null);
                         }
                     }
                 });
 
     }
 
-    private void updateUI(FirebaseUser user) {
-        if (user != null) {
+    private void updateUI() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, location -> {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            Log.d("ADD_LIST", "Latitude : " + location.getLatitude() + ", Longitude : " +
+                                    location.getLongitude());
 
-            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            } else {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                        lastKnownLocation.getLongitude());
-
-                                final boolean[] found = {false};
-                                final int[] loaded = {2};
+                            final boolean[] found = {false};
+                            final int[] loaded = {2};
 
 
-                                ArrayList<String> pantries = new ArrayList<>();
-                                ArrayList<String> stores = new ArrayList<>();
+                            ArrayList<String> pantries = new ArrayList<>();
+                            ArrayList<String> stores = new ArrayList<>();
 
-                                db.collection("PantryList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        PantryList p = document.toObject(PantryList.class);
+                            db.collection("PantryList")
+                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    PantryList p = document.toObject(PantryList.class);
 
-                                                        float[] results = new float[1];
-                                                        Location.distanceBetween(p.latitude, p.longitude, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                                                                results);
+                                                    float[] results = new float[1];
+                                                    Location.distanceBetween(p.latitude, p.longitude, location.getLatitude(), location.getLongitude(),
+                                                            results);
 
-                                                        //Less than 20 meters
-                                                        if (results[0] < 20f) {
+                                                    //Less than 20 meters
+                                                    if (results[0] < 20f) {
 
-                                                            pantries.add(document.getId());
+                                                        pantries.add(document.getId());
 
 
-                                                        }
                                                     }
-                                                } else {
-                                                    Log.d("TAG", "Error getting documents: ", task.getException());
                                                 }
-                                                loaded[0]--;
-                                            }
-                                        });
-
-                                db.collection("StoreList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                        .get()
-                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                                        StoreList s = document.toObject(StoreList.class);
-
-                                                        float[] results = new float[1];
-                                                        Location.distanceBetween(s.latitude, s.longitude, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(),
-                                                                results);
-
-                                                        //Less than 20 meters
-                                                        if (results[0] < 20f) {
-                                                            stores.add(document.getId());
-
-                                                        }
-                                                    }
-                                                } else {
-                                                    Log.d("TAG", "Error getting documents: ", task.getException());
-                                                }
-                                                loaded[0]--;
-                                            }
-                                        });
-
-
-                                Handler timerHandler = new Handler();
-                                Runnable timerRunnable = new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        if (loaded[0] == 0) {
-
-                                            if (pantries.size() + stores.size() == 1) {
-
-                                                if (pantries.size() == 1) {
-
-
-                                                    LoginActivity.this.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-
-                                                            Intent intent = new Intent(LoginActivity.this, ListActivity.class);
-                                                            intent.putExtra("TAB", "PANTRY");
-                                                            intent.putExtra("ID", pantries.get(0));
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }
-                                                    });
-
-
-                                                } else if (stores.size() == 1) {
-
-                                                    LoginActivity.this.runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-
-                                                            Intent intent = new Intent(LoginActivity.this, ListActivity.class);
-                                                            intent.putExtra("TAB", "STORE");
-                                                            intent.putExtra("ID", stores.get(0));
-                                                            startActivity(intent);
-                                                            finish();
-                                                        }
-                                                    });
-
-                                                }
-
                                             } else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+                                            loaded[0]--;
+                                        }
+                                    });
+
+                            db.collection("StoreList")
+                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    StoreList s = document.toObject(StoreList.class);
+
+                                                    float[] results = new float[1];
+                                                    Location.distanceBetween(s.latitude, s.longitude, location.getLatitude(), location.getLongitude(),
+                                                            results);
+
+                                                    //Less than 20 meters
+                                                    if (results[0] < 20f) {
+                                                        stores.add(document.getId());
+
+                                                    }
+                                                }
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+                                            loaded[0]--;
+                                        }
+                                    });
+
+
+                            Handler timerHandler = new Handler();
+                            Runnable timerRunnable = new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    if (loaded[0] == 0) {
+
+                                        if (pantries.size() + stores.size() == 1) {
+
+                                            if (pantries.size() == 1) {
+
+
                                                 LoginActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
 
-                                                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        intent.putExtra("TAB", "PANTRY");
+                                                        intent.putExtra("ID", pantries.get(0));
+                                                        startActivity(intent);
+                                                        finish();
+                                                    }
+                                                });
+
+
+                                            } else if (stores.size() == 1) {
+
+                                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+
+                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        intent.putExtra("TAB", "STORE");
+                                                        intent.putExtra("ID", stores.get(0));
                                                         startActivity(intent);
                                                         finish();
                                                     }
@@ -275,24 +246,30 @@ public class LoginActivity extends AppCompatActivity {
 
                                             }
 
-                                            timerHandler.removeCallbacks(this);
                                         } else {
-                                            timerHandler.postDelayed(this, 100);
+                                            LoginActivity.this.runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+
+                                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
+                                            });
+
                                         }
+
+                                        timerHandler.removeCallbacks(this);
+                                    } else {
+                                        timerHandler.postDelayed(this, 100);
                                     }
-                                };
-                                timerHandler.postDelayed(timerRunnable, 0);
+                                }
+                            };
+                            timerHandler.postDelayed(timerRunnable, 0);
 
 
-                            }
-                        } else {
-                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
                         }
-                    }
-                });
-            }
-
-
+                    });
         }
     }
 }
