@@ -39,6 +39,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
@@ -74,6 +76,8 @@ public class AddItemActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +90,8 @@ public class AddItemActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumber);
         name = findViewById(R.id.productName);
@@ -154,6 +160,14 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (store.isChecked) {
                                                 StoreItem storeItem = new StoreItem(store.id, itemId, 0, store.price);
                                                 db.collection("StoreItem").add(storeItem);
+                                            }
+                                        }
+                                        for (String s: photoPaths) {
+                                            if (!barcodeNumber.getText().toString().equals("")) {
+
+                                            }
+                                            else {
+
                                             }
                                         }
                                         finish();

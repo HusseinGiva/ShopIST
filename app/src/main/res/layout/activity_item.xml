@@ -21,62 +21,116 @@
         app:theme="@style/Theme.Toolbar"
         app:title="Item Name" />
 
+
+    <EditText
+        android:id="@+id/itemPantryQuantity"
+        android:layout_width="197dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="100dp"
+        android:editable="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:hint="Pantry Quantity"
+        android:inputType="number"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+
+    <EditText
+        android:id="@+id/itemTargetQuantity"
+        android:layout_width="182dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="100dp"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:hint="Target Quantity"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+
+    <Button
+        android:id="@+id/addPictures"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="100dp"
+        android:text="View Pictures"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barcodeNumber" />
+
+    <Button
+        android:id="@+id/addStoresButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="100dp"
+        android:text="View Stores"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addPictures" />
+
+    <EditText
+        android:id="@+id/barcodeNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginEnd="100dp"
+        android:duplicateParentState="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:hint="Barcode Number"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/itemPantryQuantity" />
+
     <TextView
         android:id="@+id/textView"
-        android:layout_width="95dp"
-        android:layout_height="47dp"
-        android:layout_marginStart="103dp"
-        android:layout_marginTop="139dp"
-        android:layout_marginEnd="56dp"
-        android:layout_marginBottom="489dp"
-        android:text="Quantity"
+        android:layout_width="197dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="60dp"
+        android:text="Pantry Quantity"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/textView2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="32dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="139dp"
-        android:layout_marginEnd="125dp"
-        android:layout_marginBottom="488dp"
-        android:text="1"
+        android:layout_width="197dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="60dp"
+        android:text="Target Quantity"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="139dp"
-        android:layout_marginEnd="43dp"
-        android:layout_marginBottom="488dp"
-        android:text="1"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
 
     <TextView
         android:id="@+id/textView3"
-        android:layout_width="0dp"
-        android:layout_height="82dp"
-        android:layout_marginStart="314dp"
-        android:layout_marginTop="139dp"
-        android:layout_marginBottom="454dp"
-        android:text="/"
+        android:layout_width="197dp"
+        android:layout_height="34dp"
+        android:layout_marginTop="200dp"
+        android:layout_marginEnd="104dp"
+        android:text="Barcode Number"
         android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/textView4"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+
+    <Button
+        android:id="@+id/saveItemButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        android:background="#FF1687CE"
+        android:text="Move Item to Store List"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
