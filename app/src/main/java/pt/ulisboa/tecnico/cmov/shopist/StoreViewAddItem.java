@@ -4,13 +4,13 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class StoreViewAddItem implements Parcelable {
-    public String id;
+    public String storeId;
     public String name;
     public float price;
     public Boolean isChecked;
 
-    public StoreViewAddItem(String id, String name, Float price) {
-        this.id = id;
+    public StoreViewAddItem(String storeId, String name, Float price) {
+        this.storeId = storeId;
         this.name = name;
         this.price = price;
         this.isChecked = false;
@@ -20,15 +20,15 @@ public class StoreViewAddItem implements Parcelable {
         this.isChecked = false;
     }
 
-    public StoreViewAddItem(String id, String name, Float price, Boolean isChecked) {
-        this.id = id;
+    public StoreViewAddItem(String storeId, String name, Float price, Boolean isChecked) {
+        this.storeId = storeId;
         this.name = name;
         this.price = price;
         this.isChecked = isChecked;
     }
 
     private StoreViewAddItem(Parcel in) {
-        this.id = in.readString();
+        this.storeId = in.readString();
         this.name = in.readString();
         this.price = in.readFloat();
         this.isChecked = in.readBoolean();
@@ -41,7 +41,7 @@ public class StoreViewAddItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
+        dest.writeString(storeId);
         dest.writeString(name);
         dest.writeFloat(price);
         dest.writeBoolean(isChecked);

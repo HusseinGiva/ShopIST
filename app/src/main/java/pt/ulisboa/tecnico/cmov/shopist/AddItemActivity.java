@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.location.Location;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -143,7 +145,7 @@ public class AddItemActivity extends AppCompatActivity {
             Toast.makeText(this, "Please insert an item target quantity.", Toast.LENGTH_SHORT).show();
             return;
         }
-        Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString());
+        Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
         db.collection("Item")
                 .add(item)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -158,7 +160,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     public void onSuccess(DocumentReference documentReference) {
                                         for (StoreViewAddItem store: storeViewAddItems) {
                                             if (store.isChecked) {
-                                                StoreItem storeItem = new StoreItem(store.id, itemId, 0, store.price);
+                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, 0, store.price);
                                                 db.collection("StoreItem").add(storeItem);
                                             }
                                         }
@@ -199,29 +201,37 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickAddStores(View view) {
         Intent intent = new Intent(this, AddStoresActivity.class);
-        if (storeViewAddItems.isEmpty()) {
-            db.collection("StoreList")
-                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            storeViewAddItems.clear();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                StoreList pantry = document.toObject(StoreList.class);
-                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), pantry.name, 0f);
+        db.collection("StoreList")
+                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            StoreList store = document.toObject(StoreList.class);
+                            if (!storeViewAddItems.isEmpty()) {
+                                Boolean present = false;
+                                for (StoreViewAddItem item: storeViewAddItems) {
+                                    if (item.name.equals(store.name)) {
+                                        present = true;
+                                    }
+                                }
+                                if (!present) {
+                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                    storeViewAddItems.add(storeViewAddItem);
+                                }
+
+                            }
+                            else {
+                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
                                 storeViewAddItems.add(storeViewAddItem);
                             }
-                            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-                            storesResultLauncher.launch(intent);
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-                    });
-        }
-        else {
-            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-            storesResultLauncher.launch(intent);
-        }
+                        intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+                        storesResultLauncher.launch(intent);
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
+                    }
+                });
     }
 
     void onClickClearBarcode() {
@@ -271,6 +281,7 @@ public class AddItemActivity extends AppCompatActivity {
                                         // See API reference for complete list of supported types
                                         if (barcodeNumber.getText().toString().matches("")) {
                                             barcodeNumber.setText(rawValue);
+                                            autocompleteStoreList();
                                         }
                                     }
                                 })
@@ -305,6 +316,71 @@ public class AddItemActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    public void autocompleteStoreList() {
+        if (storeViewAddItems.isEmpty()) {
+            db.collection("Item")
+                    .whereEqualTo("barcode", barcodeNumber.getText().toString())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Item item = document.toObject(Item.class);
+                                if (item.users.contains(mAuth.getCurrentUser().getUid())) {
+                                    name.setText(item.name);
+                                }
+                                db.collection("StoreItem")
+                                        .whereEqualTo("itemId", document.getId())
+                                        .get()
+                                        .addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                    StoreItem item2 = document2.toObject(StoreItem.class);
+                                                    db.collection("StoreList")
+                                                            .document(item2.storeId)
+                                                            .get()
+                                                            .addOnCompleteListener(task3 -> {
+                                                                if (task3.isSuccessful()) {
+                                                                    DocumentSnapshot document3 = task3.getResult();
+                                                                        Toast.makeText(getApplicationContext(), document3.getId(), Toast.LENGTH_LONG).show();
+                                                                        StoreList item3 = document3.toObject(StoreList.class);
+                                                                        db.collection("StoreList")
+                                                                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                                                                .get()
+                                                                                .addOnCompleteListener(task4 -> {
+                                                                                    if (task4.isSuccessful()) {
+                                                                                        for (QueryDocumentSnapshot document4 : task4.getResult()) {
+                                                                                            StoreList item4 = document4.toObject(StoreList.class);
+                                                                                            float[] results = new float[1];
+                                                                                            Location.distanceBetween(item4.latitude, item4.longitude, item3.latitude, item3.longitude,
+                                                                                                    results);
+                                                                                            //Less than 20 meters
+                                                                                            if (results[0] < 20f) {
+                                                                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document4.getId(), item4.name, item2.price, true);
+                                                                                                storeViewAddItems.add(storeViewAddItem);
+                                                                                            }
+                                                                                        }
+                                                                                    } else {
+                                                                                        Log.d("TAG", "Error getting documents: ", task4.getException());
+                                                                                    }
+                                                                                });
+                                                                    }
+                                                                else {
+                                                                    Log.d("TAG", "Error getting documents: ", task3.getException());
+                                                                }
+                                                            });
+                                                }
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task2.getException());
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    });
         }
     }
 }
