@@ -2,34 +2,24 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.MenuItem;
-import android.widget.Button;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 
 public class AddStoresActivity extends AppCompatActivity implements StoresFragment.OnListFragmentInteractionListener {
 
     private RecyclerView.Adapter recyclerViewAdapter;
     private RecyclerView recyclerView;
-    ArrayList<StoreItem> stores = new ArrayList<>();
+    ArrayList<StoreViewAddItem> stores = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +39,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
         StoreContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
         if (!stores.isEmpty()) {
-            for (StoreItem item : stores) {
+            for (StoreViewAddItem item : stores) {
                 StoreContent.addItem(item);
                 recyclerViewAdapter.notifyItemInserted(0);
             }
@@ -57,7 +47,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
     }
 
     @Override
-    public void onListFragmentInteraction(StoreItem mItem) {
+    public void onListFragmentInteraction(StoreViewAddItem mItem) {
         //Intent intent = new Intent(this, ViewPicturesActivity.class);
         //intent.putExtra("URI", mItem.toString());
         //startActivity(intent);
@@ -66,9 +56,12 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
     }
 
     @Override
-    public void onListFragmentPriceInteraction(StoreItem mItem, Editable s) {
+    public void onListFragmentPriceInteraction(StoreViewAddItem mItem, Editable s) {
         if (!s.toString().equals("")) {
             mItem.price = Float.parseFloat(s.toString());
+        }
+        else {
+            mItem.price = 0;
         }
     }
 

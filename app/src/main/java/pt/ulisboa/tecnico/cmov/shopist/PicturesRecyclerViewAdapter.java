@@ -13,12 +13,12 @@ import java.util.List;
 /**
  * TODO: Replace the implementation with code for your data type.
  */
-public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecyclerViewAdapter.ViewHolder> {
+public class PicturesRecyclerViewAdapter extends RecyclerView.Adapter<PicturesRecyclerViewAdapter.ViewHolder> {
 
     private final List<Uri> mValues;
     private final PicturesFragment.OnListFragmentInteractionListener mListener;
 
-    public MyItemRecyclerViewAdapter(List<Uri> items, PicturesFragment.OnListFragmentInteractionListener listener) {
+    public PicturesRecyclerViewAdapter(List<Uri> items, PicturesFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }

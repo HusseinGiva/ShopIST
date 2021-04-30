@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StoreList {
-    public String storeId;
     public String name;
     public long number_of_items;
     public double latitude;

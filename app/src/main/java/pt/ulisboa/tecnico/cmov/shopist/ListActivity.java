@@ -69,6 +69,7 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         listType = getIntent().getStringExtra("TAB");
         id = getIntent().getStringExtra("ID");
 
+        list = findViewById(R.id.pantry_list);
 
         if (listType.equals("PANTRY")) {
 
@@ -92,8 +93,9 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                                             if (task.isSuccessful()) {
                                                 ArrayList<String> itemIds = new ArrayList<String>();
                                                 List<String> pantry_item_names = new ArrayList<>();
-                                                List<Long> pantry_item_quantities = new ArrayList<>();
-
+                                                List<Integer> pantry_item_quantities = new ArrayList<>();
+                                                ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
+                                                //list.setAdapter(a);
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     PantryItem pi = document.toObject(PantryItem.class);
                                                     itemIds.add(pi.itemId);
@@ -118,10 +120,6 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                                                         }
                                                     });
                                                 }
-                                                //list = findViewById(R.id.pantry_list);
-                                                //ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
-                                                //list.setAdapter(a);
-
 
                                             } else {
                                                 Log.d("TAG", "Error getting documents: ", task.getException());
@@ -171,6 +169,8 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 return true;
             case R.id.addProduct:
                 Intent intent = new Intent(this, AddItemActivity.class);
+                intent.putExtra("TYPE", listType);
+                intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
             case R.id.shareList:

@@ -19,14 +19,14 @@ public class ListAdapter extends ArrayAdapter<String> {
     List<String> drive_times;
     List<Integer> n_items;
     List<String> pantry_item_names;
-    List<Long> pantry_item_quantities;
+    List<Integer> pantry_item_quantities;
     String list_type;
     String tabSelected;
     List<String> pantryIds;
     List<String> storeIds;
 
     public ListAdapter(Context context, String list_type, List<String> list_names, List<String> drive_times, List<Integer> n_items,
-                       List<String> pantry_item_names, List<Long> pantry_item_quantities, String tabSelected, List<String> pantryIds, List<String> storeIds) {
+                       List<String> pantry_item_names, List<Integer> pantry_item_quantities, String tabSelected, List<String> pantryIds, List<String> storeIds) {
         super(context, R.layout.list_item, R.id.list_name, list_names);
         this.context = context;
         this.list_type = list_type;

@@ -12,12 +12,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class MyStoresRecyclerViewAdapter extends RecyclerView.Adapter<MyStoresRecyclerViewAdapter.ViewHolder> {
+public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecyclerViewAdapter.ViewHolder> {
 
-    private final List<StoreItem> mValues;
+    private final List<StoreViewAddItem> mValues;
     private final StoresFragment.OnListFragmentInteractionListener mListener;
 
-    public MyStoresRecyclerViewAdapter(List<StoreItem> items, StoresFragment.OnListFragmentInteractionListener listener) {
+    public StoresRecyclerViewAdapter(List<StoreViewAddItem> items, StoresFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -33,7 +33,12 @@ public class MyStoresRecyclerViewAdapter extends RecyclerView.Adapter<MyStoresRe
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
         holder.mNameView.setText(mValues.get(position).name);
-        holder.mPriceView.setText(String.valueOf(mValues.get(position).price));
+        if (mValues.get(position).price == 0) {
+            holder.mPriceView.setText("");
+        }
+        else {
+            holder.mPriceView.setText(String.valueOf(mValues.get(position).price));
+        }
         holder.mPriceView.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -70,7 +75,7 @@ public class MyStoresRecyclerViewAdapter extends RecyclerView.Adapter<MyStoresRe
         public final TextView mNameView;
         public final TextView mPriceView;
         public final CheckBox mChecked;
-        public StoreItem mItem;
+        public StoreViewAddItem mItem;
 
         public ViewHolder(View view) {
             super(view);

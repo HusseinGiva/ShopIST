@@ -64,7 +64,7 @@ public class StoresFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyStoresRecyclerViewAdapter(StoreContent.ITEMS, mListener));
+            recyclerView.setAdapter(new StoresRecyclerViewAdapter(StoreContent.ITEMS, mListener));
         }
         return view;
     }
@@ -87,8 +87,8 @@ public class StoresFragment extends Fragment {
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(StoreItem mItem);
+        void onListFragmentInteraction(StoreViewAddItem mItem);
 
-        void onListFragmentPriceInteraction(StoreItem mItem, Editable s);
+        void onListFragmentPriceInteraction(StoreViewAddItem mItem, Editable s);
     }
 }

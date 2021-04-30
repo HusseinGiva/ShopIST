@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PantryList {
-    public String pantryId;
     public String name;
     public long number_of_items;
     public double latitude;
