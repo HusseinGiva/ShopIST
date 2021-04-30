@@ -20,15 +20,17 @@
         app:theme="@style/Theme.Toolbar"
         app:title="Add Stores" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/emailList"
+    <fragment
+        android:id="@+id/storesFragment"
+        android:name="pt.ulisboa.tecnico.cmov.shopist.StoresFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="58dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout="@layout/fragment_stores_list"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

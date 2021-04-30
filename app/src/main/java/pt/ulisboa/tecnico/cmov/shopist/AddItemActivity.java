@@ -32,6 +32,9 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
@@ -41,6 +44,8 @@ import com.google.mlkit.vision.common.InputImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class AddItemActivity extends AppCompatActivity {
 
@@ -53,10 +58,13 @@ public class AddItemActivity extends AppCompatActivity {
     EditText name;
     EditText quantity;
     ArrayList<String> photoPaths = new ArrayList<>();
-    ArrayList<String> stores = new ArrayList<>();
+    ArrayList<StoreItem> storeItems = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
     ActivityResultLauncher<Intent> storesResultLauncher;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +75,8 @@ public class AddItemActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumber);
         name = findViewById(R.id.productName);
@@ -84,7 +94,7 @@ public class AddItemActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        photoPaths = result.getData().getStringArrayListExtra("PATHS");
+                        storeItems = result.getData().getParcelableArrayListExtra("STORES");
                     }
                 });
         saveItem = findViewById(R.id.saveItemButton);
@@ -117,8 +127,29 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickAddStores(View view) {
         Intent intent = new Intent(this, AddStoresActivity.class);
-        intent.putStringArrayListExtra("PATHS", photoPaths);
-        storesResultLauncher.launch(intent);
+        if (storeItems.isEmpty()) {
+            db.collection("StoreList")
+                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            storeItems.clear();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                StoreList pantry = document.toObject(StoreList.class);
+                                StoreItem storeItem = new StoreItem(document.getId(), pantry.name, 0f);
+                                storeItems.add(storeItem);
+                            }
+                            intent.putParcelableArrayListExtra("STORES", storeItems);
+                            storesResultLauncher.launch(intent);
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    });
+        }
+        else {
+            intent.putParcelableArrayListExtra("STORES", storeItems);
+            storesResultLauncher.launch(intent);
+        }
     }
 
     void onClickClearBarcode() {
