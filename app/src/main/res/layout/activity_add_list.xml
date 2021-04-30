@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".AddListActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -16,7 +17,8 @@
         android:theme="@style/Theme.ShopIST"
         app:layout_constraintTop_toTopOf="parent"
         app:theme="@style/Theme.Toolbar"
-        app:title="New List" />
+        app:title="New List"
+        app:menu="@menu/qrcode"/>
 
     <EditText
         android:id="@+id/listName"

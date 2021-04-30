@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="false"
+    tools:context=".QrCodeScanner"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/scanToolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/Theme.ShopIST"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:theme="@style/Theme.Toolbar"
+        app:title="Scan List" />
+
+    <TextView
+        android:id="@+id/tag_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+    <EditText android:layout_margin="20dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Item Number"
+        android:id="@+id/pn"
+        />
+    <TableLayout
+        android:id="@+id/button_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*"
+        >
+        <TableRow>
+            <Button
+                android:id="@+id/scan_button"
+                android:text="SCAN"
+                />
+            <Button android:layout_width="wrap_content"
+                android:id="@+id/my_button"
+                android:text="GET RESULTS"
+                />
+        </TableRow>
+    </TableLayout>
+    <EditText android:layout_margin="20dip"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:minLines="30"
+        android:maxLines="30"
+        android:textSize="18sp"
+        android:editable="false"
+        android:id="@+id/my_edit" />
+    <WebView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/webview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+</LinearLayout>

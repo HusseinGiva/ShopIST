@@ -9,7 +9,7 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/shareList"
+        android:id="@+id/manualEntry"
         android:icon="@drawable/baseline_share_24"
         android:title="Share"
         app:showAsAction="ifRoom" />

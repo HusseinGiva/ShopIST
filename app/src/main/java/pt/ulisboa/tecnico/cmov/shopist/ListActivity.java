@@ -173,8 +173,10 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
-            case R.id.shareList:
+            case R.id.manualEntry:
                 intent = new Intent(this, ShareListActivity.class);
+                intent.putExtra("TYPE", listType);
+                intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
             default:

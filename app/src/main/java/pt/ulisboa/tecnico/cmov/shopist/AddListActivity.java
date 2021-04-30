@@ -1,12 +1,17 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -36,6 +41,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.jetbrains.annotations.NotNull;
@@ -316,10 +322,110 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         }
                     });
                 }
+                else if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                    startQrCodeActivity();
+                }
             } else {
                 Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.qrcode, menu);
+        return true;
+    }
+
+    private void requestCamera() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, 1);
+        } else {
+            startQrCodeActivity();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.manualEntry:
+                manualEntry();
+                return true;
+            case R.id.qrcode:
+                requestCamera();
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+    private void manualEntry() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle("Manual Input");
+        alert.setMessage("Enter List Code");
+
+        // Set an EditText view to get user input
+        final EditText input = new EditText(this);
+        alert.setView(input);
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+
+                String[] splitted = input.getText().toString().split("_");
+
+                db = FirebaseFirestore.getInstance();
+                mAuth =  FirebaseAuth.getInstance();
+
+                if(splitted.length > 1) {
+                    String type = splitted[0];
+                    String id = splitted[1];
+                    if (type.equals("PANTRY")) {
+                        db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+
+                        Intent intent = new Intent(AddListActivity.this, ListActivity.class);
+                        intent.putExtra("TAB", type);
+                        intent.putExtra("ID", id);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                        return;
+                    } else if (type.equals("STORE")) {
+                        db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+
+                        Intent intent = new Intent(AddListActivity.this, ListActivity.class);
+                        intent.putExtra("TAB", type);
+                        intent.putExtra("ID", id);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                        return;
+                    }
+                }
+                Toast.makeText(AddListActivity.this, "Invalid Code", Toast.LENGTH_SHORT).show();
+                dialog.cancel();
+
+            }
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
+
+    public void startQrCodeActivity(){
+        Intent intent = new Intent(AddListActivity.this, QrCodeScanner.class);
+        startActivity(intent);
     }
 
 }
