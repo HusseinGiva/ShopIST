@@ -37,23 +37,23 @@ import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;*/
 
-public class LoginActivity extends AppCompatActivity {
+public class StartActivity extends AppCompatActivity {
 
-    private static final String TAG = "MAIN";
+    private static final String TAG = "START";
     private FirebaseAuth mAuth;
     private FusedLocationProviderClient fusedLocationClient;
 
-    private EditText email;
-    private EditText password;
     private FirebaseFirestore db;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        Toolbar myToolbar = findViewById(R.id.mainToolbar);
+        setContentView(R.layout.activity_start);
+        Toolbar myToolbar = findViewById(R.id.startToolbar);
         setSupportActionBar(myToolbar);
+
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Initialize Firebase Auth
@@ -67,68 +67,17 @@ public class LoginActivity extends AppCompatActivity {
         SimWifiP2pSocketServer mSrvSocket = null;
         SimWifiP2pSocket mCliSocket = null;*/
 
-        email = findViewById(R.id.emailTextBox);
-        password = findViewById(R.id.passwordTextBox);
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-    }
-
-    public void onClickSignUp(View view) {
-        Intent intent = new Intent(this, RegisterActivity.class);
-        startActivity(intent);
-    }
-
-    public void onClickNoAccount(View view) {
-        mAuth.signInAnonymously()
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInAnonymously:success");
-                            updateUI();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInAnonymously:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Something went wrong. Please make sure you have Internet Connection.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-    }
-
-    public void onClickLogin(View view) {
-
-        String emailText = email.getText().toString();
-        String passwordText = password.getText().toString();
-
-        //Check if fields are empty
-        if (emailText.trim().isEmpty() || passwordText.trim().isEmpty()) {
-            Toast.makeText(this, "Please fill in the required fields", Toast.LENGTH_SHORT).show();
-            return;
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            updateUI();
+        }else{
+            Intent intent = new Intent(StartActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         }
 
-        mAuth.signInWithEmailAndPassword(emailText, passwordText)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            updateUI();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
     }
+
 
     private void updateUI() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -219,11 +168,11 @@ public class LoginActivity extends AppCompatActivity {
                                             if (pantries.size() == 1) {
 
 
-                                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                                StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
 
-                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        Intent intent = new Intent(StartActivity.this, ListActivity.class);
                                                         intent.putExtra("TAB", "PANTRY");
                                                         intent.putExtra("ID", pantries.get(0));
                                                         startActivity(intent);
@@ -234,11 +183,11 @@ public class LoginActivity extends AppCompatActivity {
 
                                             } else if (stores.size() == 1) {
 
-                                                LoginActivity.this.runOnUiThread(new Runnable() {
+                                                StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
 
-                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        Intent intent = new Intent(StartActivity.this, ListActivity.class);
                                                         intent.putExtra("TAB", "STORE");
                                                         intent.putExtra("ID", stores.get(0));
                                                         startActivity(intent);
@@ -249,11 +198,11 @@ public class LoginActivity extends AppCompatActivity {
                                             }
 
                                         } else {
-                                            LoginActivity.this.runOnUiThread(new Runnable() {
+                                            StartActivity.this.runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
 
-                                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                                    Intent intent = new Intent(StartActivity.this, HomeActivity.class);
                                                     startActivity(intent);
                                                     finish();
                                                 }
@@ -271,11 +220,11 @@ public class LoginActivity extends AppCompatActivity {
 
 
                         }else {
-                            LoginActivity.this.runOnUiThread(new Runnable() {
+                            StartActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
 
-                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    Intent intent = new Intent(StartActivity.this, HomeActivity.class);
                                     startActivity(intent);
                                     finish();
                                 }
