@@ -134,10 +134,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         .draggable(true));
             }
         });
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (map != null) {
                 map.setMyLocationEnabled(true);
             }
@@ -156,6 +153,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     }
                 }
             });
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }
 
@@ -225,7 +225,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                 lastKnownLocation.getLongitude() + "&destinations=" + m.getPosition().latitude + "," + m.getPosition().longitude +
-                "&key=AIzaSyATItFqioRqPJqHdbrH8wDddm_LqKBCpBk";
+                "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
 
 
         if (this.list_type.equals("pantry")) {

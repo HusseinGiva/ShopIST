@@ -73,6 +73,11 @@ public class LoginActivity extends AppCompatActivity {
         }
         email = findViewById(R.id.emailTextBox);
         password = findViewById(R.id.passwordTextBox);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
     }
 
     public void onClickSignUp(View view) {
@@ -130,9 +135,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            updateUI();
         } else {
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, location -> {
@@ -268,6 +274,17 @@ public class LoginActivity extends AppCompatActivity {
                             timerHandler.postDelayed(timerRunnable, 0);
 
 
+                        }
+                        else {
+                            LoginActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            });
                         }
                     });
         }
