@@ -1,7 +1,10 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.ActionBar;
@@ -23,5 +26,23 @@ public class ViewPicturesActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         imageView = findViewById(R.id.imageView);
         imageView.setImageURI(Uri.parse(getIntent().getStringExtra("URI")));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();    //Call the back button's method
+                return true;
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 }

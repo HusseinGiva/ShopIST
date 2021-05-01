@@ -9,6 +9,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.location.Location;
 import android.media.Image;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -43,13 +44,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -99,6 +104,10 @@ public class AddItemActivity extends AppCompatActivity {
         name = findViewById(R.id.productName);
         pantryQuantity = findViewById(R.id.itemPantryQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
+        if (getIntent().getStringExtra("TYPE").equals("STORE")) {
+            pantryQuantity.setHint("Store Quantity");
+            targetQuantity.setVisibility(View.INVISIBLE);
+        }
         addPictures = findViewById(R.id.addPictures);
         picturesResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -165,11 +174,14 @@ public class AddItemActivity extends AppCompatActivity {
                                             }
                                         }
                                         for (String s: photoPaths) {
+                                            Uri file = Uri.fromFile(new File(s));
                                             if (!barcodeNumber.getText().toString().equals("")) {
-
+                                                StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                UploadTask uploadTask = imagesRef.putFile(file);
                                             }
                                             else {
-
+                                                StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
+                                                UploadTask uploadTask = imagesRef.putFile(file);
                                             }
                                         }
                                         finish();
