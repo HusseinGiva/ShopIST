@@ -18,9 +18,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:theme="@style/Theme.Toolbar"
-        app:title="Add Stores" />
+        app:title="@string/addStores" />
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/storesFragment"
         android:name="pt.ulisboa.tecnico.cmov.shopist.StoresFragment"
         android:layout_width="match_parent"

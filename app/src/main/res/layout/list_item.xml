@@ -25,7 +25,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
                 android:layout_marginTop="20dp"
                 android:orientation="vertical">
 
@@ -33,15 +33,27 @@
                     android:id="@+id/list_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Name"
+                    android:text="@string/name"
                     android:textSize="20sp" />
 
-                <TextView
-                    android:id="@+id/drive_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Drive time: 5 min"
-                    android:textSize="16sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/driveTime"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/drive_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp" />
+                </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>
@@ -60,16 +72,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
                 android:background="@drawable/rounded_corner"
                 android:padding="7dp"
-                android:text="Number of items" />
+                android:text="@string/numberOfItems" />
 
             <TextView
                 android:id="@+id/n_items"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="180dp"
+                android:layout_marginStart="180dp"
                 android:text="0" />
 
         </LinearLayout>

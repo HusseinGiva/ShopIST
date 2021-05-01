@@ -105,7 +105,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 } else {
                     m = map.addMarker(new MarkerOptions()
                             .position(place.getLatLng())
-                            .title("Marker in Location")
+                            .title(getResources().getString(R.string.selectedLocation))
                             .draggable(true));
                 }
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
@@ -130,7 +130,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             } else {
                 m = map.addMarker(new MarkerOptions()
                         .position(point)
-                        .title("Marker in Location")
+                        .title(getResources().getString(R.string.selectedLocation))
                         .draggable(true));
             }
         });
@@ -171,12 +171,12 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         switch (view.getId()) {
             case R.id.radio_pantry:
                 if (checked) {
-                    this.list_type = "pantry";
+                    this.list_type = getResources().getString(R.string.pantry);
                     break;
                 }
             case R.id.radio_store:
                 if (checked) {
-                    this.list_type = "store";
+                    this.list_type = getResources().getString(R.string.store);
                     break;
                 }
         }
@@ -185,50 +185,19 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     public void onClickSaveList(View view) {
         EditText e = (EditText) findViewById(R.id.listName);
         if (e.getText().toString().equals("")) {
-            Toast.makeText(this, "Please insert a list name.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pleaseInsertListName, Toast.LENGTH_SHORT).show();
             return;
         }
         if (this.list_type.equals("")) {
-            Toast.makeText(this, "Please select a list type.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pleaseSelectListType, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (this.m == null) {
-            Toast.makeText(this, "Please select a list location on the map.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (lastKnownLocation == null) {
-            Toast.makeText(this, "Retrying to get current location.", Toast.LENGTH_SHORT).show();
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                if (map != null) {
-                    map.setMyLocationEnabled(true);
-                }
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                        lastKnownLocation.getLongitude());
-                                onClickSaveList(findViewById(R.id.saveListButton));
-                            }
-                        } else {
-                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
-                        }
-                    }
-                });
-            }
-            return;
-        }
-
         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                 lastKnownLocation.getLongitude() + "&destinations=" + m.getPosition().latitude + "," + m.getPosition().longitude +
                 "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
 
 
-        if (this.list_type.equals("pantry")) {
+        if (this.list_type.equals(getResources().getString(R.string.pantry))) {
             PantryList l = new PantryList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
             Object[] dataTransfer = new Object[]{l, url};
@@ -250,7 +219,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 }
             };
             timerHandler.postDelayed(timerRunnable, 0);
-        } else if (this.list_type.equals("store")) {
+        } else if (this.list_type.equals(getResources().getString(R.string.store))) {
             StoreList l = new StoreList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
             Object[] dataTransfer = new Object[]{l, url};
@@ -290,7 +259,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         } else {
             m = map.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .title("Marker in Location")
+                    .title(getResources().getString(R.string.selectedLocation))
                     .draggable(true));
         }
     }

@@ -36,6 +36,7 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -104,8 +105,8 @@ public class AddItemActivity extends AppCompatActivity {
         name = findViewById(R.id.productName);
         pantryQuantity = findViewById(R.id.itemPantryQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
-        if (getIntent().getStringExtra("TYPE").equals("STORE")) {
-            pantryQuantity.setHint("Store Quantity");
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+            pantryQuantity.setHint(R.string.storeQuantity);
             targetQuantity.setVisibility(View.INVISIBLE);
         }
         addPictures = findViewById(R.id.addPictures);
@@ -143,15 +144,19 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickSaveItem(View view) {
         if (name.getText().toString().equals("")) {
-            Toast.makeText(this, "Please insert an item name.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pleaseInsertItemName, Toast.LENGTH_SHORT).show();
             return;
         }
         if (targetQuantity.getText().toString().equals("") || targetQuantity.getText().toString().equals("0")) {
-            Toast.makeText(this, "Please insert an item target quantity.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pleaseInsertItemTargetQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0")) {
-            Toast.makeText(this, "Please insert an item target quantity.", Toast.LENGTH_SHORT).show();
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0"))) {
+            Toast.makeText(this, R.string.pleaseInsertItemPantryQuantity, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store)) && (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0"))) {
+            Toast.makeText(this, R.string.pleaseInsertItemStoreQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
         Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
@@ -294,6 +299,8 @@ public class AddItemActivity extends AppCompatActivity {
                                         if (barcodeNumber.getText().toString().matches("")) {
                                             barcodeNumber.setText(rawValue);
                                             autocompleteStoreList();
+                                            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), R.string.pleaseSubmitPriceDataAndPictures, Snackbar.LENGTH_LONG);
+                                            mySnackbar.show();
                                         }
                                     }
                                 })

@@ -27,7 +27,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:theme="@style/Theme.Toolbar"
-        app:title="Shop IST" />
+        app:title="ShopIST" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

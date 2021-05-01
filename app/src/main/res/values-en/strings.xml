@@ -37,7 +37,7 @@
     <string name="price">Price</string>
     <string name="euro">€</string>
     <string name="numberOfItems">Number Of Products</string>
-    <string name="driveTime">Drive Time: </string>
+    <string name="driveTime">"Drive Time: "</string>
     <string name="name">Name</string>
     <string name="lists">Lists</string>
     <string name="cart">Cart</string>

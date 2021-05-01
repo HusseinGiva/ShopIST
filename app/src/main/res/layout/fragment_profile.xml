@@ -27,24 +27,24 @@
 
         <Button
             android:id="@+id/buttonCreateAccount"
-            android:layout_width="254dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/textViewLastName"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="100sp"
             android:foregroundGravity="center_horizontal"
-            android:text="Create Account"
+            android:text="@string/createAccount"
             android:textAlignment="center" />
 
         <Button
             android:id="@+id/buttonLogOut"
-            android:layout_width="254dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/buttonCreateAccount"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20sp"
             android:background="#F44336"
-            android:text="Log Out"
+            android:text="@string/logout"
             android:textAlignment="center"
             android:textColor="#FFFFFF" />
     </RelativeLayout>

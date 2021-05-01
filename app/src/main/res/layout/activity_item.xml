@@ -18,8 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/item_share_flag"
-        app:theme="@style/Theme.Toolbar"
-        app:title="Item Name" />
+        app:theme="@style/Theme.Toolbar" />
 
 
     <EditText

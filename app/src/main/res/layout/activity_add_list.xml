@@ -16,9 +16,9 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/Theme.ShopIST"
         app:layout_constraintTop_toTopOf="parent"
+        app:menu="@menu/qrcode"
         app:theme="@style/Theme.Toolbar"
-        app:title="New List"
-        app:menu="@menu/qrcode"/>
+        app:title="@string/newList" />
 
     <EditText
         android:id="@+id/listName"
@@ -29,7 +29,7 @@
         android:layout_marginEnd="100dp"
         android:autofillHints="Please Enter List Name"
         android:ems="10"
-        android:hint="List Name"
+        android:hint="@string/listName"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,7 +38,7 @@
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/autocomplete_fragment"
@@ -47,24 +47,24 @@
 
         <RadioButton
             android:id="@+id/radio_pantry"
-            android:layout_width="168dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="75dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
             android:onClick="onRadioButtonClicked"
-            android:text="Pantry"
+            android:text="@string/pantry"
             android:textSize="22sp" />
 
         <RadioButton
             android:id="@+id/radio_store"
-            android:layout_width="168dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="50dp"
             android:onClick="onRadioButtonClicked"
-            android:text="Shopping"
+            android:text="@string/store"
             android:textSize="22sp" />
     </RadioGroup>
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/autocomplete_fragment"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
@@ -90,7 +90,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp"
         android:onClick="onClickClearLocation"
-        android:text="Clear Location"
+        android:text="@string/clearLocation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/map" />
@@ -104,7 +104,7 @@
         android:layout_marginBottom="35dp"
         android:background="#FF1687CE"
         android:onClick="onClickSaveList"
-        android:text="Save List"
+        android:text="@string/saveList"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -11,93 +11,86 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="110dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:ems="10"
-        android:hint="Email"
+        android:hint="@string/email"
         android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/firstNameTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="23dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:ems="10"
-        android:hint="First Name"
+        android:hint="@string/firstName"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/registerEmailTextBox" />
+        app:layout_constraintTop_toBottomOf="@+id/registerEmailTextBox"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/lastNameTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="17dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:ems="10"
-        android:hint="Last Name"
+        android:hint="@string/lastName"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/firstNameTextBox" />
+        app:layout_constraintTop_toBottomOf="@+id/firstNameTextBox"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/registerPasswordTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="23dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:ems="10"
-        android:hint="Password"
+        android:hint="@string/password"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lastNameTextBox" />
+        app:layout_constraintTop_toBottomOf="@+id/lastNameTextBox"
+        android:autofillHints="" />
 
     <EditText
         android:id="@+id/confirmPasswordTextBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="18dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:ems="10"
-        android:hint="Confirm Password"
+        android:hint="@string/confirmPassword"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/registerPasswordTextBox" />
+        app:layout_constraintTop_toBottomOf="@+id/registerPasswordTextBox"
+        android:autofillHints="" />
 
     <Button
         android:id="@+id/registerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginLeft="100dp"
         android:layout_marginTop="38dp"
         android:layout_marginEnd="100dp"
-        android:layout_marginRight="100dp"
         android:onClick="OnClickRegister"
-        android:text="Register"
+        android:text="@string/register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/confirmPasswordTextBox" />

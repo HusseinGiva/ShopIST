@@ -9,7 +9,6 @@
         android:layout_width="228dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Store Name"
         android:textSize="24sp" />
 
     <EditText
@@ -18,17 +17,18 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:ems="10"
-        android:hint="Price"
+        android:hint="@string/price"
         android:inputType="numberDecimal"
         android:textAlignment="textEnd"
-        android:textSize="24sp" />
+        android:textSize="24sp"
+        android:autofillHints="" />
 
     <TextView
         android:id="@+id/euroSign"
         android:layout_width="38dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="€"
+        android:text="@string/euro"
         android:textSize="24sp" />
 
     <CheckBox

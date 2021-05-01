@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:theme="@style/Theme.Toolbar"
-        app:title="Add Pictures" />
+        app:title="@string/addPictures" />
 
     <Button
         android:id="@+id/addNewPicture"
@@ -27,7 +27,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="100dp"
-        android:text="Add New Picture"
+        android:text="@string/addNewPicture"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addPicturesToolbar" />
@@ -39,12 +39,12 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="100dp"
-        android:text="Browse Pictures"
+        android:text="@string/browsePictures"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addNewPicture" />
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/picturesFragment"
         android:name="pt.ulisboa.tecnico.cmov.shopist.PicturesFragment"
         android:layout_width="match_parent"

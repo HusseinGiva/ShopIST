@@ -51,7 +51,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp"
         android:onClick="onClickResetLocation"
-        android:text="Recenter Location"
+        android:text="@string/recenterLocation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/map" />
