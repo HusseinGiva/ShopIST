@@ -70,7 +70,13 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
         id = getIntent().getStringExtra("ID");
 
         list = findViewById(R.id.pantry_list);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(this, "onResume", Toast.LENGTH_LONG).show();
+        Log.d("LETSDOIT", "onResume");
         if (listType.equals("PANTRY")) {
 
             db.collection("PantryList").document(id)
@@ -94,8 +100,8 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
                                                 ArrayList<String> itemIds = new ArrayList<String>();
                                                 List<String> pantry_item_names = new ArrayList<>();
                                                 List<Integer> pantry_item_quantities = new ArrayList<>();
-                                                ListAdapter a = new ListAdapter(ListActivity.this, PANTRY, null, null, null, pantry_item_names, pantry_item_quantities, null, null, null);
-                                                //list.setAdapter(a);
+                                                PantryListAdapter a = new PantryListAdapter(ListActivity.this, pantry_item_names, pantry_item_quantities);
+                                                list.setAdapter(a);
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     PantryItem pi = document.toObject(PantryItem.class);
                                                     itemIds.add(pi.itemId);
@@ -142,8 +148,13 @@ public class ListActivity extends AppCompatActivity implements GoogleMap.OnMyLoc
 
 
         }
+    }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Toast.makeText(this, "onPause", Toast.LENGTH_LONG).show();
+        Log.d("LETSDOIT", "onPause");
     }
 
     @Override

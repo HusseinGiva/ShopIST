@@ -179,7 +179,7 @@ public class ListFragment extends Fragment {
                             }
 
                             list = view.findViewById(R.id.list);
-                            ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, null, null, typeSelected, pantryIds, storeIds);
+                            ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, typeSelected, pantryIds, storeIds);
                             list.setAdapter(a);
                         } else {
                             Log.d("TAG", "Error getting documents: ", task.getException());
