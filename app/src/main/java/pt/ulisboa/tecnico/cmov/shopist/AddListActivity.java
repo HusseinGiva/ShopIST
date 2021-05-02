@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -197,6 +200,8 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             return;
         }
 
+        if(!isConnected(getApplicationContext()))
+            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
         if (this.list_type.equals(getResources().getString(R.string.pantry))) {
 
@@ -208,6 +213,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 l = new PantryList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
             db.collection("PantryList").add(l);
+
             Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
             startActivity(intent);
 
@@ -220,11 +226,27 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             else
                 l = new StoreList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
+
             db.collection("StoreList").add(l);
+
+
             Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
             startActivity(intent);
 
         }
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 
     @Override
@@ -338,6 +360,10 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     String type = splitted[0];
                     String id = splitted[1];
                     if (type.equals("PANTRY")) {
+
+                        if(!isConnected(getApplicationContext()))
+                            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
+
                         db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
@@ -353,6 +379,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
                         return;
                     } else if (type.equals("STORE")) {
+
+                        if(!isConnected(getApplicationContext()))
+                            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
                         db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {

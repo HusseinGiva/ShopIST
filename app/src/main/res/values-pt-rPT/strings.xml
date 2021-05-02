@@ -81,4 +81,5 @@
     <string name="viewStores">Ver Lojas</string>
     <string name="moveItemToStoreList">Mover Produto Para Loja</string>
     <string name="no_drivetime">Sem Localização/GPS/Wifi</string>
+    <string name="noInternetConnection">A sincronização será feita quando ligação à Internet estiver disponível</string>
 </resources>

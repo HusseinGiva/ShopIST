@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -58,6 +60,9 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
             String id = splitted[1];
             if (type.equals("PANTRY")) {
 
+                if(!isConnected(getApplicationContext()))
+                    Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
+
                 db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Intent intent = new Intent(QrCodeScanner.this, PantryListActivity.class);
@@ -73,6 +78,9 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                 });
                 return;
             } else if (type.equals("STORE")) {
+
+                if(!isConnected(getApplicationContext()))
+                    Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
                 db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -97,5 +105,18 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
         finish();
 
 
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 }

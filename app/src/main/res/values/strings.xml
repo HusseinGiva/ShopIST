@@ -81,4 +81,5 @@
     <string name="viewPictures">View Pictures</string>
     <string name="viewStores">View Stores</string>
     <string name="moveItemToStoreList">Move Product To Store List</string>
+    <string name="noInternetConnection">Synchronization will be made when Internet connection is available</string>
 </resources>

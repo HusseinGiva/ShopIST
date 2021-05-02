@@ -4,12 +4,14 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.location.Location;
 import android.media.Image;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -174,6 +176,11 @@ public class AddItemActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.pleaseInsertItemStoreQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
+
+        if(!isConnected(getApplicationContext()))
+            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
+
+
         Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
         db.collection("Item").whereEqualTo("barcode", item.barcode).
                 get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -195,6 +202,9 @@ public class AddItemActivity extends AppCompatActivity {
                                         for (StoreViewAddItem store: storeViewAddItems) {
                                             if (store.isChecked) {
                                                 StoreItem storeItem = new StoreItem(store.storeId, itemId, 0, store.price);
+
+
+
                                                 db.collection("StoreItem").add(storeItem);
                                             }
                                         }
@@ -302,6 +312,19 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 
     public void onClickAddPictures(View view) {
