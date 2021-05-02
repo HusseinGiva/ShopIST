@@ -18,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -36,6 +37,7 @@ public class PantryListActivity extends AppCompatActivity {
     private ListView list;
     private String id;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     private static Double latitude = null;
     private static Double longitude = null;
@@ -61,6 +63,7 @@ public class PantryListActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         id = getIntent().getStringExtra("ID");
 
@@ -105,7 +108,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                             DocumentSnapshot document = task.getResult();
                                                             if (document.exists()) {
                                                                 Item i = document.toObject(Item.class);
-                                                                pantry_item_names.add(i.name);
+                                                                pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                 pantry_item_quantities.add(pi.idealQuantity);
                                                                 list.invalidateViews();
                                                             } else {
