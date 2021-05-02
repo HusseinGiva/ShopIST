@@ -44,6 +44,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -173,13 +174,18 @@ public class AddItemActivity extends AppCompatActivity {
             return;
         }
         Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
-        db.collection("Item")
-                .add(item)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        itemId = documentReference.getId();
-                        PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
+        db.collection("Item").whereEqualTo("barcode", item.barcode).
+                get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful()) {
+                    boolean itemAlreadyExisted = false;
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        itemAlreadyExisted = true;
+                        Item i = document.toObject(Item.class);
+                        i.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                        db.collection("Item").document(document.getId()).update("users", i.users);
+                        PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), document.getId(), Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
                         db.collection("PantryItem")
                                 .add(pantryItem)
                                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -212,17 +218,74 @@ public class AddItemActivity extends AppCompatActivity {
                                                             if (document.exists()) {
                                                                 PantryList pantry = document.toObject(PantryList.class);
                                                                 db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                finish();
                                                             }
                                                         }
+                                                    }
+                                                });
+                                        //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                                    }
+                                });
+                    }
+                    if(!itemAlreadyExisted) {
+                        db.collection("Item")
+                                .add(item)
+                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                    @Override
+                                    public void onSuccess(DocumentReference documentReference) {
+                                        itemId = documentReference.getId();
+                                        PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
+                                        db.collection("PantryItem")
+                                                .add(pantryItem)
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+                                                        for (StoreViewAddItem store : storeViewAddItems) {
+                                                            if (store.isChecked) {
+                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, 0, store.price);
+                                                                db.collection("StoreItem").add(storeItem);
+                                                            }
+                                                        }
+                                                        for (String s : photoPaths) {
+                                                            Uri file = Uri.fromFile(new File(s));
+                                                            if (!barcodeNumber.getText().toString().equals("")) {
+                                                                StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                                UploadTask uploadTask = imagesRef.putFile(file);
+                                                            } else {
+                                                                StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
+                                                                UploadTask uploadTask = imagesRef.putFile(file);
+                                                            }
+                                                        }
+                                                        db.collection("PantryList").document(getIntent().getStringExtra("ID"))
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            DocumentSnapshot document = task.getResult();
+                                                                            if (document.exists()) {
+                                                                                PantryList pantry = document.toObject(PantryList.class);
+                                                                                db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                })
+                                                                .addOnFailureListener(new OnFailureListener() {
+                                                                    @Override
+                                                                    public void onFailure(@NonNull Exception e) {
+
+                                                                    }
+                                                                });
+                                                        finish();
+                                                        //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                                                     }
                                                 })
                                                 .addOnFailureListener(new OnFailureListener() {
                                                     @Override
                                                     public void onFailure(@NonNull Exception e) {
-
+                                                        //Log.w(TAG, "Error adding document", e);
                                                     }
                                                 });
-                                        finish();
                                         //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                                     }
                                 })
@@ -232,15 +295,12 @@ public class AddItemActivity extends AppCompatActivity {
                                         //Log.w(TAG, "Error adding document", e);
                                     }
                                 });
-                        //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        //Log.w(TAG, "Error adding document", e);
-                    }
-                });
+
+                }
+            }
+        });
+
     }
 
     public void onClickAddPictures(View view) {
