@@ -20,6 +20,9 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,6 +30,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
@@ -97,6 +101,7 @@ public class ListFragment extends Fragment {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
             locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
@@ -162,29 +167,33 @@ public class ListFragment extends Fragment {
                                             pantry.driveTime = null;
                                             drive_times.add(pantry.driveTime);
 
-                                            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
-                                                    lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
-                                                    "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+                                            if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
+                                                String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                        lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
+                                                        "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
 
-                                            Object[] dataTransfer = new Object[]{pantry, url};
-                                            new DownloadUrl().execute(dataTransfer);
+                                                Object[] dataTransfer = new Object[]{pantry, url};
+                                                new DownloadUrl().execute(dataTransfer);
 
-                                            Handler timerHandler = new Handler();
-                                            Runnable timerRunnable = new Runnable() {
+                                                Handler timerHandler = new Handler();
+                                                Runnable timerRunnable = new Runnable() {
 
-                                                @Override
-                                                public void run() {
-                                                    if (pantry.driveTime != null) {
-                                                        Log.d("LIST", String.valueOf(pantry.driveTime));
-                                                        drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
-                                                        list.invalidateViews();
-                                                        timerHandler.removeCallbacks(this);
-                                                    } else {
-                                                        timerHandler.postDelayed(this, 500);
+                                                    @Override
+                                                    public void run() {
+                                                        if (pantry.driveTime != null) {
+                                                            Log.d("LIST", String.valueOf(pantry.driveTime));
+                                                            drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                                            list.invalidateViews();
+                                                            timerHandler.removeCallbacks(this);
+                                                        } else {
+                                                            timerHandler.postDelayed(this, 500);
+                                                        }
                                                     }
-                                                }
-                                            };
-                                            timerHandler.postDelayed(timerRunnable, 0);
+                                                };
+                                                timerHandler.postDelayed(timerRunnable, 0);
+                                            }
+
+
 
 
 
@@ -214,29 +223,33 @@ public class ListFragment extends Fragment {
                                             store.driveTime = null;
                                             drive_times.add(store.driveTime);
 
-                                            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
-                                                    lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
-                                                    "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+                                            if(lastKnownLocation != null && store.latitude != null && store.longitude != null){
+                                                String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                        lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
+                                                        "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
 
-                                            Object[] dataTransfer = new Object[]{store, url};
-                                            new DownloadUrl().execute(dataTransfer);
+                                                Object[] dataTransfer = new Object[]{store, url};
+                                                new DownloadUrl().execute(dataTransfer);
 
-                                            Handler timerHandler = new Handler();
-                                            Runnable timerRunnable = new Runnable() {
+                                                Handler timerHandler = new Handler();
+                                                Runnable timerRunnable = new Runnable() {
 
-                                                @Override
-                                                public void run() {
-                                                    if (store.driveTime != null) {
-                                                        Log.d("LIST", String.valueOf(store.driveTime));
-                                                        drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
-                                                        list.invalidateViews();
-                                                        timerHandler.removeCallbacks(this);
-                                                    } else {
-                                                        timerHandler.postDelayed(this, 500);
+                                                    @Override
+                                                    public void run() {
+                                                        if (store.driveTime != null) {
+                                                            Log.d("LIST", String.valueOf(store.driveTime));
+                                                            drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
+                                                            list.invalidateViews();
+                                                            timerHandler.removeCallbacks(this);
+                                                        } else {
+                                                            timerHandler.postDelayed(this, 500);
+                                                        }
                                                     }
-                                                }
-                                            };
-                                            timerHandler.postDelayed(timerRunnable, 0);
+                                                };
+                                                timerHandler.postDelayed(timerRunnable, 0);
+                                            }
+
+
 
 
 
@@ -278,33 +291,38 @@ public class ListFragment extends Fragment {
                                 pantryIds.add(document.getId());
 
                                 pantry.driveTime = null;
-
-                                String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
-                                        lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
-                                        "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
-
-                                Object[] dataTransfer = new Object[]{pantry, url};
-                                new DownloadUrl().execute(dataTransfer);
-
-                                Handler timerHandler = new Handler();
-                                Runnable timerRunnable = new Runnable() {
-
-                                    @Override
-                                    public void run() {
-                                        if (pantry.driveTime != null) {
-                                            Log.d("LIST", String.valueOf(pantry.driveTime));
-                                            drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
-                                            list.invalidateViews();
-                                            timerHandler.removeCallbacks(this);
-                                        } else {
-                                            timerHandler.postDelayed(this, 500);
-                                        }
-                                    }
-                                };
-                                timerHandler.postDelayed(timerRunnable, 0);
-
-
                                 drive_times.add(pantry.driveTime);
+
+                                if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
+                                    String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                            lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
+                                            "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                    Object[] dataTransfer = new Object[]{pantry, url};
+                                    new DownloadUrl().execute(dataTransfer);
+
+                                    Handler timerHandler = new Handler();
+                                    Runnable timerRunnable = new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            if (pantry.driveTime != null) {
+                                                Log.d("LIST", String.valueOf(pantry.driveTime));
+                                                drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                                list.invalidateViews();
+                                                timerHandler.removeCallbacks(this);
+                                            } else {
+                                                timerHandler.postDelayed(this, 500);
+                                            }
+                                        }
+                                    };
+                                    timerHandler.postDelayed(timerRunnable, 0);
+                                }
+
+
+
+
+
 
                             }
 

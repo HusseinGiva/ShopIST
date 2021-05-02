@@ -15,8 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -68,15 +70,77 @@ public class StartActivity extends AppCompatActivity {
         SimWifiP2pSocketServer mSrvSocket = null;
         SimWifiP2pSocket mCliSocket = null;*/
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            updateUI();
-        } else {
-            Intent intent = new Intent(StartActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }else{
+
+
+            Task<Location> locationResult = fusedLocationClient.getLastLocation();
+            locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
+                    if (task.isSuccessful()) {
+                        FirebaseUser currentUser = mAuth.getCurrentUser();
+                        if (currentUser != null) {
+                            updateUI();
+                        } else {
+                            Intent intent = new Intent(StartActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                    }
+                }
+            });
+
+
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    Task<Location> locationResult = fusedLocationClient.getLastLocation();
+                    locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful()) {
+                                FirebaseUser currentUser = mAuth.getCurrentUser();
+                                if (currentUser != null) {
+                                    updateUI();
+                                } else {
+                                    Intent intent = new Intent(StartActivity.this, LoginActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            } else {
+                                Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                            }
+                        }
+                    });
+                }
+            } else {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                Intent intent;
+                if (currentUser != null) {
+                    intent = new Intent(StartActivity.this, HomeActivity.class);
+                } else {
+                    intent = new Intent(StartActivity.this, LoginActivity.class);
+                }
+                startActivity(intent);
+                finish();
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 
@@ -110,17 +174,21 @@ public class StartActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     PantryList p = document.toObject(PantryList.class);
 
-                                                    float[] results = new float[1];
-                                                    Location.distanceBetween(p.latitude, p.longitude, location.getLatitude(), location.getLongitude(),
-                                                            results);
+                                                    if(p.latitude != null && p.longitude != null){
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(Double.parseDouble(p.latitude), Double.parseDouble(p.longitude), location.getLatitude(), location.getLongitude(),
+                                                                results);
 
-                                                    //Less than 20 meters
-                                                    if (results[0] < 20f) {
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
 
-                                                        pantries.add(document.getId());
+                                                            pantries.add(document.getId());
 
 
+                                                        }
                                                     }
+
+
                                                 }
                                             } else {
                                                 Log.d("TAG", "Error getting documents: ", task.getException());
@@ -139,15 +207,19 @@ public class StartActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     StoreList s = document.toObject(StoreList.class);
 
-                                                    float[] results = new float[1];
-                                                    Location.distanceBetween(s.latitude, s.longitude, location.getLatitude(), location.getLongitude(),
-                                                            results);
+                                                    if(s.latitude != null && s.longitude != null){
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(Double.parseDouble(s.latitude), Double.parseDouble(s.longitude), location.getLatitude(), location.getLongitude(),
+                                                                results);
 
-                                                    //Less than 20 meters
-                                                    if (results[0] < 20f) {
-                                                        stores.add(document.getId());
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
+                                                            stores.add(document.getId());
 
+                                                        }
                                                     }
+
+
                                                 }
                                             } else {
                                                 Log.d("TAG", "Error getting documents: ", task.getException());
@@ -177,21 +249,18 @@ public class StartActivity extends AppCompatActivity {
                                                             if (task.isSuccessful()) {
 
                                                                 DocumentSnapshot document = task.getResult();
-                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                                String language;
                                                                 if (document.exists()) {
-                                                                    language = document.getData().get("language").toString();
-                                                                }else{ //Anonymous sign in
-                                                                    language = Locale.getDefault().getLanguage();
+                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                                                    String language = document.getData().get("language").toString();
+                                                                    editor.putString("language", language);
+                                                                    editor.commit();
+                                                                    Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
+                                                                    intent.putExtra("TAB", getResources().getString(R.string.pantry));
+                                                                    intent.putExtra("ID", pantries.get(0));
+                                                                    startActivity(intent);
+                                                                    finish();
                                                                 }
-                                                                editor.putString("language", language);
-                                                                editor.commit();
-                                                                Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
-                                                                intent.putExtra("TAB", getResources().getString(R.string.pantry));
-                                                                intent.putExtra("ID", pantries.get(0));
-                                                                startActivity(intent);
-                                                                finish();
 
                                                             }
                                                         });
@@ -206,21 +275,20 @@ public class StartActivity extends AppCompatActivity {
                                                         db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                                             if (task.isSuccessful()) {
                                                                 DocumentSnapshot document = task.getResult();
-                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                                String language;
                                                                 if (document.exists()) {
-                                                                    language = document.getData().get("language").toString();
-                                                                }else{ //Anonymous sign in
-                                                                    language = Locale.getDefault().getLanguage();
+                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                                                    String language = document.getData().get("language").toString();
+                                                                    editor.putString("language", language);
+                                                                    editor.commit();
+                                                                    Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
+                                                                    intent.putExtra("TAB", getResources().getString(R.string.store));
+                                                                    intent.putExtra("ID", stores.get(0));
+                                                                    startActivity(intent);
+                                                                    finish();
                                                                 }
-                                                                editor.putString("language", language);
-                                                                editor.commit();
-                                                                Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
-                                                                intent.putExtra("TAB", getResources().getString(R.string.store));
-                                                                intent.putExtra("ID", stores.get(0));
-                                                                startActivity(intent);
-                                                                finish();
+
+
 
                                                             }
                                                         });
@@ -237,19 +305,16 @@ public class StartActivity extends AppCompatActivity {
                                                     db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                                         if (task.isSuccessful()) {
                                                             DocumentSnapshot document = task.getResult();
-                                                            SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                            SharedPreferences.Editor editor = sharedPref.edit();
-                                                            String language;
                                                             if (document.exists()) {
-                                                                language = document.getData().get("language").toString();
-                                                            }else{ //Anonymous sign in
-                                                                language = Locale.getDefault().getLanguage();
+                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                                String language = document.getData().get("language").toString();
+                                                                editor.putString("language", language);
+                                                                editor.commit();
+                                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
+                                                                startActivity(intent);
+                                                                finish();
                                                             }
-                                                            editor.putString("language", language);
-                                                            editor.commit();
-                                                            Intent intent = new Intent(StartActivity.this, HomeActivity.class);
-                                                            startActivity(intent);
-                                                            finish();
                                                         }
                                                     });
                                                 }

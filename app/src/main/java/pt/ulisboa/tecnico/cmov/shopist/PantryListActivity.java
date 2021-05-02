@@ -39,8 +39,8 @@ public class PantryListActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    private static Double latitude = null;
-    private static Double longitude = null;
+    private static String latitude = null;
+    private static String longitude = null;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -181,8 +181,8 @@ public class PantryListActivity extends AppCompatActivity {
                     return false;
                 }
                 intent = new Intent(this, ListLocationActivity.class);
-                intent.putExtra("LATITUDE", String.valueOf(latitude));
-                intent.putExtra("LONGITUDE", String.valueOf(longitude));
+                intent.putExtra("LATITUDE", latitude);
+                intent.putExtra("LONGITUDE", longitude);
                 startActivity(intent);
                 return true;
             default:

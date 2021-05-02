@@ -76,4 +76,5 @@
     <string name="listLocation">Localização Da Lista</string>
     <string name="listDoesntHaveLocationSet">Lista Sem Localização Definida</string>
     <string name="total_cost">Total :</string>
+    <string name="no_drivetime">Sem Localização/GPS/Wifi</string>
 </resources>

@@ -24,13 +24,16 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -97,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("language", language);
                             editor.commit();
+                            addUserToFirestore(task.getResult().getUser(), language);
                             updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -135,7 +139,9 @@ public class LoginActivity extends AppCompatActivity {
                                         String language = document.getData().get("language").toString();
                                         editor.putString("language", language);
                                         editor.commit();
-                                        updateUI();
+                                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                                        startActivity(intent);
+                                        finish();
                                     }
                                 }
                             });
@@ -180,17 +186,21 @@ public class LoginActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     PantryList p = document.toObject(PantryList.class);
 
-                                                    float[] results = new float[1];
-                                                    Location.distanceBetween(p.latitude, p.longitude, location.getLatitude(), location.getLongitude(),
-                                                            results);
+                                                    if(p.latitude != null && p.longitude != null){
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(Double.parseDouble(p.latitude), Double.parseDouble(p.longitude), location.getLatitude(), location.getLongitude(),
+                                                                results);
 
-                                                    //Less than 20 meters
-                                                    if (results[0] < 20f) {
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
 
-                                                        pantries.add(document.getId());
+                                                            pantries.add(document.getId());
 
 
+                                                        }
                                                     }
+
+
                                                 }
                                             } else {
                                                 Log.d("TAG", "Error getting documents: ", task.getException());
@@ -209,15 +219,19 @@ public class LoginActivity extends AppCompatActivity {
                                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                                     StoreList s = document.toObject(StoreList.class);
 
-                                                    float[] results = new float[1];
-                                                    Location.distanceBetween(s.latitude, s.longitude, location.getLatitude(), location.getLongitude(),
-                                                            results);
+                                                    if(s.latitude != null && s.longitude != null){
+                                                        float[] results = new float[1];
+                                                        Location.distanceBetween(Double.parseDouble(s.latitude), Double.parseDouble(s.longitude), location.getLatitude(), location.getLongitude(),
+                                                                results);
 
-                                                    //Less than 20 meters
-                                                    if (results[0] < 20f) {
-                                                        stores.add(document.getId());
+                                                        //Less than 20 meters
+                                                        if (results[0] < 20f) {
+                                                            stores.add(document.getId());
 
+                                                        }
                                                     }
+
+
                                                 }
                                             } else {
                                                 Log.d("TAG", "Error getting documents: ", task.getException());
@@ -303,5 +317,17 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         }
+    }
+
+    private void addUserToFirestore(FirebaseUser user,  String language) {
+
+        Map<String, String> userInfo = new HashMap<>();
+
+        userInfo.put("language", language);
+
+        db.collection("user").document(user.getUid())
+                .set(userInfo)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
     }
 }

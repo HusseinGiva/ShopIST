@@ -43,7 +43,6 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -142,6 +141,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             if (map != null) {
                 map.setMyLocationEnabled(true);
             }
+
             Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
             locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                 @Override
@@ -196,65 +196,34 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             Toast.makeText(this, R.string.pleaseSelectListType, Toast.LENGTH_SHORT).show();
             return;
         }
-        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
-                lastKnownLocation.getLongitude() + "&destinations=" + m.getPosition().latitude + "," + m.getPosition().longitude +
-                "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
 
 
         if (this.list_type.equals(getResources().getString(R.string.pantry))) {
-            PantryList l = new PantryList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
-            Object[] dataTransfer = new Object[]{l, url};
-            new DownloadUrl().execute(dataTransfer);
+            PantryList l;
 
-            Handler timerHandler = new Handler();
-            Runnable timerRunnable = new Runnable() {
+            if(m != null && m.getPosition() != null)
+                l = new PantryList(e.getText().toString(), String.valueOf(m.getPosition().latitude), String.valueOf(m.getPosition().longitude), mAuth.getCurrentUser().getUid());
+            else
+                l = new PantryList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
-                @Override
-                public void run() {
-                    if (l.driveTime != null) {
-                        db.collection("PantryList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                if(task.isSuccessful()) {
-                                    finish();
-                                }
-                            }
-                        });
-                        timerHandler.removeCallbacks(this);
-                    } else {
-                        timerHandler.postDelayed(this, 500);
-                    }
-                }
-            };
-            timerHandler.postDelayed(timerRunnable, 0);
+            db.collection("PantryList").add(l);
+            Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+            startActivity(intent);
+
         } else if (this.list_type.equals(getResources().getString(R.string.store))) {
-            StoreList l = new StoreList(e.getText().toString(), m.getPosition().latitude, m.getPosition().longitude, mAuth.getCurrentUser().getUid());
 
-            Object[] dataTransfer = new Object[]{l, url};
-            new DownloadUrl().execute(dataTransfer);
+            StoreList l;
 
-            Handler timerHandler = new Handler();
-            Runnable timerRunnable = new Runnable() {
+            if(m != null && m.getPosition() != null)
+                l = new StoreList(e.getText().toString(), String.valueOf(m.getPosition().latitude),String.valueOf(m.getPosition().longitude), mAuth.getCurrentUser().getUid());
+            else
+                l = new StoreList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
-                @Override
-                public void run() {
-                    if (l.driveTime != null) {
-                        db.collection("StoreList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                if(task.isSuccessful()) {
-                                    finish();
-                                }
-                            }
-                        });
-                        timerHandler.removeCallbacks(this);
-                    } else {
-                        timerHandler.postDelayed(this, 500);
-                    }
-                }
-            };
-            timerHandler.postDelayed(timerRunnable, 0);
+            db.collection("StoreList").add(l);
+            Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+            startActivity(intent);
+
         }
     }
 

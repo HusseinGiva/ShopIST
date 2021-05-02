@@ -502,26 +502,35 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     DocumentSnapshot document3 = task3.getResult();
                                                                         Toast.makeText(getApplicationContext(), document3.getId(), Toast.LENGTH_LONG).show();
                                                                         StoreList item3 = document3.toObject(StoreList.class);
-                                                                        db.collection("StoreList")
-                                                                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                                                .get()
-                                                                                .addOnCompleteListener(task4 -> {
-                                                                                    if (task4.isSuccessful()) {
-                                                                                        for (QueryDocumentSnapshot document4 : task4.getResult()) {
-                                                                                            StoreList item4 = document4.toObject(StoreList.class);
-                                                                                            float[] results = new float[1];
-                                                                                            Location.distanceBetween(item4.latitude, item4.longitude, item3.latitude, item3.longitude,
-                                                                                                    results);
-                                                                                            //Less than 20 meters
-                                                                                            if (results[0] < 20f) {
-                                                                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document4.getId(), item4.name, item2.price, true);
-                                                                                                storeViewAddItems.add(storeViewAddItem);
+                                                                        if(item3.latitude != null && item3.longitude != null){
+                                                                            db.collection("StoreList")
+                                                                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                                                                    .get()
+                                                                                    .addOnCompleteListener(task4 -> {
+                                                                                        if (task4.isSuccessful()) {
+                                                                                            for (QueryDocumentSnapshot document4 : task4.getResult()) {
+                                                                                                StoreList item4 = document4.toObject(StoreList.class);
+
+                                                                                                if(item4.latitude != null && item4.longitude != null){
+                                                                                                    float[] results = new float[1];
+                                                                                                    Location.distanceBetween(Double.parseDouble(item4.latitude), Double.parseDouble(item4.longitude),
+                                                                                                            Double.parseDouble(item3.latitude), Double.parseDouble(item3.longitude),
+                                                                                                            results);
+                                                                                                    //Less than 20 meters
+                                                                                                    if (results[0] < 20f) {
+                                                                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document4.getId(), item4.name, item2.price, true);
+                                                                                                        storeViewAddItems.add(storeViewAddItem);
+                                                                                                    }
+                                                                                                }
+
+
                                                                                             }
+                                                                                        } else {
+                                                                                            Log.d("TAG", "Error getting documents: ", task4.getException());
                                                                                         }
-                                                                                    } else {
-                                                                                        Log.d("TAG", "Error getting documents: ", task4.getException());
-                                                                                    }
-                                                                                });
+                                                                                    });
+                                                                        }
+
                                                                     }
                                                                 else {
                                                                     Log.d("TAG", "Error getting documents: ", task3.getException());

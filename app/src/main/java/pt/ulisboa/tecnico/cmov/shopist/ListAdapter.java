@@ -54,6 +54,8 @@ public class ListAdapter extends ArrayAdapter<String> {
         holder.listName.setText(list_names.get(position));
         if(drive_times.get(position) != null)
             holder.driveTime.setText(drive_times.get(position));
+        else
+            holder.driveTime.setText(getContext().getResources().getString(R.string.no_drivetime));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
 
         view.setOnClickListener(new View.OnClickListener() {
