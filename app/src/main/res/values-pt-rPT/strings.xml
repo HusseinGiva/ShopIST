@@ -72,6 +72,8 @@
     <string name="english">Inglês</string>
     <string name="portuguese">Português</string>
     <string name="items">Produtos</string>
+    <string name="checkout">CHECKOUT</string>
     <string name="listLocation">Localização Da Lista</string>
     <string name="listDoesntHaveLocationSet">Lista Sem Localização Definida</string>
+    <string name="total_cost">Total :</string>
 </resources>

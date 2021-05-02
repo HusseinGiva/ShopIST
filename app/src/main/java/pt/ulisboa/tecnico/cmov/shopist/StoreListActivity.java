@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,7 +36,6 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListActivity extends AppCompatActivity {
 
-    private ListView list;
     private String id;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -67,7 +68,42 @@ public class StoreListActivity extends AppCompatActivity {
 
         id = getIntent().getStringExtra("ID");
 
-        list = findViewById(R.id.store_list);
+        Bundle bundle = new Bundle();
+        bundle.putString("ID", id);
+
+        getSupportFragmentManager().beginTransaction()
+                .setReorderingAllowed(true)
+                .add(R.id.fragment_container_view, StoreListFragment.class, bundle)
+                .commit();
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getText().equals(getResources().getString(R.string.items))) {
+                    getSupportFragmentManager().beginTransaction()
+                            .setReorderingAllowed(true)
+                            .replace(R.id.fragment_container_view, StoreListFragment.class, bundle)
+                            .commit();
+                }
+                else if(tab.getText().equals(getResources().getString(R.string.cart))) {
+                    getSupportFragmentManager().beginTransaction()
+                            .setReorderingAllowed(true)
+                            .replace(R.id.fragment_container_view, CartFragment.class, bundle)
+                            .commit();
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     @Override
@@ -87,52 +123,6 @@ public class StoreListActivity extends AppCompatActivity {
                                 latitude = store.latitude;
                                 longitude = store.longitude;
                                 getSupportActionBar().setTitle(store.name);
-
-                                db.collection("StoreItem").whereEqualTo("storeId", id).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                                        if (task.isSuccessful()) {
-                                            ArrayList<String> itemIds = new ArrayList<String>();
-                                            List<String> store_item_names = new ArrayList<>();
-                                            List<Integer> store_item_quantities = new ArrayList<>();
-                                            List<Float> item_prices = new ArrayList<>();
-                                            StoreListAdapter a = new StoreListAdapter(StoreListActivity.this, store_item_names, store_item_quantities, item_prices);
-                                            list.setAdapter(a);
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                StoreItem si = document.toObject(StoreItem.class);
-                                                itemIds.add(si.itemId);
-                                                db.collection("Item").document(si.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            DocumentSnapshot document = task.getResult();
-                                                            if (document.exists()) {
-                                                                Item i = document.toObject(Item.class);
-                                                                store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                store_item_quantities.add(si.quantity);
-                                                                item_prices.add(si.price);
-                                                                list.invalidateViews();
-                                                            } else {
-                                                                Log.d("TAG", "No such document");
-                                                            }
-
-
-                                                        } else {
-                                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                                        }
-                                                    }
-                                                });
-                                            }
-
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                        }
-
-                                    }
-                                });
-
-
                             } else {
                                 Log.d("TAG", "No such document");
                             }

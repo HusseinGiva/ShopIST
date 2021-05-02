@@ -43,6 +43,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -212,9 +213,14 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 @Override
                 public void run() {
                     if (l.driveTime != null) {
-                        db.collection("PantryList").add(l);
-                        Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-                        startActivity(intent);
+                        db.collection("PantryList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if(task.isSuccessful()) {
+                                    finish();
+                                }
+                            }
+                        });
                         timerHandler.removeCallbacks(this);
                     } else {
                         timerHandler.postDelayed(this, 500);
@@ -234,9 +240,14 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 @Override
                 public void run() {
                     if (l.driveTime != null) {
-                        db.collection("StoreList").add(l);
-                        Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-                        startActivity(intent);
+                        db.collection("StoreList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentReference> task) {
+                                if(task.isSuccessful()) {
+                                    finish();
+                                }
+                            }
+                        });
                         timerHandler.removeCallbacks(this);
                     } else {
                         timerHandler.postDelayed(this, 500);
