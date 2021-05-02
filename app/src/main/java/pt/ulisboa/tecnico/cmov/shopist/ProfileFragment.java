@@ -79,10 +79,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     db.collection("user").document(currentUser.getUid()).update("language", "en").addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            /*SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString("language", "en");
-                            editor.commit();*/
                             Intent intent = new Intent(getContext(), StartActivity.class);
                             startActivity(intent);
                             getActivity().finish();
@@ -93,10 +89,16 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            /*SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString("language", "pt");
-                            editor.commit();*/
+                            Intent intent = new Intent(getContext(), StartActivity.class);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }
+                    });
+                } else if (checkedId == view.findViewById(R.id.auto).getId()) {
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    db.collection("user").document(currentUser.getUid()).update("language", "auto").addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
                             Intent intent = new Intent(getContext(), StartActivity.class);
                             startActivity(intent);
                             getActivity().finish();

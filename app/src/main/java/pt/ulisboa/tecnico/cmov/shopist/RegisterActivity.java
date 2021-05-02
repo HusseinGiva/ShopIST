@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -72,6 +75,11 @@ public class RegisterActivity extends AppCompatActivity {
         String lastNameText = lastName.getText().toString();
         String passwordText = password.getText().toString();
         String confirmPasswordText = confirmPassword.getText().toString();
+        String language = "auto";
+        SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("language", language);
+        editor.commit();
 
         //Check if name fields are empty
         if (firstNameText.trim().isEmpty() || lastNameText.trim().isEmpty()) {
@@ -107,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            addUserToFirestore(user, firstNameText, lastNameText);
+                            addUserToFirestore(user, firstNameText, lastNameText, language);
                             updateUI(user, false);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -127,7 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "linkWithCredential:success");
                             FirebaseUser user = task.getResult().getUser();
-                            addUserToFirestore(user, firstNameText, lastNameText);
+                            addUserToFirestore(user, firstNameText, lastNameText, language);
                             updateUI(user, true);
                         } else {
                             Log.w(TAG, "linkWithCredential:failure", task.getException());
@@ -141,12 +149,13 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void addUserToFirestore(FirebaseUser user, String firstNameText, String lastNameText) {
+    private void addUserToFirestore(FirebaseUser user, String firstNameText, String lastNameText, String language) {
 
         Map<String, String> userInfo = new HashMap<>();
 
         userInfo.put("firstName", firstNameText);
         userInfo.put("lastName", lastNameText);
+        userInfo.put("language", language);
 
         db.collection("user").document(user.getUid())
                 .set(userInfo)

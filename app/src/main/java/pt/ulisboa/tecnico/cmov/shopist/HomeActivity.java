@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Locale;
+
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -21,6 +23,9 @@ public class HomeActivity extends AppCompatActivity {
     protected void attachBaseContext(Context newBase) {
         SharedPreferences sharedPref = newBase.getSharedPreferences("language", Context.MODE_PRIVATE);
         String language = sharedPref.getString("language", "en");
+        if (language.equals("auto")) {
+            language = Locale.getDefault().getLanguage();
+        }
         super.attachBaseContext(ContextUtils.updateLocale(newBase, language));
     }
 
@@ -65,8 +70,12 @@ public class HomeActivity extends AppCompatActivity {
             }
             return true;
         });
+    }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     @Override

@@ -1,6 +1,8 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +25,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -36,6 +39,16 @@ public class PantryListActivity extends AppCompatActivity {
 
     private static Double latitude = null;
     private static Double longitude = null;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        SharedPreferences sharedPref = newBase.getSharedPreferences("language", Context.MODE_PRIVATE);
+        String language = sharedPref.getString("language", "en");
+        if (language.equals("auto")) {
+            language = Locale.getDefault().getLanguage();
+        }
+        super.attachBaseContext(ContextUtils.updateLocale(newBase, language));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

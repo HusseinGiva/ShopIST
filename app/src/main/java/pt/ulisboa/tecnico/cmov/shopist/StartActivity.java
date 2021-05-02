@@ -9,6 +9,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +28,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -179,7 +181,6 @@ public class StartActivity extends AppCompatActivity {
                                                                     String language = document.getData().get("language").toString();
                                                                     editor.putString("language", language);
                                                                     editor.commit();
-                                                                    ContextUtils.updateLocale(getApplicationContext(), language);
                                                                     Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
                                                                     intent.putExtra("TAB", getResources().getString(R.string.pantry));
                                                                     intent.putExtra("ID", pantries.get(0));
@@ -203,9 +204,10 @@ public class StartActivity extends AppCompatActivity {
                                                                 if (document.exists()) {
                                                                     SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                                     SharedPreferences.Editor editor = sharedPref.edit();
-                                                                    editor.putString("language", document.getData().get("language").toString());
+                                                                    String language = document.getData().get("language").toString();
+                                                                    editor.putString("language", language);
                                                                     editor.commit();
-                                                                    Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
+                                                                    Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
                                                                     intent.putExtra("TAB", getResources().getString(R.string.store));
                                                                     intent.putExtra("ID", stores.get(0));
                                                                     startActivity(intent);
@@ -229,7 +231,8 @@ public class StartActivity extends AppCompatActivity {
                                                             if (document.exists()) {
                                                                 SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                                 SharedPreferences.Editor editor = sharedPref.edit();
-                                                                editor.putString("language", document.getData().get("language").toString());
+                                                                String language = document.getData().get("language").toString();
+                                                                editor.putString("language", language);
                                                                 editor.commit();
                                                                 Intent intent = new Intent(StartActivity.this, HomeActivity.class);
                                                                 startActivity(intent);
@@ -255,14 +258,14 @@ public class StartActivity extends AppCompatActivity {
                             StartActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-
                                     db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
                                             DocumentSnapshot document = task.getResult();
                                             if (document.exists()) {
                                                 SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                 SharedPreferences.Editor editor = sharedPref.edit();
-                                                editor.putString("language", document.getData().get("language").toString());
+                                                String language = document.getData().get("language").toString();
+                                                editor.putString("language", language);
                                                 editor.commit();
                                                 Intent intent = new Intent(StartActivity.this, HomeActivity.class);
                                                 startActivity(intent);

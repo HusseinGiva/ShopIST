@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -22,11 +24,13 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -88,6 +92,11 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success");
+                            String language = Locale.getDefault().getLanguage();
+                            SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("language", language);
+                            editor.commit();
                             updateUI();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -117,7 +126,19 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
-                            updateUI();
+                            db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task2 -> {
+                                if (task2.isSuccessful()) {
+                                    DocumentSnapshot document = task2.getResult();
+                                    if (document.exists()) {
+                                        SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                        SharedPreferences.Editor editor = sharedPref.edit();
+                                        String language = document.getData().get("language").toString();
+                                        editor.putString("language", language);
+                                        editor.commit();
+                                        updateUI();
+                                    }
+                                }
+                            });
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
