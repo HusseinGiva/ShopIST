@@ -380,8 +380,8 @@ public class AddItemActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Item item = document.toObject(Item.class);
-                                if (item.users.contains(mAuth.getCurrentUser().getUid())) {
-                                    name.setText(item.name);
+                                if (item.users.containsKey(mAuth.getCurrentUser().getUid())) {
+                                    name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
                                 }
                                 db.collection("StoreItem")
                                         .whereEqualTo("itemId", document.getId())
