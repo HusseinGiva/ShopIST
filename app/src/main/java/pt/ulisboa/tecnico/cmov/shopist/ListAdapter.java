@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,11 +62,16 @@ public class ListAdapter extends ArrayAdapter<String> {
             @Override
             public void onClick(View v) {
 
-                Intent intent = new Intent(context, ListActivity.class);
-                intent.putExtra("TAB", tabSelected);
-                //TODO - if
-                intent.putExtra("ID", pantryIds.get(position));
-                context.startActivity(intent);
+                if(tabSelected.equals("Pantry")) {
+                    Intent intent = new Intent(context, PantryListActivity.class);
+                    intent.putExtra("ID", pantryIds.get(position));
+                    context.startActivity(intent);
+                }
+                else if(tabSelected.equals("Store")) {
+                    Intent intent = new Intent(context, StoreListActivity.class);
+                    intent.putExtra("ID", storeIds.get(position));
+                    context.startActivity(intent);
+                }
             }
         });
 

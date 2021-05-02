@@ -18,7 +18,7 @@
 
     <style name="Theme.Toolbar" parent="Theme.ShopIST">
         <!--This line changes the color of text in Toolbar-->
-        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorPrimary">@color/black</item>
         <!--This line changes the color of icons in toolbar (back, overflow menu icons)-->
         <item name="android:textColorSecondary">@color/white</item>
     </style>

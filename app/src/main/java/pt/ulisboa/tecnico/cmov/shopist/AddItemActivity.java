@@ -33,6 +33,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -61,6 +62,7 @@ import java.util.concurrent.ExecutionException;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
@@ -189,6 +191,26 @@ public class AddItemActivity extends AppCompatActivity {
                                                 UploadTask uploadTask = imagesRef.putFile(file);
                                             }
                                         }
+                                        db.collection("PantryList").document(getIntent().getStringExtra("ID"))
+                                                .get()
+                                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                        if (task.isSuccessful()) {
+                                                            DocumentSnapshot document = task.getResult();
+                                                            if (document.exists()) {
+                                                                PantryList pantry = document.toObject(PantryList.class);
+                                                                db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                            }
+                                                        }
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+
+                                                    }
+                                                });
                                         finish();
                                         //Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                                     }

@@ -36,7 +36,6 @@ public class ListFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-    private String typeSelected = "PANTRY";
 
     private List<String> pantryIds = new ArrayList<>();
     private List<String> storeIds = new ArrayList<>();
@@ -44,6 +43,7 @@ public class ListFragment extends Fragment {
     private List<String> drive_times = new ArrayList<>();
     private List<Integer> n_items = new ArrayList<>();
     private ListView list;
+    ListAdapter listAdapter = null;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -95,14 +95,14 @@ public class ListFragment extends Fragment {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 
-                typeSelected = tab.getText().toString();
+                listAdapter.tabSelected = tab.getText().toString();
 
                 names.clear();
                 drive_times.clear();
                 n_items.clear();
                 pantryIds.clear();
                 storeIds.clear();
-                if (tab.getText().equals("PANTRY")) {
+                if (tab.getText().equals("Pantry")) {
 
                     db.collection("PantryList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
@@ -124,7 +124,7 @@ public class ListFragment extends Fragment {
                                     }
                                 }
                             });
-                } else if (tab.getText().equals("SHOPPING")) {
+                } else if (tab.getText().equals("Store")) {
 
                     db.collection("StoreList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
@@ -179,8 +179,8 @@ public class ListFragment extends Fragment {
                             }
 
                             list = view.findViewById(R.id.list);
-                            ListAdapter a = new ListAdapter(getContext(), LIST, names, drive_times, n_items, typeSelected, pantryIds, storeIds);
-                            list.setAdapter(a);
+                            listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, "Pantry", pantryIds, storeIds);
+                            list.setAdapter(listAdapter);
                         } else {
                             Log.d("TAG", "Error getting documents: ", task.getException());
                         }

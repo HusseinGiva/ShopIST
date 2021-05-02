@@ -22,7 +22,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -223,7 +222,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
 
-                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        Intent intent = new Intent(LoginActivity.this, PantryListActivity.class);
                                                         intent.putExtra("TAB", "PANTRY");
                                                         intent.putExtra("ID", pantries.get(0));
                                                         startActivity(intent);
@@ -238,7 +237,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     @Override
                                                     public void run() {
 
-                                                        Intent intent = new Intent(LoginActivity.this, ListActivity.class);
+                                                        Intent intent = new Intent(LoginActivity.this, PantryListActivity.class);
                                                         intent.putExtra("TAB", "STORE");
                                                         intent.putExtra("ID", stores.get(0));
                                                         startActivity(intent);

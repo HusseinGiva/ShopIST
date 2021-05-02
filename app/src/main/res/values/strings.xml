@@ -51,4 +51,6 @@
     <string name="selectedLocation">Selected Location</string>
     <string name="pleaseInsertListName">Please Insert List Name</string>
     <string name="pleaseSelectListType">Please Select List Type</string>
+    <string name="listLocation">List Location</string>
+    <string name="items">Items</string>
 </resources>

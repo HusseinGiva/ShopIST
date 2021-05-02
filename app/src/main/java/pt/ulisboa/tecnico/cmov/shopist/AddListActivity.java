@@ -358,7 +358,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     if (type.equals("PANTRY")) {
                         db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
-                        Intent intent = new Intent(AddListActivity.this, ListActivity.class);
+                        Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
                         intent.putExtra("TAB", type);
                         intent.putExtra("ID", id);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -368,7 +368,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     } else if (type.equals("STORE")) {
                         db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
-                        Intent intent = new Intent(AddListActivity.this, ListActivity.class);
+                        Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
                         intent.putExtra("TAB", type);
                         intent.putExtra("ID", id);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

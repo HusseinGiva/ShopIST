@@ -18,10 +18,13 @@
         tools:replace="android:icon,android:theme">
         <activity
             android:name=".ShareListActivity"
-            android:parentActivityName=".ListActivity"></activity>
+            android:parentActivityName=".PantryListActivity" />
+        <activity
+            android:name=".ListLocationActivity"
+            android:parentActivityName=".PantryListActivity" />
         <activity
             android:name=".AddStoresActivity"
-            android:parentActivityName=".AddItemActivity"></activity>
+            android:parentActivityName=".AddItemActivity" />
         <activity
             android:name=".ViewPicturesActivity"
             android:parentActivityName=".AddPicturesActivity" />
@@ -41,12 +44,15 @@
             android:parentActivityName=".AddItemActivity" />
         <activity
             android:name=".AddItemActivity"
-            android:parentActivityName=".ListActivity" />
+            android:parentActivityName=".PantryListActivity" />
         <activity
             android:name=".ItemActivity"
-            android:parentActivityName=".ListActivity" />
+            android:parentActivityName=".PantryListActivity" />
         <activity
-            android:name=".ListActivity"
+            android:name=".PantryListActivity"
+            android:parentActivityName=".HomeActivity" />
+        <activity
+            android:name=".StoreListActivity"
             android:parentActivityName=".HomeActivity" />
 
         <meta-data

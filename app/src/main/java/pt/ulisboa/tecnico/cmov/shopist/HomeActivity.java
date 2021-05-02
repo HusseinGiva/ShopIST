@@ -37,13 +37,13 @@ public class HomeActivity extends AppCompatActivity {
                             .setReorderingAllowed(true)
                             .commit();
                     break;
-                case R.id.cart:
+                /*case R.id.cart:
                     fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragment_container_view, CartFragment.class, null)
                             .setReorderingAllowed(true)
                             .commit();
-                    break;
+                    break;*/
                 case R.id.profile:
                     fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction()

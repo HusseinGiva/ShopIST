@@ -6,7 +6,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -60,7 +59,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
             if (type.equals("PANTRY")) {
                 db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
-                Intent intent = new Intent(this, ListActivity.class);
+                Intent intent = new Intent(this, PantryListActivity.class);
                 intent.putExtra("TAB", type);
                 intent.putExtra("ID", id);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -70,7 +69,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
             } else if (type.equals("STORE")) {
                 db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
-                Intent intent = new Intent(this, ListActivity.class);
+                Intent intent = new Intent(this, PantryListActivity.class);
                 intent.putExtra("TAB", type);
                 intent.putExtra("ID", id);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

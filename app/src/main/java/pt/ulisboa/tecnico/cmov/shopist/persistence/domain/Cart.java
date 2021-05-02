@@ -1,7 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist.persistence.domain;
 
 public class Cart {
-    public String cartId;
     public long number_of_items;
-    public long associatedStoreId;
+    public String associatedStoreId;
+
+    public Cart() {}
+
+    public Cart(long number_of_items, String associatedStoreId) {
+        this.number_of_items = number_of_items;
+        this.associatedStoreId = associatedStoreId;
+    }
 }
