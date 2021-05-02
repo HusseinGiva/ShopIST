@@ -175,19 +175,24 @@ public class StartActivity extends AppCompatActivity {
                                                     public void run() {
                                                         db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                                             if (task.isSuccessful()) {
+
                                                                 DocumentSnapshot document = task.getResult();
+                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                                String language;
                                                                 if (document.exists()) {
-                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                    SharedPreferences.Editor editor = sharedPref.edit();
-                                                                    String language = document.getData().get("language").toString();
-                                                                    editor.putString("language", language);
-                                                                    editor.commit();
-                                                                    Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
-                                                                    intent.putExtra("TAB", getResources().getString(R.string.pantry));
-                                                                    intent.putExtra("ID", pantries.get(0));
-                                                                    startActivity(intent);
-                                                                    finish();
+                                                                    language = document.getData().get("language").toString();
+                                                                }else{ //Anonymous sign in
+                                                                    language = Locale.getDefault().getLanguage();
                                                                 }
+                                                                editor.putString("language", language);
+                                                                editor.commit();
+                                                                Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
+                                                                intent.putExtra("TAB", getResources().getString(R.string.pantry));
+                                                                intent.putExtra("ID", pantries.get(0));
+                                                                startActivity(intent);
+                                                                finish();
+
                                                             }
                                                         });
                                                     }
@@ -201,18 +206,22 @@ public class StartActivity extends AppCompatActivity {
                                                         db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                                             if (task.isSuccessful()) {
                                                                 DocumentSnapshot document = task.getResult();
+                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                                String language;
                                                                 if (document.exists()) {
-                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                    SharedPreferences.Editor editor = sharedPref.edit();
-                                                                    String language = document.getData().get("language").toString();
-                                                                    editor.putString("language", language);
-                                                                    editor.commit();
-                                                                    Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
-                                                                    intent.putExtra("TAB", getResources().getString(R.string.store));
-                                                                    intent.putExtra("ID", stores.get(0));
-                                                                    startActivity(intent);
-                                                                    finish();
+                                                                    language = document.getData().get("language").toString();
+                                                                }else{ //Anonymous sign in
+                                                                    language = Locale.getDefault().getLanguage();
                                                                 }
+                                                                editor.putString("language", language);
+                                                                editor.commit();
+                                                                Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
+                                                                intent.putExtra("TAB", getResources().getString(R.string.store));
+                                                                intent.putExtra("ID", stores.get(0));
+                                                                startActivity(intent);
+                                                                finish();
+
                                                             }
                                                         });
                                                     }
@@ -228,25 +237,19 @@ public class StartActivity extends AppCompatActivity {
                                                     db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
                                                         if (task.isSuccessful()) {
                                                             DocumentSnapshot document = task.getResult();
+                                                            SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                            SharedPreferences.Editor editor = sharedPref.edit();
+                                                            String language;
                                                             if (document.exists()) {
-                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                                String language = document.getData().get("language").toString();
-                                                                editor.putString("language", language);
-                                                                editor.commit();
-                                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
-                                                                startActivity(intent);
-                                                                finish();
+                                                                language = document.getData().get("language").toString();
                                                             }else{ //Anonymous sign in
-                                                                String language = Locale.getDefault().getLanguage();
-                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
-                                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                                editor.putString("language", language);
-                                                                editor.commit();
-                                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
-                                                                startActivity(intent);
-                                                                finish();
+                                                                language = Locale.getDefault().getLanguage();
                                                             }
+                                                            editor.putString("language", language);
+                                                            editor.commit();
+                                                            Intent intent = new Intent(StartActivity.this, HomeActivity.class);
+                                                            startActivity(intent);
+                                                            finish();
                                                         }
                                                     });
                                                 }
