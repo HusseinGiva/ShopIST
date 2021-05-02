@@ -20,7 +20,7 @@
         app:theme="@style/Theme.Toolbar"
         app:title="@string/addStores" />
 
-    <androidx.fragment.app.FragmentContainerView
+    <fragment
         android:id="@+id/storesFragment"
         android:name="pt.ulisboa.tecnico.cmov.shopist.StoresFragment"
         android:layout_width="match_parent"

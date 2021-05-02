@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -92,7 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInAnonymously:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Something went wrong. Please make sure you have Internet Connection.",
+                            Toast.makeText(LoginActivity.this, R.string.somethingWentWrongNoInternetConnection,
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -106,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //Check if fields are empty
         if (emailText.trim().isEmpty() || passwordText.trim().isEmpty()) {
-            Toast.makeText(this, "Please fill in the required fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pleaseFillRequiredFields, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -121,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed",
+                            Toast.makeText(LoginActivity.this, R.string.authenticationFailed,
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -223,7 +224,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     public void run() {
 
                                                         Intent intent = new Intent(LoginActivity.this, PantryListActivity.class);
-                                                        intent.putExtra("TAB", "PANTRY");
+                                                        intent.putExtra("TAB", getResources().getString(R.string.pantry));
                                                         intent.putExtra("ID", pantries.get(0));
                                                         startActivity(intent);
                                                         finish();
@@ -238,7 +239,7 @@ public class LoginActivity extends AppCompatActivity {
                                                     public void run() {
 
                                                         Intent intent = new Intent(LoginActivity.this, PantryListActivity.class);
-                                                        intent.putExtra("TAB", "STORE");
+                                                        intent.putExtra("TAB", getResources().getString(R.string.store));
                                                         intent.putExtra("ID", stores.get(0));
                                                         startActivity(intent);
                                                         finish();

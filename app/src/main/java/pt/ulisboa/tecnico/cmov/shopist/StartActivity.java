@@ -1,12 +1,17 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,8 +22,10 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -167,12 +174,24 @@ public class StartActivity extends AppCompatActivity {
                                                 StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
-
-                                                        Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
-                                                        intent.putExtra("TAB", "PANTRY");
-                                                        intent.putExtra("ID", pantries.get(0));
-                                                        startActivity(intent);
-                                                        finish();
+                                                        db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                                            if (task.isSuccessful()) {
+                                                                DocumentSnapshot document = task.getResult();
+                                                                if (document.exists()) {
+                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                                                    String language = document.getData().get("language").toString();
+                                                                    editor.putString("language", language);
+                                                                    editor.commit();
+                                                                    ContextUtils.updateLocale(getApplicationContext(), language);
+                                                                    Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
+                                                                    intent.putExtra("TAB", getResources().getString(R.string.pantry));
+                                                                    intent.putExtra("ID", pantries.get(0));
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }
+                                                            }
+                                                        });
                                                     }
                                                 });
 
@@ -182,12 +201,22 @@ public class StartActivity extends AppCompatActivity {
                                                 StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
-
-                                                        Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
-                                                        intent.putExtra("TAB", "STORE");
-                                                        intent.putExtra("ID", stores.get(0));
-                                                        startActivity(intent);
-                                                        finish();
+                                                        db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                                            if (task.isSuccessful()) {
+                                                                DocumentSnapshot document = task.getResult();
+                                                                if (document.exists()) {
+                                                                    SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                                                    editor.putString("language", document.getData().get("language").toString());
+                                                                    editor.commit();
+                                                                    Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
+                                                                    intent.putExtra("TAB", getResources().getString(R.string.store));
+                                                                    intent.putExtra("ID", stores.get(0));
+                                                                    startActivity(intent);
+                                                                    finish();
+                                                                }
+                                                            }
+                                                        });
                                                     }
                                                 });
 
@@ -198,9 +227,20 @@ public class StartActivity extends AppCompatActivity {
                                                 @Override
                                                 public void run() {
 
-                                                    Intent intent = new Intent(StartActivity.this, HomeActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
+                                                    db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                                        if (task.isSuccessful()) {
+                                                            DocumentSnapshot document = task.getResult();
+                                                            if (document.exists()) {
+                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                                editor.putString("language", document.getData().get("language").toString());
+                                                                editor.commit();
+                                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }
+                                                        }
+                                                    });
                                                 }
                                             });
 
@@ -220,9 +260,20 @@ public class StartActivity extends AppCompatActivity {
                                 @Override
                                 public void run() {
 
-                                    Intent intent = new Intent(StartActivity.this, HomeActivity.class);
-                                    startActivity(intent);
-                                    finish();
+                                    db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                        if (task.isSuccessful()) {
+                                            DocumentSnapshot document = task.getResult();
+                                            if (document.exists()) {
+                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                SharedPreferences.Editor editor = sharedPref.edit();
+                                                editor.putString("language", document.getData().get("language").toString());
+                                                editor.commit();
+                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            }
+                                        }
+                                    });
                                 }
                             });
                         }

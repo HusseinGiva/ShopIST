@@ -51,6 +51,26 @@
     <string name="selectedLocation">Selected Location</string>
     <string name="pleaseInsertListName">Please Insert List Name</string>
     <string name="pleaseSelectListType">Please Select List Type</string>
+    <string name="manualInput">Manual Input</string>
+    <string name="enterListCode">Enter List Code</string>
+    <string name="ok">OK</string>
+    <string name="invalidCode">Invalid Code</string>
+    <string name="cancel">Cancel</string>
+    <string name="somethingWentWrongNoInternetConnection">Something went wrong. Please make sure you have Internet Connection.</string>
+    <string name="pleaseFillRequiredFields">Please Fill In Required Fields</string>
+    <string name="authenticationFailed">Authentication Failed</string>
+    <string name="warning">Warning</string>
+    <string name="logoutWarning">If you confirm this action, all your lists and products will be permanently deleted! Are you sure you want to continue?</string>
+    <string name="confirm">Confirm</string>
+    <string name="invalidQRCode">Invalid QR Code</string>
+    <string name="invalidName">Invalid Name</string>
+    <string name="invalidEmail">Invalid Email</string>
+    <string name="invalidPassword">Invalid Password</string>
+    <string name="passwordDontMatch">Passwords Don\'t Match</string>
+    <string name="language">Language</string>
+    <string name="english">English</string>
+    <string name="portuguese">Portuguese</string>
+    <string name="auto">Auto</string>
+    <string name="items">Products</string>
     <string name="listLocation">List Location</string>
-    <string name="items">Items</string>
 </resources>

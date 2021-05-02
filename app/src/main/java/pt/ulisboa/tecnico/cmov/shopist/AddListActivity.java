@@ -337,14 +337,14 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     private void manualEntry() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Manual Input");
-        alert.setMessage("Enter List Code");
+        alert.setTitle(R.string.manualInput);
+        alert.setMessage(R.string.enterListCode);
 
         // Set an EditText view to get user input
         final EditText input = new EditText(this);
         alert.setView(input);
 
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
 
                 String[] splitted = input.getText().toString().split("_");
@@ -355,7 +355,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 if(splitted.length > 1) {
                     String type = splitted[0];
                     String id = splitted[1];
-                    if (type.equals("PANTRY")) {
+                    if (type.equals(getResources().getString(R.string.pantry))) {
                         db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
                         Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
@@ -365,7 +365,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         startActivity(intent);
                         finish();
                         return;
-                    } else if (type.equals("STORE")) {
+                    } else if (type.equals(getResources().getString(R.string.store))) {
                         db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
                         Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
@@ -377,13 +377,13 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         return;
                     }
                 }
-                Toast.makeText(AddListActivity.this, "Invalid Code", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
                 dialog.cancel();
 
             }
         });
 
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 // Canceled.
             }

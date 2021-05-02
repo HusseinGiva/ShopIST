@@ -33,7 +33,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
 
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = layoutInflater.inflate(R.layout.pantry_list_item, parent, false);
+            view = layoutInflater.inflate(R.layout.store_list_item, parent, false);
             holder = new StoreListViewHolder(view);
             view.setTag(holder);
         } else {

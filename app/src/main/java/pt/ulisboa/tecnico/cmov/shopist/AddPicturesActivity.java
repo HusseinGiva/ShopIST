@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -53,7 +54,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.picturesFragment);
             recyclerView = (RecyclerView) currentFragment.getView();
-            recyclerViewAdapter = ((RecyclerView) currentFragment.getView()).getAdapter();
+            recyclerViewAdapter = recyclerView.getAdapter();
         }
         PictureContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();

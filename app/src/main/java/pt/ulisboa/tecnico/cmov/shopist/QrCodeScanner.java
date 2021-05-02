@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -56,7 +57,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
         if(splitted.length > 1) {
             String type = splitted[0];
             String id = splitted[1];
-            if (type.equals("PANTRY")) {
+            if (type.equals(getResources().getString(R.string.pantry))) {
                 db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
                 Intent intent = new Intent(this, PantryListActivity.class);
@@ -66,7 +67,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                 startActivity(intent);
                 finish();
                 return;
-            } else if (type.equals("STORE")) {
+            } else if (type.equals(getResources().getString(R.string.store))) {
                 db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
 
                 Intent intent = new Intent(this, PantryListActivity.class);
@@ -79,7 +80,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
             }
         }
 
-        Toast.makeText(this, "Invalid QRCode", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, AddListActivity.class);
         startActivity(intent);
         finish();

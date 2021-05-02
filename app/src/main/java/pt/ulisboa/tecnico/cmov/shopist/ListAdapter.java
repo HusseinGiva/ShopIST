@@ -2,7 +2,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +11,6 @@ import java.util.List;
 
 public class ListAdapter extends ArrayAdapter<String> {
 
-    public static final String LIST = "LIST";
-    public static final String PANTRY = "PANTRY";
-    public static final String STORE = "STORE";
     Context context;
     List<String> list_names;
     List<String> drive_times;
@@ -62,12 +58,12 @@ public class ListAdapter extends ArrayAdapter<String> {
             @Override
             public void onClick(View v) {
 
-                if(tabSelected.equals("Pantry")) {
+                if(tabSelected.equals(getContext().getResources().getString(R.string.pantry))) {
                     Intent intent = new Intent(context, PantryListActivity.class);
                     intent.putExtra("ID", pantryIds.get(position));
                     context.startActivity(intent);
                 }
-                else if(tabSelected.equals("Store")) {
+                else if(tabSelected.equals(getContext().getResources().getString(R.string.store))) {
                     Intent intent = new Intent(context, StoreListActivity.class);
                     intent.putExtra("ID", storeIds.get(position));
                     context.startActivity(intent);

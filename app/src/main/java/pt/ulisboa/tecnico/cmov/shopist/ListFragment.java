@@ -102,7 +102,7 @@ public class ListFragment extends Fragment {
                 n_items.clear();
                 pantryIds.clear();
                 storeIds.clear();
-                if (tab.getText().equals("Pantry")) {
+                if (tab.getText().equals(getResources().getString(R.string.pantry))) {
 
                     db.collection("PantryList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
@@ -124,7 +124,7 @@ public class ListFragment extends Fragment {
                                     }
                                 }
                             });
-                } else if (tab.getText().equals("Store")) {
+                } else if (tab.getText().equals(getResources().getString(R.string.store))) {
 
                     db.collection("StoreList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
@@ -179,7 +179,7 @@ public class ListFragment extends Fragment {
                             }
 
                             list = view.findViewById(R.id.list);
-                            listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, "Pantry", pantryIds, storeIds);
+                            listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, getResources().getString(R.string.pantry), pantryIds, storeIds);
                             list.setAdapter(listAdapter);
                         } else {
                             Log.d("TAG", "Error getting documents: ", task.getException());

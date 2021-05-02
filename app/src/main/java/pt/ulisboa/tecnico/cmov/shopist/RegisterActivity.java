@@ -75,25 +75,25 @@ public class RegisterActivity extends AppCompatActivity {
 
         //Check if name fields are empty
         if (firstNameText.trim().isEmpty() || lastNameText.trim().isEmpty()) {
-            Toast.makeText(this, "Invalid name", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalidName, Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if email is valid
         if (!isValidEmail(emailText)) {
-            Toast.makeText(this, "Invalid email", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalidEmail, Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if password field is empty
         if (passwordText.trim().isEmpty()) {
-            Toast.makeText(this, "Invalid password", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalidPassword, Toast.LENGTH_SHORT).show();
             return;
         }
 
         //Check if passwords match
         if (!passwordText.equals(confirmPasswordText)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.passwordDontMatch, Toast.LENGTH_SHORT).show();
             return;
         }
 

@@ -1,17 +1,23 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -30,6 +36,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private Button btnCreateAccount;
     private Button btnLogout;
 
+    public String language;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,7 +46,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         mAuth = FirebaseAuth.getInstance();
 
         db = FirebaseFirestore.getInstance();
-
 
     }
 
@@ -56,8 +63,54 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         btnCreateAccount.setOnClickListener((View.OnClickListener) this);
         btnLogout.setOnClickListener((View.OnClickListener) this);
-
-
+        RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup3);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences("language", Context.MODE_PRIVATE);
+        String language = sharedPref.getString("language", "en");
+        if (language.equals("en")) {
+            radioGroup.check(R.id.english);
+        }
+        else if (language.equals("pt")) {
+            radioGroup.check(R.id.portuguese);
+        }
+        else {
+            radioGroup.check(R.id.auto);
+        }
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == view.findViewById(R.id.english).getId()) {
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    db.collection("user").document(currentUser.getUid()).update("language", "en").addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            /*SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("language", "en");
+                            editor.commit();*/
+                            Intent intent = new Intent(getContext(), StartActivity.class);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }
+                    });
+                }
+                else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+                    db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            /*SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPref.edit();
+                            editor.putString("language", "pt");
+                            editor.commit();*/
+                            Intent intent = new Intent(getContext(), StartActivity.class);
+                            startActivity(intent);
+                            getActivity().finish();
+                        }
+                    });
+                }
+            }
+        });
         return view;
     }
 
@@ -105,9 +158,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setCancelable(true);
-                    builder.setTitle(new String(Character.toChars(0x26A0)) + " WARNING");
-                    builder.setMessage("If you confirm this action, all your lists and items will be permanently deleted! Are you sure you want to continue?");
-                    builder.setPositiveButton("Confirm",
+                    builder.setTitle(new String(Character.toChars(0x26A0)) + getString(R.string.warning).toUpperCase());
+                    builder.setMessage(R.string.logoutWarning);
+                    builder.setPositiveButton(R.string.confirm,
                             (dialog, which) -> {
                                 FirebaseAuth.getInstance().signOut();
 

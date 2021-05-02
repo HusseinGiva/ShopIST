@@ -51,5 +51,26 @@
     <string name="selectedLocation">Localização Selecionada</string>
     <string name="pleaseInsertListName">Por Favor Inserir Nome Da Lista</string>
     <string name="pleaseSelectListType">Por Favor Selecionar Tipo De Lista</string>
-    <string name="listLocation">Localização da Lista</string>
+    <string name="ok">OK</string>
+    <string name="manualInput">Introduzir Manualmente</string>
+    <string name="enterListCode">Inserir Código Da Lista</string>
+    <string name="invalidCode">Código Inválido</string>
+    <string name="cancel">Cancel</string>
+    <string name="somethingWentWrongNoInternetConnection">Algo correu mal. Por favor verifique a sua ligação à Internet</string>
+    <string name="pleaseFillRequiredFields">Por Favor Preencha Os Campos Necessários</string>
+    <string name="authenticationFailed">Autenticação Falhou</string>
+    <string name="warning">Aviso</string>
+    <string name="logoutWarning">Se confirmar esta ação, todas as suas listas e produtos vão ser permanentemente eliminados! Tem a certeza que quer continuar?</string>
+    <string name="confirm">Confirmar</string>
+    <string name="invalidQRCode">Código QR Inválido</string>
+    <string name="invalidName">Nome Inválido</string>
+    <string name="invalidEmail">Email Inválido</string>
+    <string name="invalidPassword">Palavra-Passe Inválida</string>
+    <string name="passwordDontMatch">As Palavras-Passe Não Correspondem</string>
+    <string name="language">Idioma</string>
+    <string name="auto">Auto</string>
+    <string name="english">Inglês</string>
+    <string name="portuguese">Português</string>
+    <string name="items">Produtos</string>
+    <string name="listLocation">Localização Da Lista</string>
 </resources>
