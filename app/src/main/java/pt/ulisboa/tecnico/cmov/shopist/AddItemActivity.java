@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -392,8 +393,51 @@ public class AddItemActivity extends AppCompatActivity {
                                         if (barcodeNumber.getText().toString().matches("")) {
                                             barcodeNumber.setText(rawValue);
                                             autocompleteStoreList();
-                                            Snackbar mySnackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout), R.string.pleaseSubmitPriceDataAndPictures, Snackbar.LENGTH_LONG);
-                                            mySnackbar.show();
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                            builder.setCancelable(true);
+                                            builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                                            builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                                            builder.setPositiveButton(R.string.addPictures, (dialog, which) -> {
+                                                Intent intent = new Intent(this, AddPicturesActivity.class);
+                                                intent.putStringArrayListExtra("PATHS", photoPaths);
+                                                picturesResultLauncher.launch(intent);
+                                            });
+                                            builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
+                                                Intent intent = new Intent(this, AddStoresActivity.class);
+                                                db.collection("StoreList")
+                                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                                        .get()
+                                                        .addOnCompleteListener(task -> {
+                                                            if (task.isSuccessful()) {
+                                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                                    StoreList store = document.toObject(StoreList.class);
+                                                                    if (!storeViewAddItems.isEmpty()) {
+                                                                        Boolean present = false;
+                                                                        for (StoreViewAddItem item: storeViewAddItems) {
+                                                                            if (item.name.equals(store.name)) {
+                                                                                present = true;
+                                                                            }
+                                                                        }
+                                                                        if (!present) {
+                                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                                            storeViewAddItems.add(storeViewAddItem);
+                                                                        }
+
+                                                                    }
+                                                                    else {
+                                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                                        storeViewAddItems.add(storeViewAddItem);
+                                                                    }
+                                                                }
+                                                                intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+                                                                storesResultLauncher.launch(intent);
+                                                            } else {
+                                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                                            }
+                                                        });
+                                            });
+                                            AlertDialog dialog = builder.create();
+                                            dialog.show();
                                         }
                                     }
                                 })
