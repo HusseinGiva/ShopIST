@@ -290,8 +290,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                             }
                         }
                     });
-                }
-                else if (ContextCompat.checkSelfPermission(this,
+                } else if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     startQrCodeActivity();
                 }
@@ -350,9 +349,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 String[] splitted = input.getText().toString().split("_");
 
                 db = FirebaseFirestore.getInstance();
-                mAuth =  FirebaseAuth.getInstance();
+                mAuth = FirebaseAuth.getInstance();
 
-                if(splitted.length > 1) {
+                if (splitted.length > 1) {
                     String type = splitted[0];
                     String id = splitted[1];
                     if (type.equals(getResources().getString(R.string.pantry))) {
@@ -392,7 +391,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         alert.show();
     }
 
-    public void startQrCodeActivity(){
+    public void startQrCodeActivity() {
         Intent intent = new Intent(AddListActivity.this, QrCodeScanner.class);
         startActivity(intent);
     }

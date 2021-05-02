@@ -47,7 +47,7 @@ public class StoreViewAddItem implements Parcelable {
         dest.writeBoolean(isChecked);
     }
 
-    public static final Parcelable.Creator<StoreViewAddItem> CREATOR  = new Parcelable.Creator<StoreViewAddItem>() {
+    public static final Parcelable.Creator<StoreViewAddItem> CREATOR = new Parcelable.Creator<StoreViewAddItem>() {
 
         @Override
         public StoreViewAddItem createFromParcel(Parcel in) {

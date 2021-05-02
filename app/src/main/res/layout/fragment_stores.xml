@@ -16,12 +16,12 @@
         android:layout_width="103dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:autofillHints=""
         android:ems="10"
         android:hint="@string/price"
         android:inputType="numberDecimal"
         android:textAlignment="textEnd"
-        android:textSize="24sp"
-        android:autofillHints="" />
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/euroSign"

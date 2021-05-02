@@ -24,11 +24,11 @@ public class ContextUtils extends ContextWrapper {
         return new ContextUtils(context);
     }
 
-    public static Locale getSystemLocale(Configuration config){
+    public static Locale getSystemLocale(Configuration config) {
         return config.getLocales().get(0);
     }
 
-    public static void setSystemLocale(Configuration config, Locale locale){
+    public static void setSystemLocale(Configuration config, Locale locale) {
         config.setLocale(locale);
     }
 }

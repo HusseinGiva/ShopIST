@@ -1,13 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,7 +21,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ListLocationActivity extends AppCompatActivity implements GoogleMap.OnMyLocationButtonClickListener,
         OnMapReadyCallback,
@@ -71,7 +68,7 @@ public class ListLocationActivity extends AppCompatActivity implements GoogleMap
         LatLng marker = new LatLng(latitude, longitude);
         map.addMarker(new MarkerOptions()
                 .position(marker)
-                .title("Marker in Location"));
+                .title(getResources().getString(R.string.selectedLocation)));
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker, 15));
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,

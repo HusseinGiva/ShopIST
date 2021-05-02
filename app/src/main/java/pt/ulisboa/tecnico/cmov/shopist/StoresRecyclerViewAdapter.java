@@ -35,8 +35,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
         holder.mNameView.setText(mValues.get(position).name);
         if (mValues.get(position).price == 0) {
             holder.mPriceView.setText("");
-        }
-        else {
+        } else {
             holder.mPriceView.setText(String.valueOf(mValues.get(position).price));
         }
         holder.mPriceView.addTextChangedListener(new TextWatcher() {

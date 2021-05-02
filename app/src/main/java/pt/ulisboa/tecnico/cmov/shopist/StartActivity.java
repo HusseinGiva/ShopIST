@@ -9,9 +9,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,7 +19,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -73,7 +69,7 @@ public class StartActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             updateUI();
-        }else{
+        } else {
             Intent intent = new Intent(StartActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
@@ -255,7 +251,7 @@ public class StartActivity extends AppCompatActivity {
                             timerHandler.postDelayed(timerRunnable, 0);
 
 
-                        }else {
+                        } else {
                             StartActivity.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {

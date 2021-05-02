@@ -35,11 +35,11 @@
             android:layout_marginEnd="100dp"
             android:ems="10"
             android:hint="@string/productName"
+            android:importantForAutofill="no"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addItemToolbar"
-            android:importantForAutofill="no" />
+            app:layout_constraintTop_toBottomOf="@+id/addItemToolbar" />
 
         <EditText
             android:id="@+id/itemPantryQuantity"
@@ -92,10 +92,10 @@
             android:duplicateParentState="false"
             android:ems="10"
             android:hint="@string/barcodeNumber"
+            android:importantForAutofill="no"
             android:inputType="number"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/viewFinder"
-            android:importantForAutofill="no" />
+            app:layout_constraintTop_toBottomOf="@+id/viewFinder" />
 
         <Button
             android:id="@+id/addStoresButton"

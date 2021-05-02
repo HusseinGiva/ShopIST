@@ -10,10 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -68,15 +66,12 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         String language = sharedPref.getString("language", "en");
         if (language.equals("en")) {
             radioGroup.check(R.id.english);
-        }
-        else if (language.equals("pt")) {
+        } else if (language.equals("pt")) {
             radioGroup.check(R.id.portuguese);
-        }
-        else {
+        } else {
             radioGroup.check(R.id.auto);
         }
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == view.findViewById(R.id.english).getId()) {
@@ -93,8 +88,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             getActivity().finish();
                         }
                     });
-                }
-                else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
+                } else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
                     FirebaseUser currentUser = mAuth.getCurrentUser();
                     db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

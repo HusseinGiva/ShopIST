@@ -73,4 +73,5 @@
     <string name="auto">Auto</string>
     <string name="items">Products</string>
     <string name="listLocation">List Location</string>
+    <string name="listDoesntHaveLocationSet">List Doesn\'t Have A Location</string>
 </resources>

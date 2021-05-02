@@ -73,4 +73,5 @@
     <string name="portuguese">Português</string>
     <string name="items">Produtos</string>
     <string name="listLocation">Localização Da Lista</string>
+    <string name="listDoesntHaveLocationSet">Lista Sem Localização Definida</string>
 </resources>

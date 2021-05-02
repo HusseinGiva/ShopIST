@@ -1,9 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -19,8 +17,6 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.WriterException;
-
-import java.net.IDN;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
@@ -49,7 +45,7 @@ public class ShareListActivity extends AppCompatActivity {
 
         String list_code = listType + "_" + id;
 
-        TextView text = (TextView)findViewById(R.id.shareText);
+        TextView text = (TextView) findViewById(R.id.shareText);
         text.setText(list_code);
 
         //Get screen dimension
@@ -68,7 +64,7 @@ public class ShareListActivity extends AppCompatActivity {
             // Getting QR-Code as Bitmap
             Bitmap bitmap = qrgEncoder.encodeAsBitmap();
             // Setting Bitmap to ImageView
-            ImageView qrcodeImg = (ImageView)findViewById(R.id.shareImage);
+            ImageView qrcodeImg = (ImageView) findViewById(R.id.shareImage);
             qrcodeImg.setImageBitmap(bitmap);
         } catch (WriterException e) {
             Log.v(TAG, e.toString());

@@ -59,8 +59,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
     public void onListFragmentPriceInteraction(StoreViewAddItem mItem, Editable s) {
         if (!s.toString().equals("")) {
             mItem.price = Float.parseFloat(s.toString());
-        }
-        else {
+        } else {
             mItem.price = 0;
         }
     }

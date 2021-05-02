@@ -150,19 +150,19 @@ public class StoreListActivity extends AppCompatActivity {
                 return true;
             case R.id.addProduct:
                 Intent intent = new Intent(this, AddItemActivity.class);
-                intent.putExtra("TYPE", "STORE");
+                intent.putExtra("TYPE", getResources().getString(R.string.store));
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
             case R.id.manualEntry:
                 intent = new Intent(this, ShareListActivity.class);
-                intent.putExtra("TYPE", "STORE");
+                intent.putExtra("TYPE", getResources().getString(R.string.store));
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
             case R.id.locationList:
-                if(latitude == null || longitude == null) {
-                    Toast.makeText(this, "The list doesn't have a location set.", Toast.LENGTH_LONG).show();
+                if (latitude == null || longitude == null) {
+                    Toast.makeText(this, R.string.listDoesntHaveLocationSet, Toast.LENGTH_LONG).show();
                     return false;
                 }
                 intent = new Intent(this, ListLocationActivity.class);
