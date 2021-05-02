@@ -2,8 +2,10 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -41,6 +43,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -354,25 +357,36 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 if (splitted.length > 1) {
                     String type = splitted[0];
                     String id = splitted[1];
-                    if (type.equals(getResources().getString(R.string.pantry))) {
-                        db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+                    if (type.equals("PANTRY")) {
+                        db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
+                                intent.putExtra("ID", id);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }else{
+                                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+                                dialog.cancel();
+                            }
+                        });
 
-                        Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
-                        intent.putExtra("TAB", type);
-                        intent.putExtra("ID", id);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
                         return;
-                    } else if (type.equals(getResources().getString(R.string.store))) {
-                        db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+                    } else if (type.equals("STORE")) {
 
-                        Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
-                        intent.putExtra("TAB", type);
-                        intent.putExtra("ID", id);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
+                        db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
+                                intent.putExtra("ID", id);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }else{
+                                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+                                dialog.cancel();
+                            }
+                        });
+
                         return;
                     }
                 }

@@ -162,12 +162,13 @@ public class StartActivity extends AppCompatActivity {
 
                                 @Override
                                 public void run() {
+
                                     if (loaded[0] == 0) {
 
                                         if (pantries.size() + stores.size() == 1) {
 
-                                            if (pantries.size() == 1) {
 
+                                            if (pantries.size() == 1) {
 
                                                 StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
@@ -194,7 +195,6 @@ public class StartActivity extends AppCompatActivity {
 
 
                                             } else if (stores.size() == 1) {
-
                                                 StartActivity.this.runOnUiThread(new Runnable() {
                                                     @Override
                                                     public void run() {
@@ -232,6 +232,15 @@ public class StartActivity extends AppCompatActivity {
                                                                 SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                                 SharedPreferences.Editor editor = sharedPref.edit();
                                                                 String language = document.getData().get("language").toString();
+                                                                editor.putString("language", language);
+                                                                editor.commit();
+                                                                Intent intent = new Intent(StartActivity.this, HomeActivity.class);
+                                                                startActivity(intent);
+                                                                finish();
+                                                            }else{ //Anonymous sign in
+                                                                String language = Locale.getDefault().getLanguage();
+                                                                SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+                                                                SharedPreferences.Editor editor = sharedPref.edit();
                                                                 editor.putString("language", language);
                                                                 editor.commit();
                                                                 Intent intent = new Intent(StartActivity.this, HomeActivity.class);

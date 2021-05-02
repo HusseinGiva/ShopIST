@@ -56,25 +56,37 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
         if(splitted.length > 1) {
             String type = splitted[0];
             String id = splitted[1];
-            if (type.equals(getResources().getString(R.string.pantry))) {
-                db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+            if (type.equals("PANTRY")) {
 
-                Intent intent = new Intent(this, PantryListActivity.class);
-                intent.putExtra("TAB", type);
-                intent.putExtra("ID", id);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Intent intent = new Intent(QrCodeScanner.this, PantryListActivity.class);
+                        intent.putExtra("ID", id);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }else{
+                        Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, AddListActivity.class);
+                        startActivity(intent);
+                    }
+                    finish();
+                });
                 return;
-            } else if (type.equals(getResources().getString(R.string.store))) {
-                db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid()));
+            } else if (type.equals("STORE")) {
 
-                Intent intent = new Intent(this, PantryListActivity.class);
-                intent.putExtra("TAB", type);
-                intent.putExtra("ID", id);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Intent intent = new Intent(QrCodeScanner.this, StoreListActivity.class);
+                        intent.putExtra("ID", id);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }else{
+                        Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, AddListActivity.class);
+                        startActivity(intent);
+                    }
+                    finish();
+                });
                 return;
             }
         }

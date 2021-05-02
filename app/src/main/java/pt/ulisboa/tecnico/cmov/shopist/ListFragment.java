@@ -1,6 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.Manifest;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +13,11 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
@@ -48,6 +56,10 @@ public class ListFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
+    private Location lastKnownLocation = null;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
+
 
     public ListFragment() {
         // Required empty public constructor
@@ -82,6 +94,8 @@ public class ListFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+
+
     }
 
     @Override
@@ -91,6 +105,34 @@ public class ListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+            locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
+                    if (task.isSuccessful()) {
+                        lastKnownLocation = task.getResult();
+                        if (lastKnownLocation != null) {
+                            Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                    lastKnownLocation.getLongitude());
+                        }else {
+                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                        }
+                    } else {
+                        Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                    }
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+
+
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -114,10 +156,40 @@ public class ListFragment extends Fragment {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             PantryList pantry = document.toObject(PantryList.class);
                                             names.add(pantry.name);
-                                            drive_times.add(pantry.driveTime);
                                             n_items.add((int) pantry.number_of_items);
                                             pantryIds.add(document.getId());
+
+                                            pantry.driveTime = null;
+                                            drive_times.add(pantry.driveTime);
+
+                                            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                    lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
+                                                    "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                            Object[] dataTransfer = new Object[]{pantry, url};
+                                            new DownloadUrl().execute(dataTransfer);
+
+                                            Handler timerHandler = new Handler();
+                                            Runnable timerRunnable = new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    if (pantry.driveTime != null) {
+                                                        Log.d("LIST", String.valueOf(pantry.driveTime));
+                                                        drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                                        list.invalidateViews();
+                                                        timerHandler.removeCallbacks(this);
+                                                    } else {
+                                                        timerHandler.postDelayed(this, 500);
+                                                    }
+                                                }
+                                            };
+                                            timerHandler.postDelayed(timerRunnable, 0);
+
+
+
                                         }
+
                                         list.invalidateViews();
                                     } else {
                                         Log.d("TAG", "Error getting documents: ", task.getException());
@@ -136,9 +208,38 @@ public class ListFragment extends Fragment {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             StoreList store = document.toObject(StoreList.class);
                                             names.add(store.name);
-                                            drive_times.add(store.driveTime);
                                             n_items.add((int) store.number_of_items);
                                             storeIds.add(document.getId());
+
+                                            store.driveTime = null;
+                                            drive_times.add(store.driveTime);
+
+                                            String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                    lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
+                                                    "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                            Object[] dataTransfer = new Object[]{store, url};
+                                            new DownloadUrl().execute(dataTransfer);
+
+                                            Handler timerHandler = new Handler();
+                                            Runnable timerRunnable = new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    if (store.driveTime != null) {
+                                                        Log.d("LIST", String.valueOf(store.driveTime));
+                                                        drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
+                                                        list.invalidateViews();
+                                                        timerHandler.removeCallbacks(this);
+                                                    } else {
+                                                        timerHandler.postDelayed(this, 500);
+                                                    }
+                                                }
+                                            };
+                                            timerHandler.postDelayed(timerRunnable, 0);
+
+
+
                                         }
                                         list.invalidateViews();
                                     } else {
@@ -173,9 +274,38 @@ public class ListFragment extends Fragment {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 PantryList pantry = document.toObject(PantryList.class);
                                 names.add(pantry.name);
-                                drive_times.add(pantry.driveTime);
                                 n_items.add((int) pantry.number_of_items);
                                 pantryIds.add(document.getId());
+
+                                pantry.driveTime = null;
+
+                                String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                        lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
+                                        "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                Object[] dataTransfer = new Object[]{pantry, url};
+                                new DownloadUrl().execute(dataTransfer);
+
+                                Handler timerHandler = new Handler();
+                                Runnable timerRunnable = new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        if (pantry.driveTime != null) {
+                                            Log.d("LIST", String.valueOf(pantry.driveTime));
+                                            drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                            list.invalidateViews();
+                                            timerHandler.removeCallbacks(this);
+                                        } else {
+                                            timerHandler.postDelayed(this, 500);
+                                        }
+                                    }
+                                };
+                                timerHandler.postDelayed(timerRunnable, 0);
+
+
+                                drive_times.add(pantry.driveTime);
+
                             }
 
                             list = view.findViewById(R.id.list);

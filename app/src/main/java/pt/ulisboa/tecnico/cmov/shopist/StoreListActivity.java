@@ -167,9 +167,9 @@ public class StoreListActivity extends AppCompatActivity {
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
-            case R.id.manualEntry:
+            case R.id.shareList:
                 intent = new Intent(this, ShareListActivity.class);
-                intent.putExtra("TYPE", getResources().getString(R.string.store));
+                intent.putExtra("TYPE", "STORE");
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;

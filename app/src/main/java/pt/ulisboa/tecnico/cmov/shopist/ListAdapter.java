@@ -35,6 +35,7 @@ public class ListAdapter extends ArrayAdapter<String> {
         this.storeIds = storeIds;
     }
 
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -51,7 +52,8 @@ public class ListAdapter extends ArrayAdapter<String> {
         }
 
         holder.listName.setText(list_names.get(position));
-        holder.driveTime.setText(drive_times.get(position));
+        if(drive_times.get(position) != null)
+            holder.driveTime.setText(drive_times.get(position));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
 
         view.setOnClickListener(new View.OnClickListener() {

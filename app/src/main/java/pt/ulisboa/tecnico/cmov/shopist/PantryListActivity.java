@@ -166,9 +166,9 @@ public class PantryListActivity extends AppCompatActivity {
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
-            case R.id.manualEntry:
+            case R.id.shareList:
                 intent = new Intent(this, ShareListActivity.class);
-                intent.putExtra("TYPE", getResources().getString(R.string.pantry));
+                intent.putExtra("TYPE", "PANTRY");
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
