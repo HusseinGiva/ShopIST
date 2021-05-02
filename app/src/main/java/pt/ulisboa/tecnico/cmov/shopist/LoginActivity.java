@@ -95,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInAnonymously:success");
-                            String language = Locale.getDefault().getLanguage();
+                            String language = "auto";
                             SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString("language", language);
