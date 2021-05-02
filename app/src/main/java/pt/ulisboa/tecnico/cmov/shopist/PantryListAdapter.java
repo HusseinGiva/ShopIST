@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PantryListAdapter extends ArrayAdapter<String> {
@@ -14,13 +15,14 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
+    ArrayList<String> itemIds;
 
-    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities) {
+    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, ArrayList<String> itemIds) {
         super(context, R.layout.pantry_list_item, R.id.pantry_list_item_name, item_names);
         this.context = context;
-
         this.item_names = item_names;
         this.item_quantities = item_quantities;
+        this.itemIds = itemIds;
     }
 
     @Override
@@ -46,6 +48,8 @@ public class PantryListAdapter extends ArrayAdapter<String> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ItemActivity.class);
+                intent.putExtra("ID", itemIds.get(position));
+                intent.putExtra("TAB", getContext().getResources().getString(R.string.pantry));
                 context.startActivity(intent);
             }
         });

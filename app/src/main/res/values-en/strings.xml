@@ -77,5 +77,8 @@
     <string name="listDoesntHaveLocationSet">List Doesn\'t Have A Location</string>
     <string name="total_cost">Total :</string>
     <string name="ifPossibleSubmitStoresPricesImages">If possible, please submit information regarding the stores, prices and add some images.</string>
+    <string name="viewPictures">View Pictures</string>
+    <string name="viewStores">View Stores</string>
+    <string name="moveItemToStoreList">Move Product To Store List</string>
     <string name="no_drivetime">No Location/GPS/Wifi</string>
 </resources>

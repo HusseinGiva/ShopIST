@@ -96,11 +96,8 @@ public class PantryListActivity extends AppCompatActivity {
                                             ArrayList<String> itemIds = new ArrayList<String>();
                                             List<String> pantry_item_names = new ArrayList<>();
                                             List<Integer> pantry_item_quantities = new ArrayList<>();
-                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities);
-                                            list.setAdapter(a);
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 PantryItem pi = document.toObject(PantryItem.class);
-                                                itemIds.add(pi.itemId);
                                                 db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -110,6 +107,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                                 Item i = document.toObject(Item.class);
                                                                 pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                 pantry_item_quantities.add(pi.idealQuantity);
+                                                                itemIds.add(document.getId());
                                                                 list.invalidateViews();
                                                             } else {
                                                                 Log.d("TAG", "No such document");
@@ -122,6 +120,8 @@ public class PantryListActivity extends AppCompatActivity {
                                                     }
                                                 });
                                             }
+                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, itemIds);
+                                            list.setAdapter(a);
 
                                         } else {
                                             Log.d("TAG", "Error getting documents: ", task.getException());

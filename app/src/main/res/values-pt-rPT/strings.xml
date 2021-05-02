@@ -76,5 +76,9 @@
     <string name="listLocation">Localização Da Lista</string>
     <string name="listDoesntHaveLocationSet">Lista Sem Localização Definida</string>
     <string name="total_cost">Total :</string>
+    <string name="ifPossibleSubmitStoresPricesImages">Se possível, por favor submeta informações sobre as lojas, os preços e adicione imagens.</string>
+    <string name="viewPictures">Ver Imagens</string>
+    <string name="viewStores">Ver Lojas</string>
+    <string name="moveItemToStoreList">Mover Produto Para Loja</string>
     <string name="no_drivetime">Sem Localização/GPS/Wifi</string>
 </resources>

@@ -26,11 +26,11 @@
         android:layout_width="197dp"
         android:layout_height="45dp"
         android:layout_marginTop="100dp"
-        android:editable="false"
         android:ems="10"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:hint="Pantry Quantity"
+        android:hint="@string/pantryQuantity"
+        android:importantForAutofill="no"
         android:inputType="number"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
@@ -43,10 +43,11 @@
         android:ems="10"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:hint="Target Quantity"
+        android:hint="@string/targetQuantity"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/itemToolbar"
+        android:importantForAutofill="no" />
 
     <Button
         android:id="@+id/addPictures"
@@ -55,7 +56,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="100dp"
-        android:text="View Pictures"
+        android:text="@string/viewPictures"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/barcodeNumber" />
@@ -67,7 +68,7 @@
         android:layout_marginStart="100dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="100dp"
-        android:text="View Stores"
+        android:text="@string/viewStores"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addPictures" />
@@ -83,7 +84,8 @@
         android:ems="10"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:hint="Barcode Number"
+        android:hint="@string/barcodeNumber"
+        android:importantForAutofill="no"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -94,7 +96,7 @@
         android:layout_width="197dp"
         android:layout_height="34dp"
         android:layout_marginTop="60dp"
-        android:text="Pantry Quantity"
+        android:text="@string/pantryQuantity"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
@@ -104,7 +106,7 @@
         android:layout_width="197dp"
         android:layout_height="34dp"
         android:layout_marginTop="60dp"
-        android:text="Target Quantity"
+        android:text="@string/targetQuantity"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
@@ -115,7 +117,7 @@
         android:layout_height="34dp"
         android:layout_marginTop="200dp"
         android:layout_marginEnd="104dp"
-        android:text="Barcode Number"
+        android:text="@string/barcodeNumber"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
@@ -127,7 +129,7 @@
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="5dp"
         android:background="#FF1687CE"
-        android:text="Move Item to Store List"
+        android:text="@string/moveItemToStoreList"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
