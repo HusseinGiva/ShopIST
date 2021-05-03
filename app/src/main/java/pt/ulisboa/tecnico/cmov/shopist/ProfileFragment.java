@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.File;
 
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
@@ -165,7 +168,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                     //TODO - Delete user data
                                 }).start();
 
-
+                                File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                deleteRecursive(storageDir);
                                 Intent intent1 = new Intent(getActivity(), LoginActivity.class);
                                 intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent1);
@@ -178,7 +182,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 } else {
                     FirebaseAuth.getInstance().signOut();
-
+                    File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    deleteRecursive(storageDir);
                     intent = new Intent(getActivity(), LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
@@ -187,6 +192,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 break;
         }
 
+    }
+
+    void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+
+        fileOrDirectory.delete();
     }
 
 }

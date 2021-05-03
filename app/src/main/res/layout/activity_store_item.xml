@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ItemActivity">
+    tools:context=".StoreItemActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/itemToolbar"
+        android:id="@+id/storeItemToolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
@@ -22,59 +22,36 @@
 
 
     <EditText
-        android:id="@+id/itemPantryQuantity"
+        android:id="@+id/itemStoreQuantity"
         android:layout_width="197dp"
         android:layout_height="45dp"
+        android:layout_marginStart="100dp"
         android:layout_marginTop="100dp"
+        android:layout_marginEnd="100dp"
         android:ems="10"
         android:focusable="false"
         android:focusableInTouchMode="false"
-        android:hint="@string/pantryQuantity"
+        android:hint="@string/storeQuantity"
         android:importantForAutofill="no"
         android:inputType="number"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
-
-    <EditText
-        android:id="@+id/itemTargetQuantity"
-        android:layout_width="182dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/targetQuantity"
-        android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar"
-        android:importantForAutofill="no" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
     <Button
-        android:id="@+id/addPictures"
+        android:id="@+id/viewPicturesStore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:layout_marginEnd="100dp"
         android:text="@string/viewPictures"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barcodeNumber" />
-
-    <Button
-        android:id="@+id/addStoresButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/viewStores"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addPictures" />
+        app:layout_constraintTop_toBottomOf="@+id/priceStoreItem" />
 
     <EditText
-        android:id="@+id/barcodeNumber"
+        android:id="@+id/barcodeNumberStoreItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
@@ -89,38 +66,64 @@
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemPantryQuantity" />
+        app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
+
+    <EditText
+        android:id="@+id/priceStoreItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="100dp"
+        android:duplicateParentState="false"
+        android:ems="10"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:hint="@string/price"
+        android:importantForAutofill="no"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="197dp"
         android:layout_height="34dp"
+        android:layout_marginStart="100dp"
         android:layout_marginTop="60dp"
-        android:text="@string/pantryQuantity"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
-
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginTop="60dp"
-        android:text="@string/targetQuantity"
+        android:layout_marginEnd="100dp"
+        android:text="@string/storeQuantity"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
     <TextView
         android:id="@+id/textView3"
         android:layout_width="197dp"
         android:layout_height="34dp"
+        android:layout_marginStart="100dp"
         android:layout_marginTop="200dp"
-        android:layout_marginEnd="104dp"
+        android:layout_marginEnd="100dp"
         android:text="@string/barcodeNumber"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemToolbar" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="197dp"
+        android:layout_height="34dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="100dp"
+        android:text="@string/price"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barcodeNumberStoreItem" />
 
     <Button
         android:id="@+id/saveItemButton"
@@ -129,7 +132,7 @@
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="5dp"
         android:background="#FF1687CE"
-        android:text="@string/moveItemToStoreList"
+        android:text="@string/moveProductToCart"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

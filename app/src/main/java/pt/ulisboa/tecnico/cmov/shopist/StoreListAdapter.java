@@ -58,7 +58,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ItemActivity.class);
+                Intent intent = new Intent(context, PantryItemActivity.class);
                 intent.putExtra("ID", itemIds.get(position));
                 context.startActivity(intent);
             }

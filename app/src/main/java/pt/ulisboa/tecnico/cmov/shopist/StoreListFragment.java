@@ -83,11 +83,8 @@ public class StoreListFragment extends Fragment {
                                             List<String> store_item_names = new ArrayList<>();
                                             List<Integer> store_item_quantities = new ArrayList<>();
                                             List<Float> item_prices = new ArrayList<>();
-                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds);
-                                            list.setAdapter(a);
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 StoreItem si = document.toObject(StoreItem.class);
-                                                itemIds.add(si.itemId);
                                                 db.collection("Item").document(si.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -98,6 +95,7 @@ public class StoreListFragment extends Fragment {
                                                                 store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                 store_item_quantities.add(si.quantity);
                                                                 item_prices.add(si.price);
+                                                                itemIds.add(document.getId());
                                                                 list.invalidateViews();
                                                             } else {
                                                                 Log.d("TAG", "No such document");
@@ -110,6 +108,8 @@ public class StoreListFragment extends Fragment {
                                                     }
                                                 });
                                             }
+                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds);
+                                            list.setAdapter(a);
 
                                         } else {
                                             Log.d("TAG", "Error getting documents: ", task.getException());

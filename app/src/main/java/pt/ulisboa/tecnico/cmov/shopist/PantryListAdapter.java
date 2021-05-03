@@ -47,9 +47,8 @@ public class PantryListAdapter extends ArrayAdapter<String> {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, ItemActivity.class);
+                Intent intent = new Intent(context, PantryItemActivity.class);
                 intent.putExtra("ID", itemIds.get(position));
-                intent.putExtra("TAB", getContext().getResources().getString(R.string.pantry));
                 context.startActivity(intent);
             }
         });

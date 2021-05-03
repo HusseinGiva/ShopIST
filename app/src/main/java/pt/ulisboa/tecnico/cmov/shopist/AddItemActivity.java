@@ -40,7 +40,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -105,15 +104,15 @@ public class AddItemActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
         viewFinder = findViewById(R.id.viewFinder);
-        barcodeNumber = findViewById(R.id.barcodeNumber);
+        barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
         name = findViewById(R.id.productName);
-        pantryQuantity = findViewById(R.id.itemPantryQuantity);
+        pantryQuantity = findViewById(R.id.itemStoreQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
             pantryQuantity.setHint(R.string.storeQuantity);
             targetQuantity.setVisibility(View.INVISIBLE);
         }
-        addPictures = findViewById(R.id.addPictures);
+        addPictures = findViewById(R.id.viewPicturesStore);
         picturesResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -330,6 +329,8 @@ public class AddItemActivity extends AppCompatActivity {
     public void onClickAddPictures(View view) {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         intent.putStringArrayListExtra("PATHS", photoPaths);
+        intent.putExtra("MODE", "add");
+        intent.putExtra("ID", barcodeNumber.getText());
         picturesResultLauncher.launch(intent);
     }
 
@@ -422,6 +423,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
                                             builder.setPositiveButton(R.string.addPictures, (dialog, which) -> {
                                                 Intent intent = new Intent(this, AddPicturesActivity.class);
+                                                intent.putExtra("MODE", "add");
                                                 intent.putStringArrayListExtra("PATHS", photoPaths);
                                                 picturesResultLauncher.launch(intent);
                                             });

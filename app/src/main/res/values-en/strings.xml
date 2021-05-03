@@ -82,4 +82,5 @@
     <string name="moveItemToStoreList">Move Product To Store List</string>
     <string name="no_drivetime">No Location/GPS/Wifi</string>
     <string name="noInternetConnection">Synchronization will be made when Internet connection is available</string>
+    <string name="moveProductToCart">Move Product To Cart</string>
 </resources>

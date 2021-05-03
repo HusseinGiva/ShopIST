@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -14,9 +15,18 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,9 +34,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class AddPicturesActivity extends AppCompatActivity implements PicturesFragment.OnListFragmentInteractionListener {
 
@@ -38,6 +46,10 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
     ArrayList<String> photoPaths = new ArrayList<>();
     private RecyclerView.Adapter recyclerViewAdapter;
     private RecyclerView recyclerView;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private FirebaseStorage storage;
+    private StorageReference storageRef;
 
 
     @Override
@@ -49,7 +61,8 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
-        photoPaths = getIntent().getStringArrayListExtra("PATHS");
+        addNewPicture = findViewById(R.id.addNewPicture);
+        browsePicturesButton = findViewById(R.id.browsePicturesButton);
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.picturesFragment);
             recyclerView = (RecyclerView) currentFragment.getView();
@@ -57,52 +70,102 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         }
         PictureContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
-        if (!photoPaths.isEmpty()) {
-            for (String s : photoPaths) {
-                PictureContent.loadImage(new File(s));
-                recyclerViewAdapter.notifyItemInserted(0);
+        if (getIntent().getStringExtra("MODE").equals("read")) {
+            addNewPicture.setVisibility(View.INVISIBLE);
+            browsePicturesButton.setVisibility(View.INVISIBLE);
+            RecyclerView pictureFragment = findViewById(R.id.picturesFragment);
+            ConstraintLayout.LayoutParams newLayoutParams = (ConstraintLayout.LayoutParams) pictureFragment.getLayoutParams();
+            newLayoutParams.topMargin = 150;
+            pictureFragment.setLayoutParams(newLayoutParams);
+            getSupportActionBar().setTitle(R.string.viewPictures);
+            String id = getIntent().getStringExtra("ID");
+            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
+            db = FirebaseFirestore.getInstance();
+            mAuth = FirebaseAuth.getInstance();
+            storage = FirebaseStorage.getInstance();
+            storageRef = storage.getReference();
+            StorageReference imagesRef = storageRef.child(id);
+            imagesRef.listAll()
+                    .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                        @Override
+                        public void onSuccess(ListResult listResult) {
+                            for (StorageReference item : listResult.getItems()) {
+                                Boolean exists = false;
+                                for (File f : storageDir.listFiles()) {
+                                    if (f.getName().equals(item.getName())) {
+                                        currentPhotoPath = f.getAbsolutePath();
+                                        photoPaths.add(currentPhotoPath);
+                                        PictureContent.loadImage(new File(currentPhotoPath));
+                                        recyclerViewAdapter.notifyItemInserted(0);
+                                        exists = true;
+                                    }
+                                }
+                                if (!exists) {
+                                    File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
+                                    currentPhotoPath = localFile.getAbsolutePath();
+                                    photoPaths.add(currentPhotoPath);
+                                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                        @Override
+                                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                            PictureContent.loadImage(new File(currentPhotoPath));
+                                            recyclerViewAdapter.notifyItemInserted(0);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+        } else if (getIntent().getStringExtra("MODE").equals("add")) {
+            photoPaths = getIntent().getStringArrayListExtra("PATHS");
+            addNewPicture.setOnClickListener(v -> dispatchTakePictureIntent());
+            cameraResultLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            photoPaths.add(currentPhotoPath);
+                            PictureContent.loadImage(new File(currentPhotoPath));
+                            recyclerViewAdapter.notifyItemInserted(0);
+                        }
+                    });
+            browsePicturesButton.setOnClickListener(v -> onClickBrowseButton());
+            galleryResultLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            Uri selectedImageUri = result.getData().getData();
+                            try {
+                                String id = getIntent().getStringExtra("ID");
+                                File file;
+                                if ((id != null) && (!id.equals(""))) {
+                                    file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + System.currentTimeMillis() + ".jpg");
+                                } else {
+                                    file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath() + "/" + System.currentTimeMillis() + ".jpg");
+                                }
+                                InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(selectedImageUri);
+                                OutputStream outputStream = new FileOutputStream(file);
+                                byte[] buf = new byte[1024];
+                                int len;
+                                while ((len = inputStream.read(buf)) > 0)
+                                    outputStream.write(buf, 0, len);
+                                outputStream.close();
+                                inputStream.close();
+                                photoPaths.add(file.getAbsolutePath());
+                                PictureContent.loadImage(file);
+                                recyclerViewAdapter.notifyItemInserted(0);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+            if (!photoPaths.isEmpty()) {
+                for (String s : photoPaths) {
+                    PictureContent.loadImage(new File(s));
+                    recyclerViewAdapter.notifyItemInserted(0);
+                }
             }
         }
-        addNewPicture = findViewById(R.id.addNewPicture);
-        addNewPicture.setOnClickListener(v -> dispatchTakePictureIntent());
-        cameraResultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        photoPaths.add(currentPhotoPath);
-                        PictureContent.loadImage(new File(currentPhotoPath));
-                        recyclerViewAdapter.notifyItemInserted(0);
-                    }
-                });
-        browsePicturesButton = findViewById(R.id.browsePicturesButton);
-        browsePicturesButton.setOnClickListener(v -> onClickBrowseButton());
-        galleryResultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Uri selectedImageUri = result.getData().getData();
-                        try {
-                            String filePath = getApplicationContext().getApplicationInfo().dataDir + File.separator
-                                    + System.currentTimeMillis();
-                            File file = new File(filePath);
-                            InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(selectedImageUri);
-                            OutputStream outputStream = new FileOutputStream(file);
-                            byte[] buf = new byte[1024];
-                            int len;
-                            while ((len = inputStream.read(buf)) > 0)
-                                outputStream.write(buf, 0, len);
-                            outputStream.close();
-                            inputStream.close();
-                            photoPaths.add(file.getAbsolutePath());
-                            PictureContent.loadImage(file);
-                            recyclerViewAdapter.notifyItemInserted(0);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
     }
 
     void onClickBrowseButton() {
@@ -113,18 +176,16 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     private File createImageFile() throws IOException {
         // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
+        String id = getIntent().getStringExtra("ID");
+        File file;
+        if ((id != null) && (!id.equals(""))) {
+            file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + System.currentTimeMillis() + ".jpg");
+        } else {
+            file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath() + "/" + System.currentTimeMillis() + ".jpg");
+        }
         // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
+        currentPhotoPath = file.getAbsolutePath();
+        return file;
     }
 
     private void dispatchTakePictureIntent() {

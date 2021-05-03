@@ -5,7 +5,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
@@ -16,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:replace="android:icon,android:theme">
+        <activity android:name=".StoreItemActivity"></activity>
         <activity
             android:name=".ShareListActivity"
             android:parentActivityName=".PantryListActivity" />
@@ -46,7 +46,7 @@
             android:name=".AddItemActivity"
             android:parentActivityName=".PantryListActivity" />
         <activity
-            android:name=".ItemActivity"
+            android:name=".PantryItemActivity"
             android:parentActivityName=".PantryListActivity" />
         <activity
             android:name=".PantryListActivity"
@@ -73,10 +73,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".LoginActivity" />
         </activity>
-        <activity android:name=".LoginActivity">
-
-        </activity>
-
+        <activity android:name=".LoginActivity"></activity>
         <activity android:name=".StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -84,9 +81,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".QrCodeScanner" />
-
     </application>
 
 </manifest>
