@@ -14,16 +14,26 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
+
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
@@ -62,9 +72,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         btnCreateAccount = view.findViewById(R.id.buttonCreateAccount);
         btnLogout = view.findViewById(R.id.buttonLogOut);
 
-        btnCreateAccount.setOnClickListener((View.OnClickListener) this);
-        btnLogout.setOnClickListener((View.OnClickListener) this);
-        RadioGroup radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup3);
+        btnCreateAccount.setOnClickListener(this);
+        btnLogout.setOnClickListener(this);
+        RadioGroup radioGroup = view.findViewById(R.id.radioGroup3);
         SharedPreferences sharedPref = getActivity().getSharedPreferences("language", Context.MODE_PRIVATE);
         String language = sharedPref.getString("language", "en");
         if (language.equals("en")) {
@@ -74,40 +84,28 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         } else {
             radioGroup.check(R.id.auto);
         }
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == view.findViewById(R.id.english).getId()) {
-                    FirebaseUser currentUser = mAuth.getCurrentUser();
-                    db.collection("user").document(currentUser.getUid()).update("language", "en").addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(getContext(), StartActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                        }
-                    });
-                } else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
-                    FirebaseUser currentUser = mAuth.getCurrentUser();
-                    db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(getContext(), StartActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                        }
-                    });
-                } else if (checkedId == view.findViewById(R.id.auto).getId()) {
-                    FirebaseUser currentUser = mAuth.getCurrentUser();
-                    db.collection("user").document(currentUser.getUid()).update("language", "auto").addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(getContext(), StartActivity.class);
-                            startActivity(intent);
-                            getActivity().finish();
-                        }
-                    });
-                }
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == view.findViewById(R.id.english).getId()) {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                db.collection("user").document(currentUser.getUid()).update("language", "en").addOnSuccessListener(aVoid -> {
+                    Intent intent = new Intent(getContext(), StartActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                });
+            } else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(aVoid -> {
+                    Intent intent = new Intent(getContext(), StartActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                });
+            } else if (checkedId == view.findViewById(R.id.auto).getId()) {
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                db.collection("user").document(currentUser.getUid()).update("language", "auto").addOnSuccessListener(aVoid -> {
+                    Intent intent = new Intent(getContext(), StartActivity.class);
+                    startActivity(intent);
+                    getActivity().finish();
+                });
             }
         });
         return view;
@@ -161,12 +159,84 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     builder.setMessage(R.string.logoutWarning);
                     builder.setPositiveButton(R.string.confirm,
                             (dialog, which) -> {
-                                FirebaseAuth.getInstance().signOut();
 
-                                new Thread(() -> {
+                                FirebaseUser user = mAuth.getCurrentUser();
 
-                                    //TODO - Delete user data
-                                }).start();
+                                db.collection("user").document(user.getUid()).delete();
+
+                                db.collection("PantryList").whereArrayContains("users", user.getUid()).get().addOnCompleteListener(task -> {
+                                    if(task.isSuccessful()){
+                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                            PantryList pantry = document.toObject(PantryList.class);
+                                            if(pantry.users.size() == 1){
+
+                                                db.collection("PantryItem").whereEqualTo("pantryId", document.getId()).get().addOnCompleteListener(task1 -> {
+                                                    if(task1.isSuccessful()){
+                                                        for(QueryDocumentSnapshot document2 : task1.getResult()){
+                                                            db.collection("PantryItem").document(document2.getId()).delete();
+                                                        }
+                                                    }
+                                                });
+
+                                                db.collection("PantryList").document(document.getId()).delete();
+                                            }else{
+                                                pantry.users.remove(user.getUid());
+                                                db.collection("PantryList").document(document.getId()).update("users", pantry.users);
+                                            }
+                                        }
+                                    }else{
+                                        Log.d(TAG, "Error getting documents: ", task.getException());
+
+                                    }
+                                });
+
+                                db.collection("StoreList").whereArrayContains("users", user.getUid()).get().addOnCompleteListener(task -> {
+                                    if(task.isSuccessful()){
+                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                            StoreList store = document.toObject(StoreList.class);
+                                            if(store.users.size() == 1){
+
+                                                db.collection("StoreItem").whereEqualTo("storeId", document.getId()).get().addOnCompleteListener(task12 -> {
+                                                    if(task12.isSuccessful()){
+                                                        for(QueryDocumentSnapshot document2 : task12.getResult()){
+                                                            db.collection("StoreItem").document(document2.getId()).delete();
+                                                        }
+                                                    }
+                                                });
+
+                                                db.collection("StoreList").document(document.getId()).delete();
+                                            }else{
+                                                store.users.remove(user.getUid());
+                                                db.collection("StoreList").document(document.getId()).update("users", store.users);
+                                            }
+                                        }
+                                    }else{
+                                        Log.d(TAG, "Error getting documents: ", task.getException());
+
+                                    }
+                                });
+
+                                db.collection("Item").whereEqualTo("barcode", "").get().addOnCompleteListener(task -> {
+                                    if(task.isSuccessful()){
+                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                            Item i = document.toObject(Item.class);
+
+                                            if(i.users.containsKey(user.getUid()) && i.users.size() == 1)
+                                                db.collection("Item").document(document.getId()).delete();
+                                            else if(i.users.containsKey(user.getUid())) {
+                                                i.users.remove(user.getUid());
+
+                                                db.collection("Item").document(document.getId()).update("users", i.users);
+
+
+                                            }
+                                        }
+                                    }
+                                });
+
+
+                                user.delete();
+                                mAuth.signOut();
 
                                 File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                 deleteRecursive(storageDir);
