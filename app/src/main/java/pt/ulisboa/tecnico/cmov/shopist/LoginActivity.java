@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,6 +30,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText email;
     private EditText password;
     private FirebaseFirestore db;
+    private Source source;
 
 
     @Override
@@ -61,6 +64,11 @@ public class LoginActivity extends AppCompatActivity {
         Toolbar myToolbar = findViewById(R.id.mainToolbar);
         setSupportActionBar(myToolbar);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if(isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -178,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             db.collection("PantryList")
                                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                    .get()
+                                    .get(source)
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -211,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             db.collection("StoreList")
                                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                    .get()
+                                    .get(source)
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -329,5 +337,18 @@ public class LoginActivity extends AppCompatActivity {
                 .set(userInfo)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
                 .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 }

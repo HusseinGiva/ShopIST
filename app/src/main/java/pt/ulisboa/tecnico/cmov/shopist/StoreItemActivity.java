@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,6 +20,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -30,6 +33,7 @@ public class StoreItemActivity extends AppCompatActivity {
     public Item item;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private Source source;
 
 
     @Override
@@ -44,6 +48,12 @@ public class StoreItemActivity extends AppCompatActivity {
         id = getIntent().getStringExtra("ID");
         //itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
+
+        if(isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         db.collection("Item").document(id)
@@ -57,7 +67,7 @@ public class StoreItemActivity extends AppCompatActivity {
                                 item = document.toObject(Item.class);
                                 getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                                 barcodeNumber.setText(item.barcode);
-                                db.collection("StoreItem").whereEqualTo("itemId", id).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                db.collection("StoreItem").whereEqualTo("itemId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task2) {
                                         if (task2.isSuccessful()) {
@@ -98,5 +108,18 @@ public class StoreItemActivity extends AppCompatActivity {
     @Override
     public void onBackPressed () {
         finish();
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 }

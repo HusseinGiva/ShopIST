@@ -47,6 +47,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -88,6 +89,7 @@ public class AddItemActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
+    private Source source;
     private StorageReference storageRef;
 
     @Override
@@ -99,6 +101,12 @@ public class AddItemActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
+
+        if(isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
@@ -182,7 +190,7 @@ public class AddItemActivity extends AppCompatActivity {
 
         Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
         db.collection("Item").whereEqualTo("barcode", item.barcode).
-                get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
@@ -338,7 +346,7 @@ public class AddItemActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AddStoresActivity.class);
         db.collection("StoreList")
                 .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -431,7 +439,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                 Intent intent = new Intent(this, AddStoresActivity.class);
                                                 db.collection("StoreList")
                                                         .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                        .get()
+                                                        .get(source)
                                                         .addOnCompleteListener(task -> {
                                                             if (task.isSuccessful()) {
                                                                 for (QueryDocumentSnapshot document : task.getResult()) {
@@ -504,7 +512,7 @@ public class AddItemActivity extends AppCompatActivity {
         if (storeViewAddItems.isEmpty()) {
             db.collection("Item")
                     .whereEqualTo("barcode", barcodeNumber.getText().toString())
-                    .get()
+                    .get(source)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
@@ -514,7 +522,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 }
                                 db.collection("StoreItem")
                                         .whereEqualTo("itemId", document.getId())
-                                        .get()
+                                        .get(source)
                                         .addOnCompleteListener(task2 -> {
                                             if (task2.isSuccessful()) {
                                                 for (QueryDocumentSnapshot document2 : task2.getResult()) {
@@ -530,7 +538,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                         if(item3.latitude != null && item3.longitude != null){
                                                                             db.collection("StoreList")
                                                                                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                                                    .get()
+                                                                                    .get(source)
                                                                                     .addOnCompleteListener(task4 -> {
                                                                                         if (task4.isSuccessful()) {
                                                                                             for (QueryDocumentSnapshot document4 : task4.getResult()) {

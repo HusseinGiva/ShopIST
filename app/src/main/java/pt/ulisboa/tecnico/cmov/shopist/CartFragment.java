@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +42,7 @@ public class CartFragment extends Fragment {
     private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private Source source;
 
     public CartFragment() {
         // Required empty public constructor
@@ -69,6 +73,11 @@ public class CartFragment extends Fragment {
             id = getArguments().getString(ARG_PARAM1);
         }
 
+        if(isConnected(getActivity().getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
     }
@@ -92,7 +101,7 @@ public class CartFragment extends Fragment {
                                 Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                                 StoreList store = document.toObject(StoreList.class);
 
-                                db.collection("StoreItem").whereEqualTo("storeId", id).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
@@ -149,5 +158,18 @@ public class CartFragment extends Fragment {
                 });
 
         return view;
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 }

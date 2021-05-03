@@ -1,9 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -28,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,6 +62,7 @@ public class ListFragment extends Fragment {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    private Source source;
 
     private Location lastKnownLocation = null;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -95,6 +99,11 @@ public class ListFragment extends Fragment {
             String mParam1 = getArguments().getString(ARG_PARAM1);
             String mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        if(isConnected(getActivity().getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -153,7 +162,7 @@ public class ListFragment extends Fragment {
 
                     db.collection("PantryList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                            .get()
+                            .get(source)
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -182,11 +191,16 @@ public class ListFragment extends Fragment {
                                                     public void run() {
                                                         if (pantry.driveTime != null) {
                                                             Log.d("LIST", String.valueOf(pantry.driveTime));
-                                                            drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
-                                                            list.invalidateViews();
+                                                            try{
+                                                                drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                                                list.invalidateViews();
+                                                            }catch (ArrayIndexOutOfBoundsException e){
+
+                                                            }
+
                                                             timerHandler.removeCallbacks(this);
                                                         } else {
-                                                            timerHandler.postDelayed(this, 500);
+                                                            timerHandler.postDelayed(this, 100);
                                                         }
                                                     }
                                                 };
@@ -209,7 +223,7 @@ public class ListFragment extends Fragment {
 
                     db.collection("StoreList")
                             .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                            .get()
+                            .get(source)
                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -238,11 +252,17 @@ public class ListFragment extends Fragment {
                                                     public void run() {
                                                         if (store.driveTime != null) {
                                                             Log.d("LIST", String.valueOf(store.driveTime));
-                                                            drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
-                                                            list.invalidateViews();
+                                                            try{
+                                                                drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
+                                                                list.invalidateViews();
+                                                            }catch (ArrayIndexOutOfBoundsException e){
+
+                                                            }
+
+
                                                             timerHandler.removeCallbacks(this);
                                                         } else {
-                                                            timerHandler.postDelayed(this, 500);
+                                                            timerHandler.postDelayed(this, 100);
                                                         }
                                                     }
                                                 };
@@ -279,7 +299,7 @@ public class ListFragment extends Fragment {
 
         db.collection("PantryList")
                 .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                .get()
+                .get(source)
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -312,7 +332,7 @@ public class ListFragment extends Fragment {
                                                 list.invalidateViews();
                                                 timerHandler.removeCallbacks(this);
                                             } else {
-                                                timerHandler.postDelayed(this, 500);
+                                                timerHandler.postDelayed(this, 100);
                                             }
                                         }
                                     };
@@ -336,5 +356,18 @@ public class ListFragment extends Fragment {
                 });
 
         return view;
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 }
