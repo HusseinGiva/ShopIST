@@ -37,10 +37,10 @@ import java.util.Locale;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
-/*import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
+import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;*/
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;
 
 public class StartActivity extends AppCompatActivity {
 
@@ -71,11 +71,11 @@ public class StartActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         //Termite Test - DELETE LATER
-        /*SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
+        SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
         SimWifiP2pManager mManager = null;
         SimWifiP2pManager.Channel mChanell = null;
         SimWifiP2pSocketServer mSrvSocket = null;
-        SimWifiP2pSocket mCliSocket = null;*/
+        SimWifiP2pSocket mCliSocket = null;
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

@@ -115,10 +115,6 @@ public class AddItemActivity extends AppCompatActivity {
         name = findViewById(R.id.productName);
         pantryQuantity = findViewById(R.id.itemStoreQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
-        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-            pantryQuantity.setHint(R.string.storeQuantity);
-            targetQuantity.setVisibility(View.INVISIBLE);
-        }
         addPictures = findViewById(R.id.viewPicturesStore);
         picturesResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
@@ -128,13 +124,19 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                 });
         addStores = findViewById(R.id.addStoresButton);
-        storesResultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        storeViewAddItems = result.getData().getParcelableArrayListExtra("STORES");
-                    }
-                });
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+            pantryQuantity.setHint(R.string.storeQuantity);
+            targetQuantity.setHint(R.string.price);
+            addStores.setVisibility(View.INVISIBLE);
+        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+            storesResultLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK) {
+                            storeViewAddItems = result.getData().getParcelableArrayListExtra("STORES");
+                        }
+                    });
+        }
         saveItem = findViewById(R.id.saveItemButton);
         saveItem.setOnClickListener(v -> onClickSaveItem(v));
         clearBarcode = findViewById(R.id.clearBarcodeNumber);
@@ -170,75 +172,425 @@ public class AddItemActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.pleaseInsertItemName, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (targetQuantity.getText().toString().equals("") || targetQuantity.getText().toString().equals("0")) {
-            Toast.makeText(this, R.string.pleaseInsertItemTargetQuantity, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0"))) {
-            Toast.makeText(this, R.string.pleaseInsertItemPantryQuantity, Toast.LENGTH_SHORT).show();
-            return;
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && (pantryQuantity.getText().toString().equals(""))) {
+            pantryQuantity.setText("0");
         } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store)) && (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0"))) {
             Toast.makeText(this, R.string.pleaseInsertItemStoreQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
-
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && targetQuantity.getText().toString().equals("") || targetQuantity.getText().toString().equals("0")) {
+            Toast.makeText(this, R.string.pleaseInsertItemTargetQuantity, Toast.LENGTH_SHORT).show();
+            return;
+        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store)) && targetQuantity.getText().toString().equals("")) {
+            targetQuantity.setText("0");
+        }
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()) < 0) {
+            Toast.makeText(this, "Target Quantity Should Be Bigger Than Pantry Quantity", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (!isConnected(getApplicationContext()))
             Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-
-        if (barcodeNumber.getText().toString().equals("")) {
-            Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
-            db.collection("Item")
-                    .add(item)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            itemId = documentReference.getId();
-                            PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
-                            db.collection("PantryItem")
-                                    .add(pantryItem)
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                        @Override
-                                        public void onSuccess(DocumentReference documentReference) {
-                                            for (StoreViewAddItem store : storeViewAddItems) {
-                                                if (store.isChecked) {
-                                                    item.stores.put(store.storeId, store.price);
-                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, 0);
-                                                    db.collection("StoreItem").add(storeItem);
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(getIntent().getStringExtra("ID"), "", Float.parseFloat(targetQuantity.getText().toString()), true);
+            db.collection("StoreList").document(getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            StoreList storeList = document.toObject(StoreList.class);
+                            storeViewAddItem.latitude = storeList.latitude;
+                            storeViewAddItem.longitude = storeList.longitude;
+                            storeViewAddItems.add(storeViewAddItem);
+                            if (barcodeNumber.getText().toString().equals("")) {
+                                Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
+                                db.collection("Item")
+                                        .add(item)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                itemId = documentReference.getId();
+                                                for (StoreViewAddItem store : storeViewAddItems) {
+                                                    if (store.isChecked) {
+                                                        item.stores.put(store.storeId, store.price);
+                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(pantryQuantity.getText().toString()));
+                                                        db.collection("StoreItem").add(storeItem);
+                                                    }
                                                 }
-                                            }
-                                            db.collection("Item").document(itemId).update("stores", item.stores);
-                                            for (String s : photoPaths) {
-                                                Uri file = Uri.fromFile(new File(s));
-                                                StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
-                                                UploadTask uploadTask = imagesRef.putFile(file);
-                                            }
-                                            db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                    .get()
-                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                DocumentSnapshot document = task.getResult();
-                                                                if (document.exists()) {
-                                                                    PantryList pantry = document.toObject(PantryList.class);
-                                                                    db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                for (String s : photoPaths) {
+                                                    Uri file = Uri.fromFile(new File(s));
+                                                    StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
+                                                    UploadTask uploadTask = imagesRef.putFile(file);
+                                                }
+                                                db.collection("StoreList").document(getIntent().getStringExtra("ID"))
+                                                        .get()
+                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    DocumentSnapshot document = task.getResult();
+                                                                    if (document.exists()) {
+                                                                        StoreList store = document.toObject(StoreList.class);
+                                                                        db.collection("StoreList").document(getIntent().getStringExtra("ID")).update("number_of_items", store.number_of_items + 1);
+                                                                    }
                                                                 }
                                                             }
+                                                        });
+                                                finish();
+                                            }
+                                        });
+                            } else {
+                                db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).
+                                        get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            if (task.getResult().size() == 0) {
+                                                Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
+                                                db.collection("Item")
+                                                        .add(item)
+                                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                            @Override
+                                                            public void onSuccess(DocumentReference documentReference) {
+                                                                itemId = documentReference.getId();
+                                                                for (StoreViewAddItem store : storeViewAddItems) {
+                                                                    if (store.isChecked) {
+                                                                        item.stores.put(store.storeId, store.price);
+                                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                        db.collection("StoreItem").add(storeItem);
+                                                                    }
+                                                                }
+                                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                for (String s : photoPaths) {
+                                                                    Uri file = Uri.fromFile(new File(s));
+                                                                    StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                                    UploadTask uploadTask = imagesRef.putFile(file);
+                                                                }
+                                                                db.collection("StoreList").document(getIntent().getStringExtra("ID"))
+                                                                        .get()
+                                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                if (task.isSuccessful()) {
+                                                                                    DocumentSnapshot document = task.getResult();
+                                                                                    if (document.exists()) {
+                                                                                        StoreList store = document.toObject(StoreList.class);
+                                                                                        db.collection("StoreList").document(getIntent().getStringExtra("ID")).update("number_of_items", store.number_of_items + 1);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                finish();
+                                                            }
+                                                        });
+                                            } else {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                                    if (document.exists()) {
+                                                        Item item = document.toObject(Item.class);
+                                                        itemId = document.getId();
+                                                        item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                        db.collection("Item").document(itemId).update("users", item.users);
+                                                        for (StoreViewAddItem store : storeViewAddItems) {
+                                                            if (store.isChecked) {
+                                                                if (!item.stores.keySet().isEmpty()) {
+                                                                    if (!item.stores.containsKey(store.storeId)) {
+                                                                        item.stores.put(store.storeId, store.price);
+                                                                    }
+                                                                    for (String s : item.stores.keySet()) {
+                                                                        if (store.storeId.equals(s)) {
+                                                                            if (store.price != 0) {
+                                                                                item.stores.put(s, store.price);
+                                                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                            }
+                                                                        } else {
+                                                                            db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                                @Override
+                                                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        DocumentSnapshot document = task.getResult();
+                                                                                        if (document.exists()) {
+                                                                                            StoreList sl = document.toObject(StoreList.class);
+                                                                                            float[] results = new float[1];
+                                                                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                    results);
+                                                                                            //Less than 20 meters
+                                                                                            if (results[0] < 20f) {
+                                                                                                item.stores.remove(store.storeId);
+                                                                                                if (store.price != 0) {
+                                                                                                    item.stores.put(s, store.price);
+                                                                                                    db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    item.stores.put(store.storeId, store.price);
+                                                                }
+                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                db.collection("StoreItem").add(storeItem);
+                                                            }
+                                                        }
+                                                        for (String s : photoPaths) {
+                                                            Uri file = Uri.fromFile(new File(s));
+                                                            StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                            UploadTask uploadTask = imagesRef.putFile(file);
+                                                        }
+                                                        db.collection("StoreList").document(getIntent().getStringExtra("ID"))
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            DocumentSnapshot document = task.getResult();
+                                                                            if (document.exists()) {
+                                                                                StoreList store = document.toObject(StoreList.class);
+                                                                                db.collection("StoreList").document(getIntent().getStringExtra("ID")).update("number_of_items", store.number_of_items + 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                });
+                                                        finish();
+                                                    }
+                                                }
+                                            }
+                                        } else {
+                                            Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
+                                            db.collection("Item")
+                                                    .add(item)
+                                                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                        @Override
+                                                        public void onSuccess(DocumentReference documentReference) {
+                                                            itemId = documentReference.getId();
+                                                            for (StoreViewAddItem store : storeViewAddItems) {
+                                                                if (store.isChecked) {
+                                                                    item.stores.put(store.storeId, store.price);
+                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                    db.collection("StoreItem").add(storeItem);
+                                                                }
+                                                            }
+                                                            db.collection("Item").document(itemId).update("stores", item.stores);
+                                                            for (String s : photoPaths) {
+                                                                Uri file = Uri.fromFile(new File(s));
+                                                                StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                                UploadTask uploadTask = imagesRef.putFile(file);
+                                                            }
+                                                            db.collection("StoreList").document(getIntent().getStringExtra("ID"))
+                                                                    .get()
+                                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                            if (task.isSuccessful()) {
+                                                                                DocumentSnapshot document = task.getResult();
+                                                                                if (document.exists()) {
+                                                                                    StoreList store = document.toObject(StoreList.class);
+                                                                                    db.collection("StoreList").document(getIntent().getStringExtra("ID")).update("number_of_items", store.number_of_items + 1);
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+                                                            finish();
                                                         }
                                                     });
-                                            finish();
                                         }
-                                    });
+                                    }
+                                });
+                            }
+
                         }
-                    });
-        } else {
-            db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).
-                    get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().size() == 0) {
+                    }
+                }
+            });
+        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+            if (barcodeNumber.getText().toString().equals("")) {
+                Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
+                db.collection("Item")
+                        .add(item)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                itemId = documentReference.getId();
+                                PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
+                                db.collection("PantryItem")
+                                        .add(pantryItem)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                for (StoreViewAddItem store : storeViewAddItems) {
+                                                    if (store.isChecked) {
+                                                        item.stores.put(store.storeId, store.price);
+                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                        db.collection("StoreItem").add(storeItem);
+                                                    }
+                                                }
+                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                for (String s : photoPaths) {
+                                                    Uri file = Uri.fromFile(new File(s));
+                                                    StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
+                                                    UploadTask uploadTask = imagesRef.putFile(file);
+                                                }
+                                                db.collection("PantryList").document(getIntent().getStringExtra("ID"))
+                                                        .get()
+                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    DocumentSnapshot document = task.getResult();
+                                                                    if (document.exists()) {
+                                                                        PantryList pantry = document.toObject(PantryList.class);
+                                                                        db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                finish();
+                                            }
+                                        });
+                            }
+                        });
+            } else {
+                db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).
+                        get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().size() == 0) {
+                                Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
+                                db.collection("Item")
+                                        .add(item)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                itemId = documentReference.getId();
+                                                PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
+                                                db.collection("PantryItem")
+                                                        .add(pantryItem)
+                                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                            @Override
+                                                            public void onSuccess(DocumentReference documentReference) {
+                                                                for (StoreViewAddItem store : storeViewAddItems) {
+                                                                    if (store.isChecked) {
+                                                                        item.stores.put(store.storeId, store.price);
+                                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                        db.collection("StoreItem").add(storeItem);
+                                                                    }
+                                                                }
+                                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                for (String s : photoPaths) {
+                                                                    Uri file = Uri.fromFile(new File(s));
+                                                                    StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                                    UploadTask uploadTask = imagesRef.putFile(file);
+                                                                }
+                                                                db.collection("PantryList").document(getIntent().getStringExtra("ID"))
+                                                                        .get()
+                                                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                if (task.isSuccessful()) {
+                                                                                    DocumentSnapshot document = task.getResult();
+                                                                                    if (document.exists()) {
+                                                                                        PantryList pantry = document.toObject(PantryList.class);
+                                                                                        db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                finish();
+                                                            }
+                                                        });
+                                            }
+                                        });
+                            } else {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    if (document.exists()) {
+                                        Item item = document.toObject(Item.class);
+                                        itemId = document.getId();
+                                        item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                        db.collection("Item").document(itemId).update("users", item.users);
+                                        PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
+                                        db.collection("PantryItem")
+                                                .add(pantryItem)
+                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                    @Override
+                                                    public void onSuccess(DocumentReference documentReference) {
+                                                        for (StoreViewAddItem store : storeViewAddItems) {
+                                                            if (store.isChecked) {
+                                                                if (!item.stores.keySet().isEmpty()) {
+                                                                    if (!item.stores.containsKey(store.storeId)) {
+                                                                        item.stores.put(store.storeId, store.price);
+                                                                    }
+                                                                    for (String s : item.stores.keySet()) {
+                                                                        if (store.storeId.equals(s)) {
+                                                                            if (store.price != 0) {
+                                                                                item.stores.put(s, store.price);
+                                                                                db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                            }
+                                                                        } else {
+                                                                            db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                                @Override
+                                                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        DocumentSnapshot document = task.getResult();
+                                                                                        if (document.exists()) {
+                                                                                            StoreList sl = document.toObject(StoreList.class);
+                                                                                            float[] results = new float[1];
+                                                                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                    results);
+                                                                                            //Less than 20 meters
+                                                                                            if (results[0] < 20f) {
+                                                                                                item.stores.remove(store.storeId);
+                                                                                                if (store.price != 0) {
+                                                                                                    item.stores.put(s, store.price);
+                                                                                                    db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                } else {
+                                                                    item.stores.put(store.storeId, store.price);
+                                                                }
+                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                db.collection("StoreItem").add(storeItem);
+                                                            }
+                                                        }
+                                                        for (String s : photoPaths) {
+                                                            Uri file = Uri.fromFile(new File(s));
+                                                            StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
+                                                            UploadTask uploadTask = imagesRef.putFile(file);
+                                                        }
+                                                        db.collection("PantryList").document(getIntent().getStringExtra("ID"))
+                                                                .get()
+                                                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            DocumentSnapshot document = task.getResult();
+                                                                            if (document.exists()) {
+                                                                                PantryList pantry = document.toObject(PantryList.class);
+                                                                                db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                                finish();
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                });
+                                                        finish();
+                                                    }
+                                                });
+                                    }
+                                }
+                            }
+                        } else {
                             Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
                             db.collection("Item")
                                     .add(item)
@@ -255,7 +607,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                             for (StoreViewAddItem store : storeViewAddItems) {
                                                                 if (store.isChecked) {
                                                                     item.stores.put(store.storeId, store.price);
-                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, 0);
+                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
                                                                     db.collection("StoreItem").add(storeItem);
                                                                 }
                                                             }
@@ -284,139 +636,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                     });
                                         }
                                     });
-                        } else {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                if (document.exists()) {
-                                    Item item = document.toObject(Item.class);
-                                    itemId = document.getId();
-                                    item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
-                                    db.collection("Item").document(itemId).update("users", item.users);
-                                    PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
-                                    db.collection("PantryItem")
-                                            .add(pantryItem)
-                                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                @Override
-                                                public void onSuccess(DocumentReference documentReference) {
-                                                    for (StoreViewAddItem store : storeViewAddItems) {
-                                                        if (store.isChecked) {
-                                                            if (!item.stores.keySet().isEmpty()) {
-                                                                if (!item.stores.containsKey(store.storeId)) {
-                                                                    item.stores.put(store.storeId, store.price);
-                                                                }
-                                                                for (String s : item.stores.keySet()) {
-                                                                    if (store.storeId.equals(s)) {
-                                                                        if (store.price != 0) {
-                                                                            item.stores.put(s, store.price);
-                                                                            db.collection("Item").document(itemId).update("stores", item.stores);
-                                                                        }
-                                                                    } else {
-                                                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                                if (task.isSuccessful()) {
-                                                                                    DocumentSnapshot document = task.getResult();
-                                                                                    if (document.exists()) {
-                                                                                        StoreList sl = document.toObject(StoreList.class);
-                                                                                        float[] results = new float[1];
-                                                                                        Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                                results);
-                                                                                        //Less than 20 meters
-                                                                                        if (results[0] < 20f) {
-                                                                                            item.stores.remove(store.storeId);
-                                                                                            if (store.price != 0) {
-                                                                                                item.stores.put(s, store.price);
-                                                                                                db.collection("Item").document(itemId).update("stores", item.stores);
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                }
-                                                            } else {
-                                                                item.stores.put(store.storeId, store.price);
-                                                            }
-                                                            StoreItem storeItem = new StoreItem(store.storeId, itemId, 0);
-                                                            db.collection("StoreItem").add(storeItem);
-                                                        }
-                                                    }
-                                                    for (String s : photoPaths) {
-                                                        Uri file = Uri.fromFile(new File(s));
-                                                        StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
-                                                        UploadTask uploadTask = imagesRef.putFile(file);
-                                                    }
-                                                    db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                            .get()
-                                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                    if (task.isSuccessful()) {
-                                                                        DocumentSnapshot document = task.getResult();
-                                                                        if (document.exists()) {
-                                                                            PantryList pantry = document.toObject(PantryList.class);
-                                                                            db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
-                                                                            finish();
-                                                                        }
-                                                                    }
-                                                                }
-                                                            });
-                                                    finish();
-                                                }
-                                            });
-                                }
-                            }
                         }
-                    } else {
-                        Item item = new Item(name.getText().toString(), barcodeNumber.getText().toString(), mAuth.getCurrentUser().getUid());
-                        db.collection("Item")
-                                .add(item)
-                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                    @Override
-                                    public void onSuccess(DocumentReference documentReference) {
-                                        itemId = documentReference.getId();
-                                        PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
-                                        db.collection("PantryItem")
-                                                .add(pantryItem)
-                                                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                                    @Override
-                                                    public void onSuccess(DocumentReference documentReference) {
-                                                        for (StoreViewAddItem store : storeViewAddItems) {
-                                                            if (store.isChecked) {
-                                                                item.stores.put(store.storeId, store.price);
-                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, 0);
-                                                                db.collection("StoreItem").add(storeItem);
-                                                            }
-                                                        }
-                                                        db.collection("Item").document(itemId).update("stores", item.stores);
-                                                        for (String s : photoPaths) {
-                                                            Uri file = Uri.fromFile(new File(s));
-                                                            StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
-                                                            UploadTask uploadTask = imagesRef.putFile(file);
-                                                        }
-                                                        db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                                .get()
-                                                                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                        if (task.isSuccessful()) {
-                                                                            DocumentSnapshot document = task.getResult();
-                                                                            if (document.exists()) {
-                                                                                PantryList pantry = document.toObject(PantryList.class);
-                                                                                db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-                                                        finish();
-                                                    }
-                                                });
-                                    }
-                                });
                     }
-                }
-            });
+                });
+            }
         }
     }
 
@@ -459,14 +682,14 @@ public class AddItemActivity extends AppCompatActivity {
                                     }
                                 }
                                 if (!present) {
-                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
                                     storeViewAddItem.latitude = store.latitude;
                                     storeViewAddItem.longitude = store.longitude;
                                     storeViewAddItems.add(storeViewAddItem);
                                 }
 
                             } else {
-                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
                                 storeViewAddItem.latitude = store.latitude;
                                 storeViewAddItem.longitude = store.longitude;
                                 storeViewAddItems.add(storeViewAddItem);

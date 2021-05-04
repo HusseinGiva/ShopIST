@@ -74,11 +74,6 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
         StoreContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
         if (getIntent().getStringExtra("MODE").equals("read")) {
-            //recyclerView.getChildViewHolder(currentFragment.getView()).
-            //ConstraintLayout.LayoutParams newLayoutParams = (ConstraintLayout.LayoutParams) pictureFragment.getLayoutParams();
-            //newLayoutParams.topMargin = 150;
-            //pictureFragment.setLayoutParams(newLayoutParams);
-            //recyclerView.getChildViewHolder()
             StoresRecyclerViewAdapter adapt = (StoresRecyclerViewAdapter) recyclerViewAdapter;
             adapt.isRead = true;
             getSupportActionBar().setTitle(R.string.viewStores);

@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -118,13 +119,20 @@ public class PantryItemActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.shareItem:
-                String message = "Text I want to share.";
-                Intent share = new Intent(Intent.ACTION_SEND);
-                share.setType("text/plain");
-                share.putExtra(Intent.EXTRA_TEXT, message);
+                /*Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "This is the text that will be shared.");
+                startActivity(Intent.createChooser(sharingIntent,"Share using"));
+
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                Uri screenshotUri = Uri.parse(path);
+
+                sharingIntent.setType("image/png");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
 
                 startActivity(Intent.createChooser(share, "Title of the dialog the system will open"));
-                return true;
+                return true;*/
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
                 return true;

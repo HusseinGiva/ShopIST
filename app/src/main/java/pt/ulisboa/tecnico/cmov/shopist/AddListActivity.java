@@ -234,6 +234,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             startActivity(intent);
 
         }
+
     }
 
     public static boolean isConnected(Context getApplicationContext) {
