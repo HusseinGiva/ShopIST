@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,7 +15,6 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -103,9 +103,46 @@ public class StoreListFragment extends Fragment {
                                                                 Item i = document.toObject(Item.class);
                                                                 store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                 store_item_quantities.add(si.quantity);
-                                                                item_prices.add(si.price);
                                                                 itemIds.add(document.getId());
-                                                                list.invalidateViews();
+                                                                String storeId = si.storeId;
+                                                                if (i.stores.containsKey(storeId)) {
+                                                                    item_prices.add(i.stores.get(storeId));
+                                                                    list.invalidateViews();
+                                                                } else {
+                                                                    db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                        @Override
+                                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                            if (task.isSuccessful()) {
+                                                                                DocumentSnapshot document = task.getResult();
+                                                                                if (document.exists()) {
+                                                                                    StoreList sl = document.toObject(StoreList.class);
+                                                                                    for (String s : i.stores.keySet()) {
+                                                                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                                            @Override
+                                                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task2) {
+                                                                                                if (task2.isSuccessful()) {
+                                                                                                    DocumentSnapshot document2 = task2.getResult();
+                                                                                                    if (document2.exists()) {
+                                                                                                        StoreList sl2 = document2.toObject(StoreList.class);
+                                                                                                        float[] results = new float[1];
+                                                                                                        Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                                Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
+                                                                                                                results);
+                                                                                                        //Less than 20 meters
+                                                                                                        if (results[0] < 20f) {
+                                                                                                            item_prices.add(i.stores.get(s));
+                                                                                                            list.invalidateViews();
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
                                                             } else {
                                                                 Log.d("TAG", "No such document");
                                                             }

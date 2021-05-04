@@ -7,6 +7,8 @@ public class StoreViewAddItem implements Parcelable {
     public String storeId;
     public String name;
     public float price;
+    public String latitude;
+    public String longitude;
     public Boolean isChecked;
 
     public StoreViewAddItem(String storeId, String name, Float price) {
