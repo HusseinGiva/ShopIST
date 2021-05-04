@@ -10,14 +10,13 @@
         android:id="@+id/store_list_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="20dp"
-        android:text="1" />
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="20dp" />
 
     <ImageView
         android:layout_width="70dp"
         android:layout_height="70dp"
-        android:layout_marginLeft="30dp"
+        android:layout_marginStart="30dp"
         android:layout_marginTop="10dp"
         android:scaleType="fitXY"
         android:src="@drawable/apple" />
@@ -25,15 +24,14 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/store_list_item_name"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Apple" />
+            android:layout_height="wrap_content" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -53,14 +51,13 @@
                 android:id="@+id/store_list_item_quantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:text="1" />
+                android:layout_marginStart="10dp" />
 
             <ImageView
                 android:id="@+id/increment_item_quantity"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
-                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="2dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/plus" />
@@ -72,22 +69,21 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="10dp"
         android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Price" />
+            android:text="@string/price" />
 
         <TextView
             android:id="@+id/item_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="20dp"
-            android:text="1 $" />
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp" />
 
     </LinearLayout>
 
@@ -95,7 +91,7 @@
         android:id="@+id/moveToCart"
         android:layout_width="34dp"
         android:layout_height="34dp"
-        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="30dp"
         android:scaleType="fitXY"
         android:src="@drawable/baseline_shopping_cart_24" />

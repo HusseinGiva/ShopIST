@@ -47,6 +47,7 @@ public class HomeActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.lists:
+                    myToolbar.getMenu().findItem(R.id.addList).setVisible(true);
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragment_container_view, ListFragment.class, null)
@@ -61,6 +62,7 @@ public class HomeActivity extends AppCompatActivity {
                             .commit();
                     break;*/
                 case R.id.profile:
+                    myToolbar.getMenu().findItem(R.id.addList).setVisible(false);
                     fragmentManager = getSupportFragmentManager();
                     fragmentManager.beginTransaction()
                             .replace(R.id.fragment_container_view, ProfileFragment.class, null)

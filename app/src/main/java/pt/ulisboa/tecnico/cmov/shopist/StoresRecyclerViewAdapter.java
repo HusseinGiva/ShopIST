@@ -85,6 +85,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
             mChecked = view.findViewById(R.id.checkBox);
             if (isRead) {
                 mChecked.setClickable(false);
+                mChecked.setVisibility(View.INVISIBLE);
                 mPriceView.setFocusable(false);
                 mPriceView.setFocusableInTouchMode(false);
             }
