@@ -31,6 +31,7 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 public class PantryItemActivity extends AppCompatActivity {
 
     public String id;
+    public String pantryId;
     public EditText itemPantryQuantity;
     public EditText itemTargetQuantity;
     public EditText barcodeNumber;
@@ -49,6 +50,7 @@ public class PantryItemActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
         id = getIntent().getStringExtra("ID");
+        pantryId = getIntent().getStringExtra("PantryId");
         itemPantryQuantity = findViewById(R.id.itemStoreQuantity);
         itemTargetQuantity = findViewById(R.id.itemTargetQuantity);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
@@ -71,7 +73,7 @@ public class PantryItemActivity extends AppCompatActivity {
                                 item = document.toObject(Item.class);
                                 getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                                 barcodeNumber.setText(item.barcode);
-                                db.collection("PantryItem").whereEqualTo("itemId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                db.collection("PantryItem").whereEqualTo("itemId", id).whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task2) {
                                         if (task2.isSuccessful()) {

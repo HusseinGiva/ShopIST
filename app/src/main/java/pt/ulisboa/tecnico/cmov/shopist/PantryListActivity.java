@@ -128,7 +128,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                     }
                                                 });
                                             }
-                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, itemIds);
+                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, itemIds, id);
                                             list.setAdapter(a);
 
                                         } else {

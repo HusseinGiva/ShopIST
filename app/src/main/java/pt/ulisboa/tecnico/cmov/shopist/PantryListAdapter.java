@@ -16,13 +16,15 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     List<String> item_names;
     List<Integer> item_quantities;
     ArrayList<String> itemIds;
+    String pantryId;
 
-    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, ArrayList<String> itemIds) {
+    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, ArrayList<String> itemIds, String pantryId) {
         super(context, R.layout.pantry_list_item, R.id.pantry_list_item_name, item_names);
         this.context = context;
         this.item_names = item_names;
         this.item_quantities = item_quantities;
         this.itemIds = itemIds;
+        this.pantryId = pantryId;
     }
 
     @Override
@@ -49,6 +51,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
             public void onClick(View v) {
                 Intent intent = new Intent(context, PantryItemActivity.class);
                 intent.putExtra("ID", itemIds.get(position));
+                intent.putExtra("PantryId", pantryId);
                 context.startActivity(intent);
             }
         });
