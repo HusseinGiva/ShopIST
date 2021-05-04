@@ -14,6 +14,7 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.util.Size;
 import android.view.MenuItem;
@@ -127,6 +128,7 @@ public class AddItemActivity extends AppCompatActivity {
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
             pantryQuantity.setHint(R.string.storeQuantity);
             targetQuantity.setHint(R.string.price);
+            targetQuantity.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             addStores.setVisibility(View.INVISIBLE);
         } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
             storesResultLauncher = registerForActivityResult(

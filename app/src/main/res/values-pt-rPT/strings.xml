@@ -82,4 +82,6 @@
     <string name="moveItemToStoreList">Mover Produto Para Loja</string>
     <string name="no_drivetime">Sem Localização/GPS/Wifi</string>
     <string name="noInternetConnection">A sincronização será feita quando ligação à Internet estiver disponível</string>
+    <string name="moveProductToCart">Mover Produto Para Carrinho</string>
+    <string name="cartQuantity">Quantidade Carrinho</string>
 </resources>

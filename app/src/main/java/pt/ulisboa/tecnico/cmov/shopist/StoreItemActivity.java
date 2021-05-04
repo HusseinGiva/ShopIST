@@ -1,11 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -24,12 +26,16 @@ import com.google.firebase.firestore.Source;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 
 public class StoreItemActivity extends AppCompatActivity {
 
     public String id;
+    public String storeId;
     public EditText itemStoreQuantity;
+    public EditText itemCartQuantity;
     public EditText barcodeNumber;
+    public EditText price;
     public Item item;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -46,9 +52,11 @@ public class StoreItemActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
         id = getIntent().getStringExtra("ID");
-        //itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
+        storeId = getIntent().getStringExtra("StoreId");
+        itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
+        itemCartQuantity = findViewById(R.id.itemCartQuantity);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
-
+        price = findViewById(R.id.priceStoreItem);
         if(isConnected(getApplicationContext()))
             source = Source.DEFAULT;
         else
@@ -67,14 +75,15 @@ public class StoreItemActivity extends AppCompatActivity {
                                 item = document.toObject(Item.class);
                                 getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                                 barcodeNumber.setText(item.barcode);
-                                db.collection("StoreItem").whereEqualTo("itemId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                price.setText(String.valueOf(item.stores.get(storeId)));
+                                db.collection("StoreItem").whereEqualTo("itemId", id).whereEqualTo("storeId", storeId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task2) {
                                         if (task2.isSuccessful()) {
                                             for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                PantryItem pi = document2.toObject(PantryItem.class);
+                                                StoreItem pi = document2.toObject(StoreItem.class);
                                                 itemStoreQuantity.setText(String.valueOf(pi.quantity));
-                                                //itemTargetQuantity.setText(String.valueOf(pi.idealQuantity));
+                                                itemCartQuantity.setText(String.valueOf(pi.cartQuantity));
                                             }
                                         }
                                     }
@@ -92,9 +101,36 @@ public class StoreItemActivity extends AppCompatActivity {
         return true;
     }
 
+    public void onClickViewImages(View view) {
+        Intent intent = new Intent(this, AddPicturesActivity.class);
+        intent.putExtra("MODE", "read");
+        if (barcodeNumber.getText().toString().equals("")) {
+            intent.putExtra("ID", id);
+        }
+        else {
+            intent.putExtra("ID", barcodeNumber.getText().toString());
+        }
+        startActivity(intent);
+    }
+
     @Override
-    public boolean onOptionsItemSelected (MenuItem item){
+    public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.shareItem:
+                /*Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "This is the text that will be shared.");
+                startActivity(Intent.createChooser(sharingIntent,"Share using"));
+
+                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                Uri screenshotUri = Uri.parse(path);
+
+                sharingIntent.setType("image/png");
+                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+
+                startActivity(Intent.createChooser(share, "Title of the dialog the system will open"));
+                return true;*/
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
                 return true;

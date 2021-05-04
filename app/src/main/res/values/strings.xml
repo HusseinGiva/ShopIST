@@ -83,4 +83,5 @@
     <string name="moveItemToStoreList">Move Product To Store List</string>
     <string name="noInternetConnection">Synchronization will be made when Internet connection is available</string>
     <string name="moveProductToCart">Move Product To Cart</string>
+    <string name="cartQuantity">Cart Quantity</string>
 </resources>
