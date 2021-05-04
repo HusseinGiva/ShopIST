@@ -29,11 +29,22 @@ public class StoreViewAddItem implements Parcelable {
         this.isChecked = isChecked;
     }
 
+    public StoreViewAddItem(String storeId, String name, Float price, Boolean isChecked, String latitude, String longitude) {
+        this.storeId = storeId;
+        this.name = name;
+        this.price = price;
+        this.isChecked = isChecked;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     private StoreViewAddItem(Parcel in) {
         this.storeId = in.readString();
         this.name = in.readString();
         this.price = in.readFloat();
         this.isChecked = in.readBoolean();
+        this.latitude = in.readString();
+        this.longitude = in.readString();
     }
 
     @Override
@@ -47,6 +58,8 @@ public class StoreViewAddItem implements Parcelable {
         dest.writeString(name);
         dest.writeFloat(price);
         dest.writeBoolean(isChecked);
+        dest.writeString(latitude);
+        dest.writeString(longitude);
     }
 
     public static final Parcelable.Creator<StoreViewAddItem> CREATOR = new Parcelable.Creator<StoreViewAddItem>() {

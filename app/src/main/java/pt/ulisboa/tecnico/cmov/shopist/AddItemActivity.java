@@ -207,6 +207,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     db.collection("StoreItem").add(storeItem);
                                                 }
                                             }
+                                            db.collection("Item").document(itemId).update("stores", item.stores);
                                             for (String s : photoPaths) {
                                                 Uri file = Uri.fromFile(new File(s));
                                                 StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
@@ -226,7 +227,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                             }
                                                         }
                                                     });
-                                            db.collection("Item").document(itemId).update("stores", item.stores);
                                             finish();
                                         }
                                     });
@@ -259,6 +259,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     db.collection("StoreItem").add(storeItem);
                                                                 }
                                                             }
+                                                            db.collection("Item").document(itemId).update("stores", item.stores);
                                                             for (String s : photoPaths) {
                                                                 Uri file = Uri.fromFile(new File(s));
                                                                 StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
@@ -278,7 +279,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                                             }
                                                                         }
                                                                     });
-                                                            db.collection("Item").document(itemId).update("stores", item.stores);
                                                             finish();
                                                         }
                                                     });
@@ -290,6 +290,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     Item item = document.toObject(Item.class);
                                     itemId = document.getId();
                                     item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                    db.collection("Item").document(itemId).update("users", item.users);
                                     PantryItem pantryItem = new PantryItem(getIntent().getStringExtra("ID"), itemId, Integer.parseInt(pantryQuantity.getText().toString()), Integer.parseInt(targetQuantity.getText().toString()));
                                     db.collection("PantryItem")
                                             .add(pantryItem)
@@ -306,6 +307,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     if (store.storeId.equals(s)) {
                                                                         if (store.price != 0) {
                                                                             item.stores.put(s, store.price);
+                                                                            db.collection("Item").document(itemId).update("stores", item.stores);
                                                                         }
                                                                     } else {
                                                                         db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -324,6 +326,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                                             item.stores.remove(store.storeId);
                                                                                             if (store.price != 0) {
                                                                                                 item.stores.put(s, store.price);
+                                                                                                db.collection("Item").document(itemId).update("stores", item.stores);
                                                                                             }
                                                                                         }
                                                                                     }
@@ -359,7 +362,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     }
                                                                 }
                                                             });
-                                                    db.collection("Item").document(document.getId()).update("users", item.users, "stores", item.stores);
                                                     finish();
                                                 }
                                             });
@@ -387,6 +389,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 db.collection("StoreItem").add(storeItem);
                                                             }
                                                         }
+                                                        db.collection("Item").document(itemId).update("stores", item.stores);
                                                         for (String s : photoPaths) {
                                                             Uri file = Uri.fromFile(new File(s));
                                                             StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
@@ -406,7 +409,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                                         }
                                                                     }
                                                                 });
-                                                        db.collection("Item").document(itemId).update("stores", item.stores);
                                                         finish();
                                                     }
                                                 });

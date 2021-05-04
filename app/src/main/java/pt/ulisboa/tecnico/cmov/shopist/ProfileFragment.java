@@ -190,32 +190,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                     }
                                 });
 
-                                db.collection("StoreList").whereArrayContains("users", user.getUid()).get().addOnCompleteListener(task -> {
-                                    if(task.isSuccessful()){
-                                        for(QueryDocumentSnapshot document : task.getResult()){
-                                            StoreList store = document.toObject(StoreList.class);
-                                            if(store.users.size() == 1){
-
-                                                db.collection("StoreItem").whereEqualTo("storeId", document.getId()).get().addOnCompleteListener(task12 -> {
-                                                    if(task12.isSuccessful()){
-                                                        for(QueryDocumentSnapshot document2 : task12.getResult()){
-                                                            db.collection("StoreItem").document(document2.getId()).delete();
-                                                        }
-                                                    }
-                                                });
-
-                                                db.collection("StoreList").document(document.getId()).delete();
-                                            }else{
-                                                store.users.remove(user.getUid());
-                                                db.collection("StoreList").document(document.getId()).update("users", store.users);
-                                            }
-                                        }
-                                    }else{
-                                        Log.d(TAG, "Error getting documents: ", task.getException());
-
-                                    }
-                                });
-
                                 db.collection("Item").whereEqualTo("barcode", "").get().addOnCompleteListener(task -> {
                                     if(task.isSuccessful()){
                                         for(QueryDocumentSnapshot document : task.getResult()){
