@@ -443,6 +443,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickAddStores(View view) {
         Intent intent = new Intent(this, AddStoresActivity.class);
+        intent.putExtra("MODE", "add");
         db.collection("StoreList")
                 .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                 .get(source)
@@ -540,6 +541,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             });
                                             builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
                                                 Intent intent = new Intent(this, AddStoresActivity.class);
+                                                intent.putExtra("MODE", "add");
                                                 db.collection("StoreList")
                                                         .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                                                         .get(source)

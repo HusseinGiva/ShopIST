@@ -46,11 +46,8 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
     ArrayList<String> photoPaths = new ArrayList<>();
     private RecyclerView.Adapter recyclerViewAdapter;
     private RecyclerView recyclerView;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
     private FirebaseStorage storage;
     private StorageReference storageRef;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +77,6 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
             getSupportActionBar().setTitle(R.string.viewPictures);
             String id = getIntent().getStringExtra("ID");
             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
-            db = FirebaseFirestore.getInstance();
-            mAuth = FirebaseAuth.getInstance();
             storage = FirebaseStorage.getInstance();
             storageRef = storage.getReference();
             StorageReference imagesRef = storageRef.child(id);

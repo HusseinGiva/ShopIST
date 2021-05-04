@@ -103,12 +103,7 @@ public class PantryItemActivity extends AppCompatActivity {
     public void onClickViewStores(View view) {
         Intent intent = new Intent(this, AddStoresActivity.class);
         intent.putExtra("MODE", "read");
-        if (barcodeNumber.getText().toString().equals("")) {
-            intent.putExtra("ID", id);
-        }
-        else {
-            intent.putExtra("ID", barcodeNumber.getText().toString());
-        }
+        intent.putExtra("ID", id);
         startActivity(intent);
     }
 

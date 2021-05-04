@@ -16,6 +16,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
 
     private final List<StoreViewAddItem> mValues;
     private final StoresFragment.OnListFragmentInteractionListener mListener;
+    public Boolean isRead = false;
 
     public StoresRecyclerViewAdapter(List<StoreViewAddItem> items, StoresFragment.OnListFragmentInteractionListener listener) {
         mValues = items;
@@ -26,7 +27,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_stores, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, isRead);
     }
 
     @Override
@@ -76,12 +77,17 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
         public final CheckBox mChecked;
         public StoreViewAddItem mItem;
 
-        public ViewHolder(View view) {
+        public ViewHolder(View view, boolean isRead) {
             super(view);
             mView = view;
             mNameView = view.findViewById(R.id.storeName);
             mPriceView = view.findViewById(R.id.price);
             mChecked = view.findViewById(R.id.checkBox);
+            if (isRead) {
+                mChecked.setClickable(false);
+                mPriceView.setFocusable(false);
+                mPriceView.setFocusableInTouchMode(false);
+            }
         }
     }
 }
