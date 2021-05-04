@@ -138,6 +138,14 @@ public class PantryItemActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
                 return true;
+            case R.id.editItem:
+                Intent intent = new Intent(this, AddItemActivity.class);
+                intent.putExtra("TYPE", getResources().getString(R.string.pantry));
+                intent.putExtra("ID", pantryId);
+                intent.putExtra("ItemId", id);
+                intent.putExtra("MODE", "update");
+                startActivity(intent);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.

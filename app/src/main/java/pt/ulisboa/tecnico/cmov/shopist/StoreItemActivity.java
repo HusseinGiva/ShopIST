@@ -2,13 +2,17 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -25,8 +29,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreItemActivity extends AppCompatActivity {
 
@@ -55,9 +59,15 @@ public class StoreItemActivity extends AppCompatActivity {
         storeId = getIntent().getStringExtra("StoreId");
         itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
         itemCartQuantity = findViewById(R.id.itemCartQuantity);
+        SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+        String language = sharedPref.getString("language", "en");
+        if (language.equals("pt")) {
+            TextView textViewCartQuantity = findViewById(R.id.textView2);
+            textViewCartQuantity.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
+        }
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
         price = findViewById(R.id.priceStoreItem);
-        if(isConnected(getApplicationContext()))
+        if (isConnected(getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -75,7 +85,42 @@ public class StoreItemActivity extends AppCompatActivity {
                                 item = document.toObject(Item.class);
                                 getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                                 barcodeNumber.setText(item.barcode);
-                                price.setText(String.valueOf(item.stores.get(storeId)));
+                                for (String s : item.stores.keySet()) {
+                                    if (storeId.equals(s)) {
+                                        price.setText(String.valueOf(item.stores.get(s)));
+                                    } else {
+                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    DocumentSnapshot document = task.getResult();
+                                                    if (document.exists()) {
+                                                        StoreList sl = document.toObject(StoreList.class);
+                                                        float[] results = new float[1];
+                                                        db.collection("StoreList").document(id).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    DocumentSnapshot document = task.getResult();
+                                                                    if (document.exists()) {
+                                                                        StoreList storeList = document.toObject(StoreList.class);
+                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                results);
+                                                                        //Less than 20 meters
+                                                                        if (results[0] < 20f) {
+                                                                            price.setText(String.valueOf(item.stores.get(s)));
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
                                 db.collection("StoreItem").whereEqualTo("itemId", id).whereEqualTo("storeId", storeId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task2) {
@@ -95,7 +140,7 @@ public class StoreItemActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu (Menu menu){
+    public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.item_share_flag, menu);
         return true;
@@ -106,8 +151,7 @@ public class StoreItemActivity extends AppCompatActivity {
         intent.putExtra("MODE", "read");
         if (barcodeNumber.getText().toString().equals("")) {
             intent.putExtra("ID", id);
-        }
-        else {
+        } else {
             intent.putExtra("ID", barcodeNumber.getText().toString());
         }
         startActivity(intent);
@@ -134,6 +178,14 @@ public class StoreItemActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
                 return true;
+            case R.id.editItem:
+                Intent intent = new Intent(this, AddItemActivity.class);
+                intent.putExtra("TYPE", getResources().getString(R.string.store));
+                intent.putExtra("ID", storeId);
+                intent.putExtra("ItemId", id);
+                intent.putExtra("MODE", "update");
+                startActivity(intent);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -142,7 +194,7 @@ public class StoreItemActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed () {
+    public void onBackPressed() {
         finish();
     }
 

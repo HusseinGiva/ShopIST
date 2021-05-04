@@ -54,13 +54,6 @@ public class HomeActivity extends AppCompatActivity {
                             .setReorderingAllowed(true)
                             .commit();
                     break;
-                /*case R.id.cart:
-                    fragmentManager = getSupportFragmentManager();
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.fragment_container_view, CartFragment.class, null)
-                            .setReorderingAllowed(true)
-                            .commit();
-                    break;*/
                 case R.id.profile:
                     myToolbar.getMenu().findItem(R.id.addList).setVisible(false);
                     fragmentManager = getSupportFragmentManager();

@@ -130,6 +130,69 @@ public class AddItemActivity extends AppCompatActivity {
             targetQuantity.setHint(R.string.price);
             targetQuantity.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
             addStores.setVisibility(View.INVISIBLE);
+            if (getIntent().getStringExtra("MODE").equals("update")) {
+                db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Item item = document.toObject(Item.class);
+                                barcodeNumber.setText(item.barcode);
+                                name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
+                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).whereEqualTo("storeId", getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                StoreItem storeItem = document.toObject(StoreItem.class);
+                                                pantryQuantity.setText(String.valueOf(storeItem.quantity));
+                                            }
+                                        }
+                                    }
+                                });
+                                String storeId = getIntent().getStringExtra("ID");
+                                for (String s : item.stores.keySet()) {
+                                    if (storeId.equals(s)) {
+                                        targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                    } else {
+                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    DocumentSnapshot document = task.getResult();
+                                                    if (document.exists()) {
+                                                        StoreList sl = document.toObject(StoreList.class);
+                                                        float[] results = new float[1];
+                                                        db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    DocumentSnapshot document = task.getResult();
+                                                                    if (document.exists()) {
+                                                                        StoreList storeList = document.toObject(StoreList.class);
+                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                results);
+                                                                        //Less than 20 meters
+                                                                        if (results[0] < 20f) {
+                                                                            targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
             storesResultLauncher = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
@@ -138,6 +201,70 @@ public class AddItemActivity extends AppCompatActivity {
                             storeViewAddItems = result.getData().getParcelableArrayListExtra("STORES");
                         }
                     });
+            if (getIntent().getStringExtra("MODE").equals("update")) {
+                db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Item item = document.toObject(Item.class);
+                                barcodeNumber.setText(item.barcode);
+                                name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
+                                db.collection("PantryItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).whereEqualTo("pantryId", getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if (task.isSuccessful()) {
+                                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                                PantryItem pantryItem = document.toObject(PantryItem.class);
+                                                pantryQuantity.setText(String.valueOf(pantryItem.quantity));
+                                                targetQuantity.setText(String.valueOf(pantryItem.idealQuantity));
+                                            }
+                                        }
+                                    }
+                                });
+                                String storeId = getIntent().getStringExtra("ID");
+                                for (String s : item.stores.keySet()) {
+                                    if (storeId.equals(s)) {
+                                        targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                    } else {
+                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    DocumentSnapshot document = task.getResult();
+                                                    if (document.exists()) {
+                                                        StoreList sl = document.toObject(StoreList.class);
+                                                        float[] results = new float[1];
+                                                        db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    DocumentSnapshot document = task.getResult();
+                                                                    if (document.exists()) {
+                                                                        StoreList storeList = document.toObject(StoreList.class);
+                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                results);
+                                                                        //Less than 20 meters
+                                                                        if (results[0] < 20f) {
+                                                                            targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         }
         saveItem = findViewById(R.id.saveItemButton);
         saveItem.setOnClickListener(v -> onClickSaveItem(v));
@@ -187,7 +314,7 @@ public class AddItemActivity extends AppCompatActivity {
             targetQuantity.setText("0");
         }
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()) < 0) {
-            Toast.makeText(this, "Target Quantity Should Be Bigger Than Pantry Quantity", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.targetQuantityBiggerPantryQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
         if (!isConnected(getApplicationContext()))
