@@ -111,7 +111,7 @@ public class CartFragment extends Fragment {
                                             List<String> store_item_names = new ArrayList<>();
                                             List<Integer> store_item_quantities = new ArrayList<>();
                                             List<Float> item_prices = new ArrayList<>();
-                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds);
+                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list);
                                             list.setAdapter(a);
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 StoreItem si = document.toObject(StoreItem.class);
