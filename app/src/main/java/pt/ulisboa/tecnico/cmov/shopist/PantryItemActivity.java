@@ -195,14 +195,6 @@ public class PantryItemActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                /*Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                Uri screenshotUri = Uri.parse(path);
-
-                sharingIntent.setType("image/png");
-                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-
-                startActivity(Intent.createChooser(share, "Title of the dialog the system will open"));*/
                 return true;
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
