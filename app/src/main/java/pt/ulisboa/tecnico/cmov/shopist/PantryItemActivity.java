@@ -1,11 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,8 +18,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -27,6 +29,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -59,7 +67,7 @@ public class PantryItemActivity extends AppCompatActivity {
         itemTargetQuantity = findViewById(R.id.itemTargetQuantity);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
 
-        if(isConnected(getApplicationContext()))
+        if (isConnected(getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -108,8 +116,7 @@ public class PantryItemActivity extends AppCompatActivity {
         intent.putExtra("MODE", "read");
         if (barcodeNumber.getText().toString().equals("")) {
             intent.putExtra("ID", id);
-        }
-        else {
+        } else {
             intent.putExtra("ID", barcodeNumber.getText().toString());
         }
         startActivity(intent);
@@ -130,23 +137,73 @@ public class PantryItemActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public boolean onOptionsItemSelected(MenuItem item2) {
+        switch (item2.getItemId()) {
             case R.id.shareItem:
-                /*Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "This is the text that will be shared.");
-                startActivity(Intent.createChooser(sharingIntent,"Share using"));
-
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                String shareable = "Hey, checkout this product: " + item.users.get(mAuth.getCurrentUser().getUid());
+                shareable += ". It has the barcode: " + item.barcode;
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareable);
+                File storageDir;
+                FirebaseStorage storage;
+                StorageReference storageRef;
+                storage = FirebaseStorage.getInstance();
+                storageRef = storage.getReference();
+                StorageReference imagesRef;
+                if (!barcodeNumber.getText().toString().equals("")) {
+                    storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + barcodeNumber.getText().toString());
+                    imagesRef = storageRef.child(barcodeNumber.getText().toString());
+                } else {
+                    storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
+                    imagesRef = storageRef.child(id);
+                }
+                imagesRef.listAll()
+                        .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                            @Override
+                            public void onSuccess(ListResult listResult) {
+                                if (listResult.getItems().size() == 0) {
+                                    startActivity(Intent.createChooser(sharingIntent, "Share using"));
+                                } else {
+                                    for (StorageReference item : listResult.getItems()) {
+                                        Boolean exists = false;
+                                        for (File f : storageDir.listFiles()) {
+                                            if (f.getName().equals(item.getName())) {
+                                                exists = true;
+                                                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
+                                                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                                sharingIntent.setType("image/jpeg");
+                                                startActivity(Intent.createChooser(sharingIntent, "Share using"));
+                                                break;
+                                            }
+                                        }
+                                        if (!exists) {
+                                            File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
+                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                    Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
+                                                    sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                                    sharingIntent.setType("image/jpeg");
+                                                    startActivity(Intent.createChooser(sharingIntent, "Share using"));
+                                                }
+                                            });
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        });
+                /*Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 Uri screenshotUri = Uri.parse(path);
 
                 sharingIntent.setType("image/png");
                 sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                 startActivity(Intent.createChooser(sharingIntent, "Share image using"));
 
-                startActivity(Intent.createChooser(share, "Title of the dialog the system will open"));
-                return true;*/
+                startActivity(Intent.createChooser(share, "Title of the dialog the system will open"));*/
+                return true;
             case android.R.id.home:
                 onBackPressed();    //Call the back button's method
                 return true;
@@ -160,7 +217,7 @@ public class PantryItemActivity extends AppCompatActivity {
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(item2);
         }
     }
 
