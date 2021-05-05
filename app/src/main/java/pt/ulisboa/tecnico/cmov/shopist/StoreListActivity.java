@@ -31,6 +31,7 @@ public class StoreListActivity extends AppCompatActivity {
     private String id;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    TabLayout tabLayout;
 
     private static String latitude = null;
     private static String longitude = null;
@@ -68,7 +69,7 @@ public class StoreListActivity extends AppCompatActivity {
                 .add(R.id.fragment_container_view, StoreListFragment.class, bundle)
                 .commit();
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -149,6 +150,7 @@ public class StoreListActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, AddItemActivity.class);
                 intent.putExtra("TYPE", getResources().getString(R.string.store));
                 intent.putExtra("ID", id);
+                intent.putExtra("MODE", "add");
                 startActivity(intent);
                 return true;
             case R.id.shareList:

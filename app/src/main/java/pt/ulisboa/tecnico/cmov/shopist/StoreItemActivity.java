@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -44,6 +47,7 @@ public class StoreItemActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
+    public ActivityResultLauncher<Intent> editResultLauncher;
 
 
     @Override
@@ -71,6 +75,14 @@ public class StoreItemActivity extends AppCompatActivity {
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
+
+        editResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    Intent intent2 = getIntent();
+                    finish();
+                    startActivity(intent2);
+                });
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -184,7 +196,7 @@ public class StoreItemActivity extends AppCompatActivity {
                 intent.putExtra("ID", storeId);
                 intent.putExtra("ItemId", id);
                 intent.putExtra("MODE", "update");
-                startActivity(intent);
+                editResultLauncher.launch(intent);
                 return true;
             default:
                 // If we got here, the user's action was not recognized.

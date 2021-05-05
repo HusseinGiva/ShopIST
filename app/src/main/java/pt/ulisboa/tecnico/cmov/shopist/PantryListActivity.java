@@ -150,6 +150,7 @@ public class PantryListActivity extends AppCompatActivity {
                         }
                     }
                 });
+
     }
 
     @Override
@@ -177,6 +178,7 @@ public class PantryListActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, AddItemActivity.class);
                 intent.putExtra("TYPE", getResources().getString(R.string.pantry));
                 intent.putExtra("ID", id);
+                intent.putExtra("MODE", "add");
                 startActivity(intent);
                 return true;
             case R.id.shareList:
