@@ -72,6 +72,13 @@ public class StoreListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_store_list, container, false);
         list = view.findViewById(R.id.store_list);
 
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
         db.collection("StoreList").document(id)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -174,8 +181,6 @@ public class StoreListFragment extends Fragment {
                         }
                     }
                 });
-
-        return view;
     }
 
     public static boolean isConnected(Context getApplicationContext) {
