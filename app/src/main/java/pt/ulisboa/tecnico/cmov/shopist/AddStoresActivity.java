@@ -8,8 +8,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
@@ -52,7 +50,6 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
     }
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,67 +70,81 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
         }
         StoreContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
-        if (getIntent().getStringExtra("MODE").equals("read")) {
-            StoresRecyclerViewAdapter adapt = (StoresRecyclerViewAdapter) recyclerViewAdapter;
-            adapt.isRead = true;
-            getSupportActionBar().setTitle(R.string.viewStores);
-            String id = getIntent().getStringExtra("ID");
-            db = FirebaseFirestore.getInstance();
-            mAuth = FirebaseAuth.getInstance();
-            db.collection("Item")
-                    .document(id)
-                    .get(source)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            Item item = document.toObject(Item.class);
-                            for (String storeId : item.stores.keySet()) {
-                                db.collection("StoreList")
-                                        .document(storeId)
-                                        .get()
-                                        .addOnCompleteListener(task2 -> {
-                                            if (task2.isSuccessful()) {
-                                                DocumentSnapshot document2 = task2.getResult();
-                                                StoreList item2 = document2.toObject(StoreList.class);
-                                                if (item2.users.contains(mAuth.getCurrentUser().getUid())) {
-                                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(storeId, item2.name, item.stores.get(storeId), true);
-                                                    storeViewAddItem.latitude = item2.latitude;
-                                                    storeViewAddItem.longitude = item2.longitude;
-                                                    StoreContent.addItem(storeViewAddItem);
-                                                    recyclerViewAdapter.notifyItemInserted(0);
-                                                } else if (item2.latitude != null && item2.longitude != null) {
-                                                    db.collection("StoreList")
-                                                            .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                            .get(source)
-                                                            .addOnCompleteListener(task3 -> {
-                                                                if (task3.isSuccessful()) {
-                                                                    for (QueryDocumentSnapshot document3 : task3.getResult()) {
-                                                                        StoreList item3 = document3.toObject(StoreList.class);
-                                                                        if (item3.latitude != null && item3.longitude != null) {
-                                                                            float[] results = new float[1];
-                                                                            Location.distanceBetween(Double.parseDouble(item3.latitude), Double.parseDouble(item3.longitude),
-                                                                                    Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
-                                                                                    results);
-                                                                            //Less than 20 meters
-                                                                            if (results[0] < 20f) {
-                                                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document3.getId(), item3.name, item.stores.get(storeId), true);
-                                                                                storeViewAddItem.latitude = item3.latitude;
-                                                                                storeViewAddItem.longitude = item3.longitude;
-                                                                                StoreContent.addItem(storeViewAddItem);
-                                                                                recyclerViewAdapter.notifyItemInserted(0);
+        if (getIntent().getStringExtra("MODE").equals("read") || getIntent().getStringExtra("MODE").equals("update")) {
+            if (getIntent().getStringExtra("MODE").equals("read")) {
+                StoresRecyclerViewAdapter adapt = (StoresRecyclerViewAdapter) recyclerViewAdapter;
+                adapt.isRead = true;
+                getSupportActionBar().setTitle(R.string.viewStores);
+            }
+            if (getIntent().getParcelableArrayExtra("STORES") != null) {
+                stores = getIntent().getParcelableArrayListExtra("STORES");
+                if (!stores.isEmpty()) {
+                    for (StoreViewAddItem item : stores) {
+                        StoreContent.addItem(item);
+                        recyclerViewAdapter.notifyItemInserted(0);
+                    }
+                }
+            } else {
+                String id = getIntent().getStringExtra("ID");
+                db = FirebaseFirestore.getInstance();
+                mAuth = FirebaseAuth.getInstance();
+                db.collection("Item")
+                        .document(id)
+                        .get(source)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                Item item = document.toObject(Item.class);
+                                for (String storeId : item.stores.keySet()) {
+                                    db.collection("StoreList")
+                                            .document(storeId)
+                                            .get()
+                                            .addOnCompleteListener(task2 -> {
+                                                if (task2.isSuccessful()) {
+                                                    DocumentSnapshot document2 = task2.getResult();
+                                                    StoreList item2 = document2.toObject(StoreList.class);
+                                                    if (item2.users.contains(mAuth.getCurrentUser().getUid())) {
+                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(storeId, item2.name, item.stores.get(storeId), true);
+                                                        storeViewAddItem.latitude = item2.latitude;
+                                                        storeViewAddItem.longitude = item2.longitude;
+                                                        stores.add(storeViewAddItem);
+                                                        StoreContent.addItem(storeViewAddItem);
+                                                        recyclerViewAdapter.notifyItemInserted(0);
+                                                    } else if (item2.latitude != null && item2.longitude != null) {
+                                                        db.collection("StoreList")
+                                                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                                                .get(source)
+                                                                .addOnCompleteListener(task3 -> {
+                                                                    if (task3.isSuccessful()) {
+                                                                        for (QueryDocumentSnapshot document3 : task3.getResult()) {
+                                                                            StoreList item3 = document3.toObject(StoreList.class);
+                                                                            if (item3.latitude != null && item3.longitude != null) {
+                                                                                float[] results = new float[1];
+                                                                                Location.distanceBetween(Double.parseDouble(item3.latitude), Double.parseDouble(item3.longitude),
+                                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                                                        results);
+                                                                                //Less than 20 meters
+                                                                                if (results[0] < 20f) {
+                                                                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document3.getId(), item3.name, item.stores.get(storeId), true);
+                                                                                    storeViewAddItem.latitude = item3.latitude;
+                                                                                    storeViewAddItem.longitude = item3.longitude;
+                                                                                    stores.add(storeViewAddItem);
+                                                                                    StoreContent.addItem(storeViewAddItem);
+                                                                                    recyclerViewAdapter.notifyItemInserted(0);
+                                                                                }
                                                                             }
+
+
                                                                         }
-
-
                                                                     }
-                                                                }
-                                                            });
+                                                                });
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                }
                             }
-                        }
-                    });
+                        });
+            }
         } else if (getIntent().getStringExtra("MODE").equals("add")) {
             stores = getIntent().getParcelableArrayListExtra("STORES");
             if (!stores.isEmpty()) {

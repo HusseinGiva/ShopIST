@@ -8,8 +8,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,15 +21,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListActivity extends AppCompatActivity {
@@ -85,8 +77,7 @@ public class StoreListActivity extends AppCompatActivity {
                             .setReorderingAllowed(true)
                             .replace(R.id.fragment_container_view, StoreListFragment.class, bundle)
                             .commit();
-                }
-                else if(tab.getText().equals(getResources().getString(R.string.cart))) {
+                } else if (tab.getText().equals(getResources().getString(R.string.cart))) {
                     getSupportFragmentManager().beginTransaction()
                             .setReorderingAllowed(true)
                             .replace(R.id.fragment_container_view, CartFragment.class, bundle)

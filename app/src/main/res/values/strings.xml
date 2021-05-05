@@ -85,4 +85,5 @@
     <string name="moveProductToCart">Move Product To Cart</string>
     <string name="cartQuantity">Cart Quantity</string>
     <string name="targetQuantityBiggerPantryQuantity">Target Quantity Should Be Bigger Than Pantry Quantity</string>
+    <string name="editProduct">Edit Product</string>
 </resources>

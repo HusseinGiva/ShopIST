@@ -92,6 +92,19 @@ public class AddItemActivity extends AppCompatActivity {
     private Source source;
     private StorageReference storageRef;
 
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -128,9 +141,10 @@ public class AddItemActivity extends AppCompatActivity {
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
             pantryQuantity.setHint(R.string.storeQuantity);
             targetQuantity.setHint(R.string.price);
-            targetQuantity.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            targetQuantity.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
             addStores.setVisibility(View.INVISIBLE);
             if (getIntent().getStringExtra("MODE").equals("update")) {
+                getSupportActionBar().setTitle(R.string.editProduct);
                 db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -171,12 +185,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     DocumentSnapshot document = task.getResult();
                                                                     if (document.exists()) {
                                                                         StoreList storeList = document.toObject(StoreList.class);
-                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
-                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                results);
-                                                                        //Less than 20 meters
-                                                                        if (results[0] < 20f) {
-                                                                            targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                        if (storeList.latitude != null && storeList.longitude != null && sl.latitude != null && sl.longitude != null) {
+                                                                            Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                    results);
+                                                                            //Less than 20 meters
+                                                                            if (results[0] < 20f) {
+                                                                                targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -202,6 +218,7 @@ public class AddItemActivity extends AppCompatActivity {
                         }
                     });
             if (getIntent().getStringExtra("MODE").equals("update")) {
+                getSupportActionBar().setTitle(R.string.editProduct);
                 db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -243,12 +260,14 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     DocumentSnapshot document = task.getResult();
                                                                     if (document.exists()) {
                                                                         StoreList storeList = document.toObject(StoreList.class);
-                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
-                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                results);
-                                                                        //Less than 20 meters
-                                                                        if (results[0] < 20f) {
-                                                                            targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                        if (storeList.latitude != null && storeList.longitude != null && sl.latitude != null && sl.longitude != null) {
+                                                                            Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                    results);
+                                                                            //Less than 20 meters
+                                                                            if (results[0] < 20f) {
+                                                                                targetQuantity.setText(String.valueOf(item.stores.get(s)));
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
@@ -442,15 +461,17 @@ public class AddItemActivity extends AppCompatActivity {
                                                                                         if (document.exists()) {
                                                                                             StoreList sl = document.toObject(StoreList.class);
                                                                                             float[] results = new float[1];
-                                                                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                                    results);
-                                                                                            //Less than 20 meters
-                                                                                            if (results[0] < 20f) {
-                                                                                                item.stores.remove(store.storeId);
-                                                                                                if (store.price != 0) {
-                                                                                                    item.stores.put(s, store.price);
-                                                                                                    db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                            if (store.latitude != null && store.longitude != null && sl.latitude != null && sl.longitude != null) {
+                                                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                                                        Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                        results);
+                                                                                                //Less than 20 meters
+                                                                                                if (results[0] < 20f) {
+                                                                                                    item.stores.remove(store.storeId);
+                                                                                                    if (store.price != 0) {
+                                                                                                        item.stores.put(s, store.price);
+                                                                                                        db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                                    }
                                                                                                 }
                                                                                             }
                                                                                         }
@@ -669,15 +690,17 @@ public class AddItemActivity extends AppCompatActivity {
                                                                                         if (document.exists()) {
                                                                                             StoreList sl = document.toObject(StoreList.class);
                                                                                             float[] results = new float[1];
-                                                                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                                    results);
-                                                                                            //Less than 20 meters
-                                                                                            if (results[0] < 20f) {
-                                                                                                item.stores.remove(store.storeId);
-                                                                                                if (store.price != 0) {
-                                                                                                    item.stores.put(s, store.price);
-                                                                                                    db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                            if (store.latitude != null && store.longitude != null && sl.latitude != null && sl.longitude != null) {
+                                                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                                                        Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                        results);
+                                                                                                //Less than 20 meters
+                                                                                                if (results[0] < 20f) {
+                                                                                                    item.stores.remove(store.storeId);
+                                                                                                    if (store.price != 0) {
+                                                                                                        item.stores.put(s, store.price);
+                                                                                                        db.collection("Item").document(itemId).update("stores", item.stores);
+                                                                                                    }
                                                                                                 }
                                                                                             }
                                                                                         }
@@ -772,19 +795,6 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
-    }
-
     public void onClickAddPictures(View view) {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         intent.putStringArrayListExtra("PATHS", photoPaths);
@@ -795,41 +805,47 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void onClickAddStores(View view) {
         Intent intent = new Intent(this, AddStoresActivity.class);
-        intent.putExtra("MODE", "add");
-        db.collection("StoreList")
-                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                .get(source)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            StoreList store = document.toObject(StoreList.class);
-                            if (!storeViewAddItems.isEmpty()) {
-                                Boolean present = false;
-                                for (StoreViewAddItem item : storeViewAddItems) {
-                                    if (item.storeId.equals(document.getId())) {
-                                        present = true;
+        if (getIntent().getStringExtra("MODE").equals("update")) {
+            intent.putExtra("MODE", "update");
+            intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
+            storesResultLauncher.launch(intent);
+        } else if (getIntent().getStringExtra("MODE").equals("add")) {
+            intent.putExtra("MODE", "add");
+            db.collection("StoreList")
+                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                    .get(source)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                StoreList store = document.toObject(StoreList.class);
+                                if (!storeViewAddItems.isEmpty()) {
+                                    Boolean present = false;
+                                    for (StoreViewAddItem item : storeViewAddItems) {
+                                        if (item.storeId.equals(document.getId())) {
+                                            present = true;
+                                        }
                                     }
-                                }
-                                if (!present) {
+                                    if (!present) {
+                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
+                                        storeViewAddItem.latitude = store.latitude;
+                                        storeViewAddItem.longitude = store.longitude;
+                                        storeViewAddItems.add(storeViewAddItem);
+                                    }
+
+                                } else {
                                     StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
                                     storeViewAddItem.latitude = store.latitude;
                                     storeViewAddItem.longitude = store.longitude;
                                     storeViewAddItems.add(storeViewAddItem);
                                 }
-
-                            } else {
-                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
-                                storeViewAddItem.latitude = store.latitude;
-                                storeViewAddItem.longitude = store.longitude;
-                                storeViewAddItems.add(storeViewAddItem);
                             }
+                            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+                            storesResultLauncher.launch(intent);
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-                        intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-                        storesResultLauncher.launch(intent);
-                    } else {
-                        Log.d("TAG", "Error getting documents: ", task.getException());
-                    }
-                });
+                    });
+        }
     }
 
     void onClickClearBarcode() {
