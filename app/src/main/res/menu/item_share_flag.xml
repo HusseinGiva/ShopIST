@@ -14,10 +14,4 @@
         android:title="Share"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/flagItem"
-        android:icon="@drawable/baseline_flag_24"
-        android:title="Flag"
-        app:showAsAction="ifRoom" />
-
 </menu>

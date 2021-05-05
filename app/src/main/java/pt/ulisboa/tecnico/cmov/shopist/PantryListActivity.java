@@ -163,6 +163,10 @@ public class PantryListActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        if (getIntent().getStringExtra("SENDER") != null && getIntent().getStringExtra("SENDER").equals("start")) {
+            Intent intent = new Intent(this, HomeActivity.class);
+            startActivity(intent);
+        }
         finish();
     }
 

@@ -265,6 +265,7 @@ public class StartActivity extends AppCompatActivity {
                                                                     Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
                                                                     intent.putExtra("TAB", getResources().getString(R.string.pantry));
                                                                     intent.putExtra("ID", pantries.get(0));
+                                                                    intent.putExtra("SENDER", "start");
                                                                     startActivity(intent);
                                                                     finish();
                                                                 }
@@ -291,6 +292,7 @@ public class StartActivity extends AppCompatActivity {
                                                                     Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
                                                                     intent.putExtra("TAB", getResources().getString(R.string.store));
                                                                     intent.putExtra("ID", stores.get(0));
+                                                                    intent.putExtra("SENDER", "start");
                                                                     startActivity(intent);
                                                                     finish();
                                                                 }
