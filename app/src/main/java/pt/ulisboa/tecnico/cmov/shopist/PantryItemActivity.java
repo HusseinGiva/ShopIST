@@ -11,6 +11,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -35,6 +37,7 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -46,6 +49,13 @@ public class PantryItemActivity extends AppCompatActivity {
     public EditText itemPantryQuantity;
     public EditText itemTargetQuantity;
     public EditText barcodeNumber;
+    public EditText userRating;
+    public TextView avgRating;
+    public TextView rating_5;
+    public TextView rating_4;
+    public TextView rating_3;
+    public TextView rating_2;
+    public TextView rating_1;
     public Item item;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -66,6 +76,13 @@ public class PantryItemActivity extends AppCompatActivity {
         itemPantryQuantity = findViewById(R.id.itemStoreQuantity);
         itemTargetQuantity = findViewById(R.id.itemTargetQuantity);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
+        userRating = findViewById(R.id.yourRatingInput);
+        avgRating = findViewById(R.id.avgRatingText);
+        rating_5 = findViewById(R.id.star5Text);
+        rating_4 = findViewById(R.id.star4Text);
+        rating_3 = findViewById(R.id.star3Text);
+        rating_2 = findViewById(R.id.star2Text);
+        rating_1 = findViewById(R.id.star1Text);
 
         if (isConnected(getApplicationContext()))
             source = Source.DEFAULT;
@@ -93,6 +110,31 @@ public class PantryItemActivity extends AppCompatActivity {
                                 item = document.toObject(Item.class);
                                 getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                                 barcodeNumber.setText(item.barcode);
+
+                                float[] votes = {0,0,0,0,0};
+                                float totalRatings = 0;
+                                float totalVotes = 0;
+
+                                if(item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                    userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+
+                                for(Map.Entry<String, Integer> entry : item.ratings.entrySet()){
+                                    votes[entry.getValue() - 1]++;
+                                    totalRatings += entry.getValue();
+                                    totalVotes++;
+                                }
+
+                                if(totalVotes == 0)
+                                    totalVotes = 1;
+
+                                avgRating.setText(getResources().getString(R.string.averageRating) +  " : " +
+                                        String.format( "%.1f", (totalRatings / totalVotes)));
+                                rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" +  Math.round( (votes[4] / totalVotes) * 100)  + "%)");
+                                rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" +  Math.round( (votes[3] / totalVotes) * 100)  + "%)");
+                                rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" +  Math.round( (votes[2] / totalVotes) * 100)  + "%)");
+                                rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" +  Math.round( (votes[1] / totalVotes) * 100)  + "%)");
+                                rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" +  Math.round( (votes[0] / totalVotes) * 100)  + "%)");
+
                                 db.collection("PantryItem").whereEqualTo("itemId", id).whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task2) {
@@ -127,6 +169,67 @@ public class PantryItemActivity extends AppCompatActivity {
         intent.putExtra("MODE", "read");
         intent.putExtra("ID", id);
         startActivity(intent);
+    }
+
+    public void onClickSubmitRating(View view){
+        String userRatingText = userRating.getText().toString();
+
+        int userRatingNumber;
+
+        try{
+            userRatingNumber = Integer.parseInt(userRatingText);
+        }catch (NumberFormatException e){
+            Toast.makeText(this, "Invalid rating", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(userRatingNumber < 1 || userRatingNumber > 5){
+            Toast.makeText(this, "Rating must be between 1 and 5!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("Item").document(id).update(
+          "ratings." + mAuth.getCurrentUser().getUid(), userRatingNumber
+        );
+
+        db.collection("Item").document(id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                item = document.toObject(Item.class);
+                                float[] votes = {0,0,0,0,0};
+                                float totalRatings = 0;
+                                float totalVotes = 0;
+
+                                if(item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                    userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+
+                                for(Map.Entry<String, Integer> entry : item.ratings.entrySet()){
+                                    votes[entry.getValue() - 1]++;
+                                    totalRatings += entry.getValue();
+                                    totalVotes++;
+                                }
+
+                                if(totalVotes == 0)
+                                    totalVotes = 1;
+
+                                avgRating.setText(getResources().getString(R.string.averageRating) +  " : " +
+                                        String.format( "%.1f", (totalRatings / totalVotes)));
+                                rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" +  Math.round( (votes[4] / totalVotes) * 100)  + "%)");
+                                rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" +  Math.round( (votes[3] / totalVotes) * 100)  + "%)");
+                                rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" +  Math.round( (votes[2] / totalVotes) * 100)  + "%)");
+                                rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" +  Math.round( (votes[1] / totalVotes) * 100)  + "%)");
+                                rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" +  Math.round( (votes[0] / totalVotes) * 100)  + "%)");
+                            }
+                        }
+                    }
+                });
+
     }
 
     @Override

@@ -84,4 +84,13 @@
     <string name="noInternetConnection">A sincronização será feita quando ligação à Internet estiver disponível</string>
     <string name="moveProductToCart">Mover Produto Para Carrinho</string>
     <string name="cartQuantity">Quantidade Carrinho</string>
+    <string name="yourRating">O teu rating</string>
+    <string name="insertRating">Insere rating (1-5)</string>
+    <string name="submit">Submeter</string>
+    <string name="averageRating">Rating médio</string>
+    <string name="votes5star">Votos 5 estrelas</string>
+    <string name="votes4star">Votos 4 estrelas</string>
+    <string name="votes3star">Votos 3 estrelas</string>
+    <string name="votes2star">Votos 2 estrelas</string>
+    <string name="votes1star">Votos 1 estrela</string>
 </resources>

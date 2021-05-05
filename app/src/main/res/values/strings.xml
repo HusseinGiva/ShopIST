@@ -86,4 +86,13 @@
     <string name="cartQuantity">Cart Quantity</string>
     <string name="targetQuantityBiggerPantryQuantity">Target Quantity Should Be Bigger Than Pantry Quantity</string>
     <string name="editProduct">Edit Product</string>
+    <string name="yourRating">Your Rating</string>
+    <string name="insertRating">Insert rating (1-5)</string>
+    <string name="submit">Submit</string>
+    <string name="averageRating">Average Rating</string>
+    <string name="votes5star">5 star votes</string>
+    <string name="votes4star">4 star votes</string>
+    <string name="votes3star">3 star votes</string>
+    <string name="votes2star">2 star votes</string>
+    <string name="votes1star">1 star votes</string>
 </resources>
