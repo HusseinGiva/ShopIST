@@ -93,4 +93,11 @@
     <string name="votes3star">Votos 3 estrelas</string>
     <string name="votes2star">Votos 2 estrelas</string>
     <string name="votes1star">Votos 1 estrela</string>
+    <string name="shareUsing">Partilhar Usando</string>
+    <string name="editProduct">Editar Produto</string>
+    <string name="targetQuantityBiggerPantryQuantity">A Quantidade Ideal Deve Ser Maior Que A Quantidade Despensa</string>
+    <string name="checkoutThisProduct">"Dá uma vista de olhos neste produto: "</string>
+    <string name="itHasTheBarcode">". Tem o código de barras "</string>
+    <string name="andIsSoldAt">" e é vendido em "</string>
+    <string name="forString">" por "</string>
 </resources>
