@@ -19,6 +19,8 @@ import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private String typeSelected;
+
     @Override
     protected void attachBaseContext(Context newBase) {
         SharedPreferences sharedPref = newBase.getSharedPreferences("language", Context.MODE_PRIVATE);
@@ -39,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
                     .add(R.id.fragment_container_view, ListFragment.class, null)
                     .commit();
         }
+        typeSelected = this.getResources().getString(R.string.pantry);
         //language = ContextUtils.getSystemLocale(getResources().getConfiguration()).getLanguage();
         //Toast.makeText(this, language, Toast.LENGTH_LONG).show();
         Toolbar myToolbar = findViewById(R.id.homeToolbar);
@@ -67,6 +70,10 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    public void setTypeSelected(String type) {
+        this.typeSelected = type;
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -85,6 +92,7 @@ public class HomeActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.addList:
                 Intent intent = new Intent(this, AddListActivity.class);
+                intent.putExtra("TYPE", this.typeSelected);
                 startActivity(intent);
                 return true;
             default:

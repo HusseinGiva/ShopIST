@@ -15,14 +15,16 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
+    List<Integer> item_ideal_quantities;
     ArrayList<String> itemIds;
     String pantryId;
 
-    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, ArrayList<String> itemIds, String pantryId) {
+    public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Integer> item_ideal_quantities, ArrayList<String> itemIds, String pantryId) {
         super(context, R.layout.pantry_list_item, R.id.pantry_list_item_name, item_names);
         this.context = context;
         this.item_names = item_names;
         this.item_quantities = item_quantities;
+        this.item_ideal_quantities = item_ideal_quantities;
         this.itemIds = itemIds;
         this.pantryId = pantryId;
     }
@@ -44,7 +46,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
 
         holder.pantryListPosition.setText(String.valueOf(position + 1));
         holder.pantryListItemName.setText(item_names.get(position));
-        holder.pantryListItemQuantity.setText(item_quantities.get(position).toString());
+        holder.pantryListItemQuantity.setText(item_quantities.get(position).toString() + " / " + item_ideal_quantities.get(position).toString());
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override

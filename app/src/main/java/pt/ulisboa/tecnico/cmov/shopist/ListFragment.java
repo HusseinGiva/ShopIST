@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -143,15 +144,13 @@ public class ListFragment extends Fragment {
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
 
-
-
-
-
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 
                 listAdapter.tabSelected = tab.getText().toString();
+                HomeActivity ha = (HomeActivity) getActivity();
+                ha.setTypeSelected(tab.getText().toString());
 
                 names.clear();
                 drive_times.clear();

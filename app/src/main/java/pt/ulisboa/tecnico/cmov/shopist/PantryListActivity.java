@@ -104,6 +104,7 @@ public class PantryListActivity extends AppCompatActivity {
                                             ArrayList<String> itemIds = new ArrayList<String>();
                                             List<String> pantry_item_names = new ArrayList<>();
                                             List<Integer> pantry_item_quantities = new ArrayList<>();
+                                            List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 PantryItem pi = document.toObject(PantryItem.class);
                                                 db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -114,7 +115,8 @@ public class PantryListActivity extends AppCompatActivity {
                                                             if (document.exists()) {
                                                                 Item i = document.toObject(Item.class);
                                                                 pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                pantry_item_quantities.add(pi.idealQuantity);
+                                                                pantry_item_quantities.add(pi.quantity);
+                                                                pantry_item_ideal_quantities.add(pi.idealQuantity);
                                                                 itemIds.add(document.getId());
                                                                 list.invalidateViews();
                                                             } else {
@@ -128,7 +130,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                     }
                                                 });
                                             }
-                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, itemIds, id);
+                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id);
                                             list.setAdapter(a);
 
                                         } else {
