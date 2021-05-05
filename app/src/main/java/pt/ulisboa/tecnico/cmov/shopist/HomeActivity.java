@@ -35,13 +35,13 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        typeSelected = this.getResources().getString(R.string.pantry);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .setReorderingAllowed(true)
                     .add(R.id.fragment_container_view, ListFragment.class, null)
                     .commit();
         }
-        typeSelected = this.getResources().getString(R.string.pantry);
         //language = ContextUtils.getSystemLocale(getResources().getConfiguration()).getLanguage();
         //Toast.makeText(this, language, Toast.LENGTH_LONG).show();
         Toolbar myToolbar = findViewById(R.id.homeToolbar);
@@ -72,6 +72,9 @@ public class HomeActivity extends AppCompatActivity {
 
     public void setTypeSelected(String type) {
         this.typeSelected = type;
+    }
+    public String getTypeSelected() {
+        return this.typeSelected;
     }
 
     @Override

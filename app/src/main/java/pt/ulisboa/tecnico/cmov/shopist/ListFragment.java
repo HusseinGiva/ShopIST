@@ -142,6 +142,10 @@ public class ListFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
+        list = view.findViewById(R.id.list);
+        listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, getResources().getString(R.string.pantry), pantryIds, storeIds);
+        list.setAdapter(listAdapter);
+
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -205,11 +209,6 @@ public class ListFragment extends Fragment {
                                                 };
                                                 timerHandler.postDelayed(timerRunnable, 0);
                                             }
-
-
-
-
-
                                         }
 
                                         list.invalidateViews();
@@ -258,7 +257,6 @@ public class ListFragment extends Fragment {
 
                                                             }
 
-
                                                             timerHandler.removeCallbacks(this);
                                                         } else {
                                                             timerHandler.postDelayed(this, 100);
@@ -267,11 +265,6 @@ public class ListFragment extends Fragment {
                                                 };
                                                 timerHandler.postDelayed(timerRunnable, 0);
                                             }
-
-
-
-
-
                                         }
                                         list.invalidateViews();
                                     } else {
@@ -296,65 +289,127 @@ public class ListFragment extends Fragment {
             }
         });
 
-        db.collection("PantryList")
-                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                .get(source)
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                PantryList pantry = document.toObject(PantryList.class);
-                                names.add(pantry.name);
-                                n_items.add((int) pantry.number_of_items);
-                                pantryIds.add(document.getId());
+        return view;
+    }
 
-                                pantry.driveTime = null;
-                                drive_times.add(pantry.driveTime);
+    @Override
+    public void onResume() {
+        super.onResume();
 
-                                if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
-                                    String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
-                                            lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
-                                            "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+        names.clear();
+        drive_times.clear();
+        n_items.clear();
+        pantryIds.clear();
+        storeIds.clear();
 
-                                    Object[] dataTransfer = new Object[]{pantry, url};
-                                    new DownloadUrl().execute(dataTransfer);
+        HomeActivity ha = (HomeActivity) getActivity();
 
-                                    Handler timerHandler = new Handler();
-                                    Runnable timerRunnable = new Runnable() {
+        if(ha.getTypeSelected().equals(getResources().getString(R.string.pantry))) {
+            db.collection("PantryList")
+                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                    .get(source)
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    PantryList pantry = document.toObject(PantryList.class);
+                                    names.add(pantry.name);
+                                    n_items.add((int) pantry.number_of_items);
+                                    pantryIds.add(document.getId());
 
-                                        @Override
-                                        public void run() {
-                                            if (pantry.driveTime != null) {
-                                                Log.d("LIST", String.valueOf(pantry.driveTime));
-                                                drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
-                                                list.invalidateViews();
-                                                timerHandler.removeCallbacks(this);
-                                            } else {
-                                                timerHandler.postDelayed(this, 100);
+                                    pantry.driveTime = null;
+                                    drive_times.add(pantry.driveTime);
+
+                                    if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
+                                        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
+                                                "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                        Object[] dataTransfer = new Object[]{pantry, url};
+                                        new DownloadUrl().execute(dataTransfer);
+
+                                        Handler timerHandler = new Handler();
+                                        Runnable timerRunnable = new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                if (pantry.driveTime != null) {
+                                                    Log.d("LIST", String.valueOf(pantry.driveTime));
+                                                    drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
+                                                    list.invalidateViews();
+                                                    timerHandler.removeCallbacks(this);
+                                                } else {
+                                                    timerHandler.postDelayed(this, 100);
+                                                }
                                             }
-                                        }
-                                    };
-                                    timerHandler.postDelayed(timerRunnable, 0);
+                                        };
+                                        timerHandler.postDelayed(timerRunnable, 0);
+                                    }
                                 }
 
-
-
-
-
-
+                                list.invalidateViews();
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
                             }
-
-                            list = view.findViewById(R.id.list);
-                            listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, getResources().getString(R.string.pantry), pantryIds, storeIds);
-                            list.setAdapter(listAdapter);
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-                    }
-                });
+                    });
+        }
+        else if(ha.getTypeSelected().equals(getResources().getString(R.string.store))) {
+            db.collection("StoreList")
+                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                    .get(source)
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    StoreList store = document.toObject(StoreList.class);
+                                    names.add(store.name);
+                                    n_items.add((int) store.number_of_items);
+                                    storeIds.add(document.getId());
 
-        return view;
+                                    store.driveTime = null;
+                                    drive_times.add(store.driveTime);
+
+                                    if(lastKnownLocation != null && store.latitude != null && store.longitude != null){
+                                        String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
+                                                lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
+                                                "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
+
+                                        Object[] dataTransfer = new Object[]{store, url};
+                                        new DownloadUrl().execute(dataTransfer);
+
+                                        Handler timerHandler = new Handler();
+                                        Runnable timerRunnable = new Runnable() {
+
+                                            @Override
+                                            public void run() {
+                                                if (store.driveTime != null) {
+                                                    Log.d("LIST", String.valueOf(store.driveTime));
+                                                    try{
+                                                        drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
+                                                        list.invalidateViews();
+                                                    }catch (ArrayIndexOutOfBoundsException e){
+
+                                                    }
+
+                                                    timerHandler.removeCallbacks(this);
+                                                } else {
+                                                    timerHandler.postDelayed(this, 100);
+                                                }
+                                            }
+                                        };
+                                        timerHandler.postDelayed(timerRunnable, 0);
+                                    }
+                                }
+                                list.invalidateViews();
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+        }
     }
 
     public static boolean isConnected(Context getApplicationContext) {

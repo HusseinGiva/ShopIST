@@ -89,10 +89,12 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         if(getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
             RadioButton rb = (RadioButton) findViewById(R.id.radio_pantry);
             rb.setChecked(true);
+            list_type = getResources().getString(R.string.pantry);
         }
         else if(getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
             RadioButton rb = (RadioButton) findViewById(R.id.radio_store);
             rb.setChecked(true);
+            list_type = getResources().getString(R.string.store);
         }
 
         Toolbar myToolbar = findViewById(R.id.addListToolbar);
@@ -207,6 +209,11 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     public void onClickSaveList(View view) {
         EditText e = (EditText) findViewById(R.id.listName);
         if (e.getText().toString().equals("")) {
@@ -232,8 +239,10 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
             db.collection("PantryList").add(l);
 
-            Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-            startActivity(intent);
+            /*Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+            startActivity(intent);*/
+            finish();
+            return;
 
         } else if (this.list_type.equals(getResources().getString(R.string.store))) {
 
@@ -277,8 +286,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                     pantry_index[0]++;
                                                     if(pantry_index[0] >= pantries.size()) {
                                                         db.collection("StoreList").document(document_1.getId()).update("number_of_items", n_new_items[0]);
-                                                        Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-                                                        startActivity(intent);
+                                                        /*Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
+                                                        startActivity(intent);*/
+                                                        finish();
                                                         return;
                                                     }
 
@@ -368,81 +378,6 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     }
                 }
             });
-
-            /*db.collection("StoreList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentReference> task) {
-                    if(task.isSuccessful()) {
-                        DocumentReference document_1 = task.getResult();
-                        db.collection("PantryList")
-                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                .get()
-                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            int[] n_new_items = {0};
-                                            List<String> unique_barcodes = new ArrayList<>();
-                                            for (QueryDocumentSnapshot document_2 : task.getResult()) {
-                                                db.collection("PantryItem").whereEqualTo("pantryId", document_2.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            for (QueryDocumentSnapshot document_3 : task.getResult()) {
-                                                                PantryItem pi = document_3.toObject(PantryItem.class);
-                                                                db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                    @Override
-                                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                        if(task.isSuccessful()) {
-                                                                            DocumentSnapshot document_4 = task.getResult();
-                                                                            if (document_4.exists()) {
-                                                                                Item i = document_4.toObject(Item.class);
-                                                                                if(!unique_barcodes.contains(i.barcode)) {
-                                                                                    if(!i.barcode.equals("")) {
-                                                                                        unique_barcodes.add(i.barcode);
-                                                                                    }
-                                                                                    StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
-                                                                                    if(pi.idealQuantity - pi.quantity > 0) n_new_items[0]++;
-                                                                                    db.collection("StoreItem").add(si);
-                                                                                    i.stores.put(pi.itemId, 0f);
-                                                                                    db.collection("Item").document(pi.itemId).update("stores", i.stores);
-                                                                                }
-                                                                                else {
-                                                                                    if(pi.idealQuantity - pi.quantity > 0) {
-                                                                                        db.collection("StoreItem").whereEqualTo("itemId", pi.itemId)
-                                                                                                .whereEqualTo("storeId", document_1.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                                                if(task.isSuccessful()) {
-                                                                                                    for (QueryDocumentSnapshot document_5 : task.getResult()) {
-                                                                                                        StoreItem si = document_5.toObject(StoreItem.class);
-                                                                                                        db.collection("StoreItem").document(document_5.getId()).update("quantity", si.quantity + pi.idealQuantity - pi.quantity);
-                                                                                                    }
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                            db.collection("StoreList").document(document_1.getId()).update("number_of_items", n_new_items[0]);
-                                        }
-                                    }
-                                });
-                    }
-                }
-            });*/
-
-
-            /*Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-            startActivity(intent);*/
 
         }
 
@@ -536,6 +471,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();    //Call the back button's method
+                return true;
             case R.id.manualEntry:
                 manualEntry();
                 return true;
