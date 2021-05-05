@@ -14,13 +14,18 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Size;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -126,6 +131,71 @@ public class AddItemActivity extends AppCompatActivity {
         storageRef = storage.getReference();
         viewFinder = findViewById(R.id.viewFinder);
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
+        barcodeNumber.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    storeViewAddItems.clear();
+                    autocompleteStoreList();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                    builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                    builder.setPositiveButton(R.string.addPictures, (dialog, which) -> {
+                        Intent intent = new Intent(getApplicationContext(), AddPicturesActivity.class);
+                        intent.putExtra("MODE", "add");
+                        intent.putStringArrayListExtra("PATHS", photoPaths);
+                        picturesResultLauncher.launch(intent);
+                    });
+                    builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
+                        Intent intent = new Intent(getApplicationContext(), AddStoresActivity.class);
+                        intent.putExtra("MODE", "add");
+                        if (getIntent().getStringExtra("MODE").equals("update")) {
+                            intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
+                        }
+                        db.collection("StoreList")
+                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                .get(source)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            StoreList store = document.toObject(StoreList.class);
+                                            if (!storeViewAddItems.isEmpty()) {
+                                                Boolean present = false;
+                                                for (StoreViewAddItem item : storeViewAddItems) {
+                                                    if (item.name.equals(store.name)) {
+                                                        present = true;
+                                                    }
+                                                }
+                                                if (!present) {
+                                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                    storeViewAddItem.latitude = store.latitude;
+                                                    storeViewAddItem.longitude = store.longitude;
+                                                    storeViewAddItems.add(storeViewAddItem);
+                                                }
+
+                                            } else {
+                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                storeViewAddItem.latitude = store.latitude;
+                                                storeViewAddItem.longitude = store.longitude;
+                                                storeViewAddItems.add(storeViewAddItem);
+                                            }
+                                        }
+                                        intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+                                        storesResultLauncher.launch(intent);
+                                    } else {
+                                        Log.d("TAG", "Error getting documents: ", task.getException());
+                                    }
+                                });
+                    });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        });
         name = findViewById(R.id.productName);
         pantryQuantity = findViewById(R.id.itemStoreQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
@@ -1394,6 +1464,9 @@ public class AddItemActivity extends AppCompatActivity {
                                             builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
                                                 Intent intent = new Intent(this, AddStoresActivity.class);
                                                 intent.putExtra("MODE", "add");
+                                                if (getIntent().getStringExtra("MODE").equals("update")) {
+                                                    intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
+                                                }
                                                 db.collection("StoreList")
                                                         .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                                                         .get(source)

@@ -276,6 +276,8 @@ public class PantryItemActivity extends AppCompatActivity {
                                                 Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
                                                 sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                 sharingIntent.setType("image/jpeg");
+                                                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
+                                                sharingIntent.setData(screenshotUri);
                                                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                 break;
                                             }
@@ -289,6 +291,8 @@ public class PantryItemActivity extends AppCompatActivity {
                                                     Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
                                                     sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                     sharingIntent.setType("image/jpeg");
+                                                    sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
+                                                    sharingIntent.setData(screenshotUri);
                                                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                 }
                                             });
