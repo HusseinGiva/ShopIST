@@ -126,6 +126,19 @@ public class StoreListActivity extends AppCompatActivity {
                 });
     }
 
+    public void goToCart() {
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        TabLayout.Tab tab = tabLayout.getTabAt(1);
+        assert tab != null;
+        tab.select();
+        Bundle bundle = new Bundle();
+        bundle.putString("ID", id);
+        getSupportFragmentManager().beginTransaction()
+                .setReorderingAllowed(true)
+                .replace(R.id.fragment_container_view, CartFragment.class, bundle)
+                .commit();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();

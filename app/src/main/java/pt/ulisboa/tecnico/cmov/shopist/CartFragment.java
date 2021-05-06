@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -91,6 +92,9 @@ public class CartFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_cart, container, false);
         list = view.findViewById(R.id.store_list);
 
+        TextView textView = (TextView) view.findViewById(R.id.total_cost);
+        float[] total_cost = {0};
+
         db.collection("StoreList").document(id)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -111,7 +115,7 @@ public class CartFragment extends Fragment {
                                             List<String> store_item_names = new ArrayList<>();
                                             List<Integer> store_item_quantities = new ArrayList<>();
                                             List<Float> item_prices = new ArrayList<>();
-                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list);
+                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list, (StoreListActivity) getActivity(), textView);
                                             list.setAdapter(a);
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 StoreItem si = document.toObject(StoreItem.class);
@@ -125,10 +129,12 @@ public class CartFragment extends Fragment {
                                                             if (document.exists()) {
                                                                 Item i = document.toObject(Item.class);
                                                                 store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                store_item_quantities.add(si.quantity);
+                                                                store_item_quantities.add(si.cartQuantity);
                                                                 String storeId = si.storeId;
                                                                 if (i.stores.containsKey(storeId)) {
                                                                     item_prices.add(i.stores.get(storeId));
+                                                                    total_cost[0] += si.cartQuantity * i.stores.get(storeId);
+                                                                    textView.setText(String.valueOf(total_cost[0]) + " €");
                                                                     list.invalidateViews();
                                                                 } else {
                                                                     db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -153,6 +159,8 @@ public class CartFragment extends Fragment {
                                                                                                         //Less than 20 meters
                                                                                                         if (results[0] < 20f) {
                                                                                                             item_prices.add(i.stores.get(s));
+                                                                                                            total_cost[0] += si.cartQuantity * i.stores.get(s);
+                                                                                                            textView.setText(String.valueOf(total_cost[0]) + " €");
                                                                                                             list.invalidateViews();
                                                                                                         }
                                                                                                     }

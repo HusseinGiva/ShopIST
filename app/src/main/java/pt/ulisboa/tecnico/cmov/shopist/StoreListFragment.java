@@ -161,7 +161,7 @@ public class StoreListFragment extends Fragment {
                                                     }
                                                 });
                                             }
-                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, list);
+                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, list, (StoreListActivity) getActivity(), null);
                                             list.setAdapter(a);
 
                                         } else {
