@@ -247,6 +247,7 @@ public class PantryItemActivity extends AppCompatActivity {
                 String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
                 shareable += getString(R.string.itHasTheBarcode) + item.barcode;
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareable);
+                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                 File storageDir;
                 FirebaseStorage storage;
                 StorageReference storageRef;
@@ -265,6 +266,7 @@ public class PantryItemActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess(ListResult listResult) {
                                 if (listResult.getItems().size() == 0) {
+                                    sharingIntent.setType("text/plain");
                                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                 } else {
                                     for (StorageReference item : listResult.getItems()) {
@@ -276,7 +278,6 @@ public class PantryItemActivity extends AppCompatActivity {
                                                 Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
                                                 sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                 sharingIntent.setType("image/jpeg");
-                                                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                                                 sharingIntent.setData(screenshotUri);
                                                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                 break;
@@ -291,7 +292,6 @@ public class PantryItemActivity extends AppCompatActivity {
                                                     Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
                                                     sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                     sharingIntent.setType("image/jpeg");
-                                                    sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                                                     sharingIntent.setData(screenshotUri);
                                                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                 }

@@ -200,6 +200,7 @@ public class StoreItemActivity extends AppCompatActivity {
                                 shareable += getString(R.string.itHasTheBarcode) + item.barcode + getString(R.string.andIsSoldAt);
                                 shareable += storeList.name + getString(R.string.forString) + price2 + getString(R.string.euro);
                                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareable);
+                                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                                 File storageDir;
                                 FirebaseStorage storage;
                                 StorageReference storageRef;
@@ -218,6 +219,7 @@ public class StoreItemActivity extends AppCompatActivity {
                                             @Override
                                             public void onSuccess(ListResult listResult) {
                                                 if (listResult.getItems().size() == 0) {
+                                                    sharingIntent.setType("text/plain");
                                                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                 } else {
                                                     for (StorageReference item : listResult.getItems()) {
@@ -229,7 +231,6 @@ public class StoreItemActivity extends AppCompatActivity {
                                                                 Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
                                                                 sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                                 sharingIntent.setType("image/jpeg");
-                                                                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                                                                 sharingIntent.setData(screenshotUri);
                                                                 startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                                 break;
@@ -244,7 +245,6 @@ public class StoreItemActivity extends AppCompatActivity {
                                                                     Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
                                                                     sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
                                                                     sharingIntent.setType("image/jpeg");
-                                                                    sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                                                                     sharingIntent.setData(screenshotUri);
                                                                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                                 }
