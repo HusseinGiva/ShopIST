@@ -14,9 +14,7 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
 import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Size;
 import android.view.KeyEvent;
@@ -190,8 +188,7 @@ public class AddItemActivity extends AppCompatActivity {
                     AlertDialog dialog = builder.create();
                     dialog.show();
                     return true;
-                }
-                else {
+                } else {
                     return false;
                 }
             }
@@ -341,6 +338,39 @@ public class AddItemActivity extends AppCompatActivity {
                                 }
                             }
                         });
+                db.collection("StoreList")
+                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                        .get(source)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    StoreList store = document.toObject(StoreList.class);
+                                    if (!storeViewAddItems.isEmpty()) {
+                                        Boolean present = false;
+                                        for (StoreViewAddItem item : storeViewAddItems) {
+
+                                            if (item.name.equals(store.name)) {
+                                                present = true;
+                                            }
+                                        }
+                                        if (!present) {
+                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                            storeViewAddItem.latitude = store.latitude;
+                                            storeViewAddItem.longitude = store.longitude;
+                                            storeViewAddItems.add(storeViewAddItem);
+                                        }
+
+                                    } else {
+                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                        storeViewAddItem.latitude = store.latitude;
+                                        storeViewAddItem.longitude = store.longitude;
+                                        storeViewAddItems.add(storeViewAddItem);
+                                    }
+                                }
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
+                            }
+                        });
                 getSupportActionBar().setTitle(R.string.editProduct);
                 db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -406,6 +436,23 @@ public class AddItemActivity extends AppCompatActivity {
                         }
                     }
                 });
+            } else if (getIntent().getStringExtra("MODE").equals("add")) {
+                db = FirebaseFirestore.getInstance();
+                mAuth = FirebaseAuth.getInstance();
+                db.collection("StoreList")
+                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                        .get(source)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    StoreList item = document.toObject(StoreList.class);
+                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), item.name, 0f, true);
+                                    storeViewAddItem.latitude = item.latitude;
+                                    storeViewAddItem.longitude = item.longitude;
+                                    storeViewAddItems.add(storeViewAddItem);
+                                }
+                            }
+                        });
             }
         }
         saveItem = findViewById(R.id.saveItemButton);
@@ -443,11 +490,8 @@ public class AddItemActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.pleaseInsertItemName, Toast.LENGTH_SHORT).show();
             return;
         }
-        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && (pantryQuantity.getText().toString().equals(""))) {
+        if (pantryQuantity.getText().toString().equals("")) {
             pantryQuantity.setText("0");
-        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store)) && (pantryQuantity.getText().toString().equals("") || pantryQuantity.getText().toString().equals("0"))) {
-            Toast.makeText(this, R.string.pleaseInsertItemStoreQuantity, Toast.LENGTH_SHORT).show();
-            return;
         }
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && targetQuantity.getText().toString().equals("") || targetQuantity.getText().toString().equals("0")) {
             Toast.makeText(this, R.string.pleaseInsertItemTargetQuantity, Toast.LENGTH_SHORT).show();
@@ -486,11 +530,15 @@ public class AddItemActivity extends AppCompatActivity {
                                                         DocumentSnapshot document = task.getResult();
                                                         if (document.exists()) {
                                                             Item item = document.toObject(Item.class);
+                                                            item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                            item.barcode = barcodeNumber.getText().toString();
+                                                            item.stores.clear();
                                                             itemId = getIntent().getStringExtra("ItemId");
+                                                            db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                                             for (StoreViewAddItem store : storeViewAddItems) {
                                                                 if (store.isChecked) {
                                                                     item.stores.put(store.storeId, store.price);
-                                                                    db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("ItemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                                    db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                                         @Override
                                                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                                                             if (task.isSuccessful()) {
@@ -579,6 +627,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                         if (document.exists()) {
                                                                             Item item = document.toObject(Item.class);
                                                                             itemId = getIntent().getStringExtra("ItemId");
+                                                                            item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                                            item.barcode = barcodeNumber.getText().toString();
+                                                                            item.stores.clear();
+                                                                            db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                                                             for (StoreViewAddItem store : storeViewAddItems) {
                                                                                 if (store.isChecked) {
                                                                                     item.stores.put(store.storeId, store.price);
@@ -765,6 +817,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     if (document.exists()) {
                                                                         Item item = document.toObject(Item.class);
                                                                         itemId = getIntent().getStringExtra("ItemId");
+                                                                        item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                                        item.stores.clear();
+                                                                        item.barcode = barcodeNumber.getText().toString();
+                                                                        db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                                                         for (StoreViewAddItem store : storeViewAddItems) {
                                                                             if (store.isChecked) {
                                                                                 item.stores.put(store.storeId, store.price);
@@ -861,6 +917,10 @@ public class AddItemActivity extends AppCompatActivity {
                                         if (document.exists()) {
                                             Item item = document.toObject(Item.class);
                                             itemId = getIntent().getStringExtra("ItemId");
+                                            item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                            item.barcode = barcodeNumber.getText().toString();
+                                            item.stores.clear();
+                                            db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                             db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -973,6 +1033,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                         if (document.exists()) {
                                                             Item item = document.toObject(Item.class);
                                                             itemId = getIntent().getStringExtra("ItemId");
+                                                            item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                            item.barcode = barcodeNumber.getText().toString();
+                                                            item.stores.clear();
+                                                            db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                                             db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -1249,6 +1313,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                     if (document.exists()) {
                                                         Item item = document.toObject(Item.class);
                                                         itemId = getIntent().getStringExtra("ItemId");
+                                                        item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
+                                                        item.barcode = barcodeNumber.getText().toString();
+                                                        item.stores.clear();
+                                                        db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
                                                         db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                             @Override
                                                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
