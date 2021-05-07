@@ -20,16 +20,10 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,9 +39,6 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
     String currentPhotoPath;
     ArrayList<String> photoPaths = new ArrayList<>();
     private RecyclerView.Adapter recyclerViewAdapter;
-    private RecyclerView recyclerView;
-    private FirebaseStorage storage;
-    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +53,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         browsePicturesButton = findViewById(R.id.browsePicturesButton);
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.picturesFragment);
-            recyclerView = (RecyclerView) currentFragment.getView();
+            RecyclerView recyclerView = (RecyclerView) currentFragment.getView();
             recyclerViewAdapter = recyclerView.getAdapter();
         }
         PictureContent.emptyList();
@@ -77,36 +68,30 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
             getSupportActionBar().setTitle(R.string.viewPictures);
             String id = getIntent().getStringExtra("ID");
             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
-            storage = FirebaseStorage.getInstance();
-            storageRef = storage.getReference();
+            FirebaseStorage storage = FirebaseStorage.getInstance();
+            StorageReference storageRef = storage.getReference();
             StorageReference imagesRef = storageRef.child(id);
             imagesRef.listAll()
-                    .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                        @Override
-                        public void onSuccess(ListResult listResult) {
-                            for (StorageReference item : listResult.getItems()) {
-                                Boolean exists = false;
-                                for (File f : storageDir.listFiles()) {
-                                    if (f.getName().equals(item.getName())) {
-                                        currentPhotoPath = f.getAbsolutePath();
-                                        photoPaths.add(currentPhotoPath);
-                                        PictureContent.loadImage(new File(currentPhotoPath));
-                                        recyclerViewAdapter.notifyItemInserted(0);
-                                        exists = true;
-                                    }
-                                }
-                                if (!exists) {
-                                    File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
-                                    currentPhotoPath = localFile.getAbsolutePath();
+                    .addOnSuccessListener(listResult -> {
+                        for (StorageReference item : listResult.getItems()) {
+                            boolean exists = false;
+                            for (File f : storageDir.listFiles()) {
+                                if (f.getName().equals(item.getName())) {
+                                    currentPhotoPath = f.getAbsolutePath();
                                     photoPaths.add(currentPhotoPath);
-                                    item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                                        @Override
-                                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                            PictureContent.loadImage(new File(currentPhotoPath));
-                                            recyclerViewAdapter.notifyItemInserted(0);
-                                        }
-                                    });
+                                    PictureContent.loadImage(new File(currentPhotoPath));
+                                    recyclerViewAdapter.notifyItemInserted(0);
+                                    exists = true;
                                 }
+                            }
+                            if (!exists) {
+                                File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
+                                currentPhotoPath = localFile.getAbsolutePath();
+                                photoPaths.add(currentPhotoPath);
+                                item.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                    PictureContent.loadImage(new File(currentPhotoPath));
+                                    recyclerViewAdapter.notifyItemInserted(0);
+                                });
                             }
                         }
                     });
@@ -147,8 +132,6 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                                 photoPaths.add(file.getAbsolutePath());
                                 PictureContent.loadImage(file);
                                 recyclerViewAdapter.notifyItemInserted(0);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -169,7 +152,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         galleryResultLauncher.launch(intent);
     }
 
-    private File createImageFile() throws IOException {
+    private File createImageFile() {
         // Create an image file name
         String id = getIntent().getStringExtra("ID");
         File file;
@@ -188,20 +171,14 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
+            File photoFile;
+            photoFile = createImageFile();
             // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "pt.ulisboa.tecnico.cmov.shopist",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                cameraResultLauncher.launch(takePictureIntent);
-            }
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    "pt.ulisboa.tecnico.cmov.shopist",
+                    photoFile);
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+            cameraResultLauncher.launch(takePictureIntent);
         }
     }
 
@@ -214,15 +191,12 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();    //Call the back button's method
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();    //Call the back button's method
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -5,12 +5,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -45,7 +42,6 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -166,18 +162,15 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             }
 
             Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-            locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    if (task.isSuccessful()) {
-                        lastKnownLocation = task.getResult();
-                        if (lastKnownLocation != null) {
-                            Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                    lastKnownLocation.getLongitude());
-                        }
-                    } else {
-                        Log.d("ADD_LIST", "Current location is null. Using defaults.");
+            locationResult.addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    lastKnownLocation = task.getResult();
+                    if (lastKnownLocation != null) {
+                        Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                lastKnownLocation.getLongitude());
                     }
+                } else {
+                    Log.d("ADD_LIST", "Current location is null. Using defaults.");
                 }
             });
         } else {
@@ -232,7 +225,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
             PantryList l;
 
-            if(m != null && m.getPosition() != null)
+            if(m != null)
                 l = new PantryList(e.getText().toString(), String.valueOf(m.getPosition().latitude), String.valueOf(m.getPosition().longitude), mAuth.getCurrentUser().getUid());
             else
                 l = new PantryList(e.getText().toString(), mAuth.getCurrentUser().getUid());
@@ -242,13 +235,12 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
             /*Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
             startActivity(intent);*/
             finish();
-            return;
 
         } else if (this.list_type.equals(getResources().getString(R.string.store))) {
 
             StoreList l;
 
-            if(m != null && m.getPosition() != null)
+            if(m != null)
                 l = new StoreList(e.getText().toString(), String.valueOf(m.getPosition().latitude),String.valueOf(m.getPosition().longitude), mAuth.getCurrentUser().getUid());
             else
                 l = new StoreList(e.getText().toString(), mAuth.getCurrentUser().getUid());
@@ -295,75 +287,57 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                     async_operations[0]++;
                                                     timerHandler.postDelayed(this, 100);
 
-                                                    db.collection("PantryItem").whereEqualTo("pantryId", pantry_ids.get(pantry_index[0])).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                for (QueryDocumentSnapshot document_3 : task.getResult()) {
-                                                                    PantryItem pi = document_3.toObject(PantryItem.class);
-                                                                    async_operations[0]++;
-                                                                    db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                            if(task.isSuccessful()) {
-                                                                                DocumentSnapshot document_4 = task.getResult();
-                                                                                if (document_4.exists()) {
-                                                                                    Item i = document_4.toObject(Item.class);
-                                                                                    if(!unique_barcodes.contains(i.barcode)) {
-                                                                                        if(!i.barcode.equals("")) {
-                                                                                            unique_barcodes.add(i.barcode);
-                                                                                        }
-                                                                                        StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
-                                                                                        if(pi.idealQuantity - pi.quantity > 0) n_new_items[0]++;
-                                                                                        async_operations[0]++;
-                                                                                        db.collection("StoreItem").add(si).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<DocumentReference> task) {
-                                                                                                if(task.isSuccessful()) async_operations[0]--;
-                                                                                            }
-                                                                                        });
-                                                                                        i.stores.put(document_1.getId(), 0f);
-                                                                                        async_operations[0]++;
-                                                                                        db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                if(task.isSuccessful()) async_operations[0]--;
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                    else {
-                                                                                        if(pi.idealQuantity - pi.quantity > 0) {
-                                                                                            async_operations[0]++;
-                                                                                            db.collection("StoreItem").whereEqualTo("itemId", pi.itemId)
-                                                                                                    .whereEqualTo("storeId", document_1.getId()).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                                                                @Override
-                                                                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                                                                    if(task.isSuccessful()) {
-                                                                                                        for (QueryDocumentSnapshot document_5 : task.getResult()) {
-                                                                                                            StoreItem si = document_5.toObject(StoreItem.class);
-                                                                                                            async_operations[0]++;
-                                                                                                            db.collection("StoreItem").document(document_5.getId()).update("quantity", si.quantity + pi.idealQuantity - pi.quantity)
-                                                                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                                @Override
-                                                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                    if(task.isSuccessful()) async_operations[0]--;
-                                                                                                                }
-                                                                                                            });
-                                                                                                        }
-                                                                                                        async_operations[0]--;
+                                                    db.collection("PantryItem").whereEqualTo("pantryId", pantry_ids.get(pantry_index[0])).get().addOnCompleteListener(task14 -> {
+                                                        if (task14.isSuccessful()) {
+                                                            for (QueryDocumentSnapshot document_3 : task14.getResult()) {
+                                                                PantryItem pi = document_3.toObject(PantryItem.class);
+                                                                async_operations[0]++;
+                                                                db.collection("Item").document(pi.itemId).get().addOnCompleteListener(task141 -> {
+                                                                    if(task141.isSuccessful()) {
+                                                                        DocumentSnapshot document_4 = task141.getResult();
+                                                                        if (document_4.exists()) {
+                                                                            Item i = document_4.toObject(Item.class);
+                                                                            if(!unique_barcodes.contains(i.barcode)) {
+                                                                                if(!i.barcode.equals("")) {
+                                                                                    unique_barcodes.add(i.barcode);
+                                                                                }
+                                                                                StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
+                                                                                if(pi.idealQuantity - pi.quantity > 0) n_new_items[0]++;
+                                                                                async_operations[0]++;
+                                                                                db.collection("StoreItem").add(si).addOnCompleteListener(task1 -> {
+                                                                                    if(task1.isSuccessful()) async_operations[0]--;
+                                                                                });
+                                                                                i.stores.put(document_1.getId(), 0f);
+                                                                                async_operations[0]++;
+                                                                                db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(task12 -> {
+                                                                                    if(task12.isSuccessful()) async_operations[0]--;
+                                                                                });
+                                                                            }
+                                                                            else {
+                                                                                if(pi.idealQuantity - pi.quantity > 0) {
+                                                                                    async_operations[0]++;
+                                                                                    db.collection("StoreItem").whereEqualTo("itemId", pi.itemId)
+                                                                                            .whereEqualTo("storeId", document_1.getId()).get().addOnCompleteListener(task13 -> {
+                                                                                                if(task13.isSuccessful()) {
+                                                                                                    for (QueryDocumentSnapshot document_5 : task13.getResult()) {
+                                                                                                        StoreItem si = document_5.toObject(StoreItem.class);
+                                                                                                        async_operations[0]++;
+                                                                                                        db.collection("StoreItem").document(document_5.getId()).update("quantity", si.quantity + pi.idealQuantity - pi.quantity)
+                                                                                                        .addOnCompleteListener(task131 -> {
+                                                                                                            if(task131.isSuccessful()) async_operations[0]--;
+                                                                                                        });
                                                                                                     }
+                                                                                                    async_operations[0]--;
                                                                                                 }
                                                                                             });
-                                                                                        }
-                                                                                    }
-                                                                                    async_operations[0]--;
                                                                                 }
                                                                             }
+                                                                            async_operations[0]--;
                                                                         }
-                                                                    });
-                                                                }
-                                                                async_operations[0]--;
+                                                                    }
+                                                                });
                                                             }
+                                                            async_operations[0]--;
                                                         }
                                                     });
                                                 } else {
@@ -428,18 +402,15 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         map.setMyLocationEnabled(true);
                     }
                     Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                    locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Location> task) {
-                            if (task.isSuccessful()) {
-                                lastKnownLocation = task.getResult();
-                                if (lastKnownLocation != null) {
-                                    Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                            lastKnownLocation.getLongitude());
-                                }
-                            } else {
-                                Log.d("ADD_LIST", "Current location is null. Using defaults.");
+                    locationResult.addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                        lastKnownLocation.getLongitude());
                             }
+                        } else {
+                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
                         }
                     });
                 } else if (ContextCompat.checkSelfPermission(this,
@@ -498,67 +469,63 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
         final EditText input = new EditText(this);
         alert.setView(input);
 
-        alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
+        alert.setPositiveButton(R.string.ok, (dialog, whichButton) -> {
 
-                String[] splitted = input.getText().toString().split("_");
+            String[] splitted = input.getText().toString().split("_");
 
-                db = FirebaseFirestore.getInstance();
-                mAuth = FirebaseAuth.getInstance();
+            db = FirebaseFirestore.getInstance();
+            mAuth = FirebaseAuth.getInstance();
 
-                if (splitted.length > 1) {
-                    String type = splitted[0];
-                    String id = splitted[1];
-                    if (type.equals("PANTRY")) {
+            if (splitted.length > 1) {
+                String type = splitted[0];
+                String id = splitted[1];
+                if (type.equals("PANTRY")) {
 
-                        if(!isConnected(getApplicationContext()))
-                            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
+                    if(!isConnected(getApplicationContext()))
+                        Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-                        db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
-                                intent.putExtra("ID", id);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finish();
-                            }else{
-                                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
-                                dialog.cancel();
-                            }
-                        });
+                    db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
+                            intent.putExtra("ID", id);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        }else{
+                            Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
+                        }
+                    });
 
-                        return;
-                    } else if (type.equals("STORE")) {
+                    return;
+                } else if (type.equals("STORE")) {
 
-                        if(!isConnected(getApplicationContext()))
-                            Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
+                    if(!isConnected(getApplicationContext()))
+                        Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-                        db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
-                                intent.putExtra("ID", id);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                startActivity(intent);
-                                finish();
-                            }else{
-                                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
-                                dialog.cancel();
-                            }
-                        });
+                    db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
+                            intent.putExtra("ID", id);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        }else{
+                            Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+                            dialog.cancel();
+                        }
+                    });
 
-                        return;
-                    }
+                    return;
                 }
-                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
-                dialog.cancel();
-
             }
+            Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+            dialog.cancel();
+
         });
 
-        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                // Canceled.
-            }
+        alert.setNegativeButton(R.string.cancel, (dialog, whichButton) -> {
+            // Canceled.
         });
 
         alert.show();
