@@ -70,11 +70,12 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-    public void setTypeSelected(String type) {
-        this.typeSelected = type;
-    }
     public String getTypeSelected() {
         return this.typeSelected;
+    }
+
+    public void setTypeSelected(String type) {
+        this.typeSelected = type;
     }
 
     @Override
@@ -92,18 +93,14 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.addList:
-                Intent intent = new Intent(this, AddListActivity.class);
-                intent.putExtra("TYPE", this.typeSelected);
-                startActivity(intent);
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
+        if (item.getItemId() == R.id.addList) {
+            Intent intent = new Intent(this, AddListActivity.class);
+            intent.putExtra("TYPE", this.typeSelected);
+            startActivity(intent);
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
 }

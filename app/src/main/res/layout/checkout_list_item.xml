@@ -8,14 +8,14 @@
         android:id="@+id/checkout_pantry_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="17dp"
         android:ellipsize="end"
         android:singleLine="true"
         android:text="Pantry name"
         android:textSize="21sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="17dp"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/linearLayout2"
@@ -50,10 +50,10 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="30dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginEnd="30dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/decrement_checkout_quantity"
@@ -71,7 +71,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:text="0"
-            android:textSize="28dp"/>
+            android:textSize="28dp" />
 
         <ImageView
             android:id="@+id/increment_checkout_quantity"

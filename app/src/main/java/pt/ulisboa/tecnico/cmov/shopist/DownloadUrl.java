@@ -42,9 +42,9 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
 
             inputStream = urlConnection.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
 
-            String line = "";
+            String line;
             while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
@@ -69,7 +69,7 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
         String driveTime = null;
 
         try {

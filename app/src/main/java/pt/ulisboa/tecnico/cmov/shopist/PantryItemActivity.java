@@ -16,24 +16,17 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -57,10 +50,23 @@ public class PantryItemActivity extends AppCompatActivity {
     public TextView rating_2;
     public TextView rating_1;
     public Item item;
+    public ActivityResultLauncher<Intent> editResultLauncher;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
-    public ActivityResultLauncher<Intent> editResultLauncher;
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,53 +107,47 @@ public class PantryItemActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db.collection("Item").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                item = document.toObject(Item.class);
-                                getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
-                                barcodeNumber.setText(item.barcode);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            item = document.toObject(Item.class);
+                            getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
+                            barcodeNumber.setText(item.barcode);
 
-                                float[] votes = {0,0,0,0,0};
-                                float totalRatings = 0;
-                                float totalVotes = 0;
+                            float[] votes = {0, 0, 0, 0, 0};
+                            float totalRatings = 0;
+                            float totalVotes = 0;
 
-                                if(item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
-                                    userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
 
-                                for(Map.Entry<String, Integer> entry : item.ratings.entrySet()){
-                                    votes[entry.getValue() - 1]++;
-                                    totalRatings += entry.getValue();
-                                    totalVotes++;
-                                }
-
-                                if(totalVotes == 0)
-                                    totalVotes = 1;
-
-                                avgRating.setText(getResources().getString(R.string.averageRating) +  " : " +
-                                        String.format( "%.1f", (totalRatings / totalVotes)));
-                                rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" +  Math.round( (votes[4] / totalVotes) * 100)  + "%)");
-                                rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" +  Math.round( (votes[3] / totalVotes) * 100)  + "%)");
-                                rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" +  Math.round( (votes[2] / totalVotes) * 100)  + "%)");
-                                rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" +  Math.round( (votes[1] / totalVotes) * 100)  + "%)");
-                                rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" +  Math.round( (votes[0] / totalVotes) * 100)  + "%)");
-
-                                db.collection("PantryItem").whereEqualTo("itemId", id).whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task2) {
-                                        if (task2.isSuccessful()) {
-                                            for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                PantryItem pi = document2.toObject(PantryItem.class);
-                                                itemPantryQuantity.setText(String.valueOf(pi.quantity));
-                                                itemTargetQuantity.setText(String.valueOf(pi.idealQuantity));
-                                            }
-                                        }
-                                    }
-                                });
+                            for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                votes[entry.getValue() - 1]++;
+                                totalRatings += entry.getValue();
+                                totalVotes++;
                             }
+
+                            if (totalVotes == 0)
+                                totalVotes = 1;
+
+                            avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                    String.format("%.1f", (totalRatings / totalVotes)));
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+
+                            db.collection("PantryItem").whereEqualTo("itemId", id).whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(task2 -> {
+                                if (task2.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                        PantryItem pi = document2.toObject(PantryItem.class);
+                                        itemPantryQuantity.setText(String.valueOf(pi.quantity));
+                                        itemTargetQuantity.setText(String.valueOf(pi.idealQuantity));
+                                    }
+                                }
+                            });
                         }
                     }
                 });
@@ -171,61 +171,57 @@ public class PantryItemActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onClickSubmitRating(View view){
+    public void onClickSubmitRating(View view) {
         String userRatingText = userRating.getText().toString();
 
         int userRatingNumber;
 
-        try{
+        try {
             userRatingNumber = Integer.parseInt(userRatingText);
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             Toast.makeText(this, "Invalid rating", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if(userRatingNumber < 1 || userRatingNumber > 5){
+        if (userRatingNumber < 1 || userRatingNumber > 5) {
             Toast.makeText(this, "Rating must be between 1 and 5!", Toast.LENGTH_SHORT).show();
             return;
         }
 
         db.collection("Item").document(id).update(
-          "ratings." + mAuth.getCurrentUser().getUid(), userRatingNumber
+                "ratings." + mAuth.getCurrentUser().getUid(), userRatingNumber
         );
 
         db.collection("Item").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            item = document.toObject(Item.class);
+                            float[] votes = {0, 0, 0, 0, 0};
+                            float totalRatings = 0;
+                            float totalVotes = 0;
 
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                item = document.toObject(Item.class);
-                                float[] votes = {0,0,0,0,0};
-                                float totalRatings = 0;
-                                float totalVotes = 0;
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
 
-                                if(item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
-                                    userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
-
-                                for(Map.Entry<String, Integer> entry : item.ratings.entrySet()){
-                                    votes[entry.getValue() - 1]++;
-                                    totalRatings += entry.getValue();
-                                    totalVotes++;
-                                }
-
-                                if(totalVotes == 0)
-                                    totalVotes = 1;
-
-                                avgRating.setText(getResources().getString(R.string.averageRating) +  " : " +
-                                        String.format( "%.1f", (totalRatings / totalVotes)));
-                                rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" +  Math.round( (votes[4] / totalVotes) * 100)  + "%)");
-                                rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" +  Math.round( (votes[3] / totalVotes) * 100)  + "%)");
-                                rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" +  Math.round( (votes[2] / totalVotes) * 100)  + "%)");
-                                rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" +  Math.round( (votes[1] / totalVotes) * 100)  + "%)");
-                                rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" +  Math.round( (votes[0] / totalVotes) * 100)  + "%)");
+                            for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                votes[entry.getValue() - 1]++;
+                                totalRatings += entry.getValue();
+                                totalVotes++;
                             }
+
+                            if (totalVotes == 0)
+                                totalVotes = 1;
+
+                            avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                    String.format("%.1f", (totalRatings / totalVotes)));
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
                         }
                     }
                 });
@@ -262,43 +258,37 @@ public class PantryItemActivity extends AppCompatActivity {
                     imagesRef = storageRef.child(id);
                 }
                 imagesRef.listAll()
-                        .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                            @Override
-                            public void onSuccess(ListResult listResult) {
-                                if (listResult.getItems().size() == 0) {
-                                    sharingIntent.setType("text/plain");
-                                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                } else {
-                                    for (StorageReference item : listResult.getItems()) {
-                                        Boolean exists = false;
-                                        for (File f : storageDir.listFiles()) {
-                                            if (f.getName().equals(item.getName())) {
-                                                exists = true;
-                                                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                                Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
-                                                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                                                sharingIntent.setType("image/jpeg");
-                                                sharingIntent.setData(screenshotUri);
-                                                startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                                break;
-                                            }
+                        .addOnSuccessListener(listResult -> {
+                            if (listResult.getItems().size() == 0) {
+                                sharingIntent.setType("text/plain");
+                                startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
+                            } else {
+                                for (StorageReference item : listResult.getItems()) {
+                                    boolean exists = false;
+                                    for (File f : storageDir.listFiles()) {
+                                        if (f.getName().equals(item.getName())) {
+                                            exists = true;
+                                            sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                            Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
+                                            sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                            sharingIntent.setType("image/jpeg");
+                                            sharingIntent.setData(screenshotUri);
+                                            startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
+                                            break;
                                         }
-                                        if (!exists) {
-                                            File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
-                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                                    Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
-                                                    sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                                                    sharingIntent.setType("image/jpeg");
-                                                    sharingIntent.setData(screenshotUri);
-                                                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                                }
-                                            });
-                                        }
-                                        break;
                                     }
+                                    if (!exists) {
+                                        File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
+                                        item.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                            sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                            Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
+                                            sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                            sharingIntent.setType("image/jpeg");
+                                            sharingIntent.setData(screenshotUri);
+                                            startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
+                                        });
+                                    }
+                                    break;
                                 }
                             }
                         });
@@ -323,18 +313,5 @@ public class PantryItemActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         finish();
-    }
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
     }
 }

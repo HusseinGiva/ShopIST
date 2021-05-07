@@ -26,10 +26,9 @@ public class ListLocationActivity extends AppCompatActivity implements GoogleMap
         OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private GoogleMap map;
-
     private static Double latitude = null;
     private static Double longitude = null;
+    private GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

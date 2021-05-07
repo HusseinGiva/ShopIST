@@ -29,9 +29,8 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class AddStoresActivity extends AppCompatActivity implements StoresFragment.OnListFragmentInteractionListener {
 
-    private RecyclerView.Adapter recyclerViewAdapter;
-    private RecyclerView recyclerView;
     ArrayList<StoreViewAddItem> stores = new ArrayList<>();
+    private RecyclerView.Adapter recyclerViewAdapter;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
@@ -65,7 +64,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
             source = Source.CACHE;
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.storesFragment);
-            recyclerView = (RecyclerView) currentFragment.getView();
+            RecyclerView recyclerView = (RecyclerView) currentFragment.getView();
             recyclerViewAdapter = ((RecyclerView) currentFragment.getView()).getAdapter();
         }
         StoreContent.emptyList();
@@ -176,15 +175,12 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();    //Call the back button's method
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-        }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();    //Call the back button's method
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -4,6 +4,18 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class StoreViewAddItem implements Parcelable {
+    public static final Parcelable.Creator<StoreViewAddItem> CREATOR = new Parcelable.Creator<StoreViewAddItem>() {
+
+        @Override
+        public StoreViewAddItem createFromParcel(Parcel in) {
+            return new StoreViewAddItem(in);
+        }
+
+        @Override
+        public StoreViewAddItem[] newArray(int size) {
+            return new StoreViewAddItem[size];
+        }
+    };
     public String storeId;
     public String name;
     public float price;
@@ -61,17 +73,4 @@ public class StoreViewAddItem implements Parcelable {
         dest.writeString(latitude);
         dest.writeString(longitude);
     }
-
-    public static final Parcelable.Creator<StoreViewAddItem> CREATOR = new Parcelable.Creator<StoreViewAddItem>() {
-
-        @Override
-        public StoreViewAddItem createFromParcel(Parcel in) {
-            return new StoreViewAddItem(in);
-        }
-
-        @Override
-        public StoreViewAddItem[] newArray(int size) {
-            return new StoreViewAddItem[size];
-        }
-    };
 }

@@ -26,7 +26,7 @@ public class StoreList {
         users.add(userId);
     }
 
-    public StoreList(String name,  String userId) {
+    public StoreList(String name, String userId) {
         this.name = name;
         this.latitude = null;
         this.longitude = null;

@@ -14,8 +14,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.WriterException;
 
 import androidmads.library.qrgenearator.QRGContents;
@@ -24,10 +22,6 @@ import androidmads.library.qrgenearator.QRGEncoder;
 public class ShareListActivity extends AppCompatActivity {
 
     private static final String TAG = "SHARE_LIST";
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
-    private String listType;
-    private String id;
 
 
     @Override
@@ -40,8 +34,8 @@ public class ShareListActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
 
-        listType = getIntent().getStringExtra("TYPE");
-        id = getIntent().getStringExtra("ID");
+        String listType = getIntent().getStringExtra("TYPE");
+        String id = getIntent().getStringExtra("ID");
 
         String list_code = listType + "_" + id;
 
@@ -55,7 +49,7 @@ public class ShareListActivity extends AppCompatActivity {
         display.getSize(point);
         int width = point.x;
         int height = point.y;
-        int smallerDimension = width < height ? width : height;
+        int smallerDimension = Math.min(width, height);
         smallerDimension = smallerDimension * 3 / 4;
 
         QRGEncoder qrgEncoder = new QRGEncoder(list_code, null, QRGContents.Type.TEXT, smallerDimension);
@@ -74,16 +68,12 @@ public class ShareListActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();    //Call the back button's method
-                return true;
-            default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
-                return super.onOptionsItemSelected(item);
-
-        }
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();    //Call the back button's method
+            return true;
+        }// If we got here, the user's action was not recognized.
+        // Invoke the superclass to handle it.
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

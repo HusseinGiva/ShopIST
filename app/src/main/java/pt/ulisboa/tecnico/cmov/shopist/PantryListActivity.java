@@ -12,18 +12,14 @@ import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
@@ -36,14 +32,26 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 
 public class PantryListActivity extends AppCompatActivity {
 
+    private static String latitude = null;
+    private static String longitude = null;
     private ListView list;
     private String id;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
 
-    private static String latitude = null;
-    private static String longitude = null;
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -65,7 +73,7 @@ public class PantryListActivity extends AppCompatActivity {
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
 
-        if(isConnected(getApplicationContext()))
+        if (isConnected(getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -84,70 +92,61 @@ public class PantryListActivity extends AppCompatActivity {
 
         db.collection("PantryList").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d("TAG", "DocumentSnapshot data: " + document.getData());
-                                PantryList pantry = document.toObject(PantryList.class);
-                                latitude = pantry.latitude;
-                                longitude = pantry.longitude;
-                                getSupportActionBar().setTitle(pantry.name);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
+                            PantryList pantry = document.toObject(PantryList.class);
+                            latitude = pantry.latitude;
+                            longitude = pantry.longitude;
+                            getSupportActionBar().setTitle(pantry.name);
 
-                                db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
 
-                                        if (task.isSuccessful()) {
-                                            ArrayList<String> itemIds = new ArrayList<String>();
-                                            List<String> pantry_item_names = new ArrayList<>();
-                                            List<Integer> pantry_item_quantities = new ArrayList<>();
-                                            List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                PantryItem pi = document.toObject(PantryItem.class);
-                                                db.collection("Item").document(pi.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            DocumentSnapshot document = task.getResult();
-                                                            if (document.exists()) {
-                                                                Item i = document.toObject(Item.class);
-                                                                pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                pantry_item_quantities.add(pi.quantity);
-                                                                pantry_item_ideal_quantities.add(pi.idealQuantity);
-                                                                itemIds.add(document.getId());
-                                                                list.invalidateViews();
-                                                            } else {
-                                                                Log.d("TAG", "No such document");
-                                                            }
+                                if (task1.isSuccessful()) {
+                                    ArrayList<String> itemIds = new ArrayList<>();
+                                    List<String> pantry_item_names = new ArrayList<>();
+                                    List<Integer> pantry_item_quantities = new ArrayList<>();
+                                    List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
+                                    for (QueryDocumentSnapshot document1 : task1.getResult()) {
+                                        PantryItem pi = document1.toObject(PantryItem.class);
+                                        db.collection("Item").document(pi.itemId).get().addOnCompleteListener(task11 -> {
+                                            if (task11.isSuccessful()) {
+                                                DocumentSnapshot document11 = task11.getResult();
+                                                if (document11.exists()) {
+                                                    Item i = document11.toObject(Item.class);
+                                                    pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
+                                                    pantry_item_quantities.add(pi.quantity);
+                                                    pantry_item_ideal_quantities.add(pi.idealQuantity);
+                                                    itemIds.add(document11.getId());
+                                                    list.invalidateViews();
+                                                } else {
+                                                    Log.d("TAG", "No such document");
+                                                }
 
 
-                                                        } else {
-                                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                                        }
-                                                    }
-                                                });
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task11.getException());
                                             }
-                                            PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id);
-                                            list.setAdapter(a);
-
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                        }
-
+                                        });
                                     }
-                                });
+                                    PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id);
+                                    list.setAdapter(a);
 
+                                } else {
+                                    Log.d("TAG", "Error getting documents: ", task1.getException());
+                                }
 
-                            } else {
-                                Log.d("TAG", "No such document");
-                            }
+                            });
+
 
                         } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
+                            Log.d("TAG", "No such document");
                         }
+
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -159,7 +158,6 @@ public class PantryListActivity extends AppCompatActivity {
         inflater.inflate(R.menu.list_share_menu, menu);
         return true;
     }
-
 
     @Override
     public void onBackPressed() {
@@ -205,18 +203,5 @@ public class PantryListActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
-    }
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
     }
 }

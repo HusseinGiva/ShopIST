@@ -26,7 +26,7 @@ public class PantryList {
         users.add(userId);
     }
 
-    public PantryList(String name,  String userId) {
+    public PantryList(String name, String userId) {
         this.name = name;
         this.latitude = null;
         this.longitude = null;

@@ -19,7 +19,7 @@
         <activity
             android:name=".CheckoutActivity"
             android:parentActivityName=".StoreListActivity" />
-        <activity android:name=".StoreItemActivity"/>
+        <activity android:name=".StoreItemActivity" />
         <activity
             android:name=".ShareListActivity"
             android:parentActivityName=".PantryListActivity" />

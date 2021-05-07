@@ -91,9 +91,9 @@
             android:duplicateParentState="false"
             android:ems="10"
             android:hint="@string/barcodeNumber"
+            android:imeOptions="actionGo"
             android:importantForAutofill="no"
             android:inputType="number"
-            android:imeOptions="actionGo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/viewFinder" />
 

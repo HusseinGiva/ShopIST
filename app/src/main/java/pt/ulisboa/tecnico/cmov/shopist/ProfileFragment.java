@@ -14,40 +14,30 @@ import android.widget.Button;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.File;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "PROFILE";
+    public String language;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
     private TextView firstName;
     private TextView lastName;
     private Button btnCreateAccount;
-    private Button btnLogout;
-
-    public String language;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +60,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         firstName = view.findViewById(R.id.textViewFirstName);
         lastName = view.findViewById(R.id.textViewLastName);
         btnCreateAccount = view.findViewById(R.id.buttonCreateAccount);
-        btnLogout = view.findViewById(R.id.buttonLogOut);
+        Button btnLogout = view.findViewById(R.id.buttonLogOut);
 
         btnCreateAccount.setOnClickListener(this);
         btnLogout.setOnClickListener(this);
@@ -165,39 +155,39 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 db.collection("user").document(user.getUid()).delete();
 
                                 db.collection("PantryList").whereArrayContains("users", user.getUid()).get().addOnCompleteListener(task -> {
-                                    if(task.isSuccessful()){
-                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
                                             PantryList pantry = document.toObject(PantryList.class);
-                                            if(pantry.users.size() == 1){
+                                            if (pantry.users.size() == 1) {
 
                                                 db.collection("PantryItem").whereEqualTo("pantryId", document.getId()).get().addOnCompleteListener(task1 -> {
-                                                    if(task1.isSuccessful()){
-                                                        for(QueryDocumentSnapshot document2 : task1.getResult()){
+                                                    if (task1.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document2 : task1.getResult()) {
                                                             db.collection("PantryItem").document(document2.getId()).delete();
                                                         }
                                                     }
                                                 });
 
                                                 db.collection("PantryList").document(document.getId()).delete();
-                                            }else{
+                                            } else {
                                                 pantry.users.remove(user.getUid());
                                                 db.collection("PantryList").document(document.getId()).update("users", pantry.users);
                                             }
                                         }
-                                    }else{
+                                    } else {
                                         Log.d(TAG, "Error getting documents: ", task.getException());
 
                                     }
                                 });
 
                                 db.collection("Item").whereEqualTo("barcode", "").get().addOnCompleteListener(task -> {
-                                    if(task.isSuccessful()){
-                                        for(QueryDocumentSnapshot document : task.getResult()){
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
                                             Item i = document.toObject(Item.class);
 
-                                            if(i.users.containsKey(user.getUid()) && i.users.size() == 1)
+                                            if (i.users.containsKey(user.getUid()) && i.users.size() == 1)
                                                 db.collection("Item").document(document.getId()).delete();
-                                            else if(i.users.containsKey(user.getUid())) {
+                                            else if (i.users.containsKey(user.getUid())) {
                                                 i.users.remove(user.getUid());
 
                                                 db.collection("Item").document(document.getId()).update("users", i.users);

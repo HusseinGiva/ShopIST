@@ -1,255 +1,254 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".PantryItemActivity">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".PantryItemActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/pantryItemToolbar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/Theme.ShopIST"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/item_share_flag"
-        app:theme="@style/Theme.Toolbar" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/pantryItemToolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/Theme.ShopIST"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/item_share_flag"
+            app:theme="@style/Theme.Toolbar" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginTop="60dp"
-        android:text="@string/pantryQuantity"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="60dp"
+            android:text="@string/pantryQuantity"
+            android:textSize="24sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <EditText
-        android:id="@+id/itemStoreQuantity"
-        android:layout_width="197dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/pantryQuantity"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <EditText
+            android:id="@+id/itemStoreQuantity"
+            android:layout_width="197dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="100dp"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/pantryQuantity"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginTop="60dp"
-        android:text="@string/targetQuantity"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="60dp"
+            android:text="@string/targetQuantity"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <EditText
-        android:id="@+id/itemTargetQuantity"
-        android:layout_width="182dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/targetQuantity"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <EditText
+            android:id="@+id/itemTargetQuantity"
+            android:layout_width="182dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="100dp"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/targetQuantity"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/barcodeNumber"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="200dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/barcodeNumber"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <EditText
-        android:id="@+id/barcodeNumberStoreItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="100dp"
-        android:duplicateParentState="false"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/barcodeNumber"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
+        <EditText
+            android:id="@+id/barcodeNumberStoreItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="100dp"
+            android:duplicateParentState="false"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/barcodeNumber"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
 
-    <Button
-        android:id="@+id/viewPicturesStore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="100dp"
-        android:onClick="onClickViewImages"
-        android:text="@string/viewPictures"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barcodeNumberStoreItem" />
+        <Button
+            android:id="@+id/viewPicturesStore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="100dp"
+            android:onClick="onClickViewImages"
+            android:text="@string/viewPictures"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barcodeNumberStoreItem" />
 
-    <Button
-        android:id="@+id/addStoresButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="100dp"
-        android:onClick="onClickViewStores"
-        android:text="@string/viewStores"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewPicturesStore" />
+        <Button
+            android:id="@+id/addStoresButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="50dp"
+            android:layout_marginEnd="100dp"
+            android:onClick="onClickViewStores"
+            android:text="@string/viewStores"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/viewPicturesStore" />
 
-    <TextView
-        android:id="@+id/yourRatingText"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="508dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/yourRating"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/yourRatingText"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="508dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/yourRating"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <EditText
-        android:id="@+id/yourRatingInput"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="360dp"
-        android:duplicateParentState="false"
-        android:ems="10"
-        android:hint="@string/insertRating"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.547"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
+        <EditText
+            android:id="@+id/yourRatingInput"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="360dp"
+            android:duplicateParentState="false"
+            android:ems="10"
+            android:hint="@string/insertRating"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.547"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
 
-    <Button
-        android:id="@+id/submitRating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="116dp"
-        android:onClick="onClickSubmitRating"
-        android:text="@string/submit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.941"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewPicturesStore" />
+        <Button
+            android:id="@+id/submitRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="116dp"
+            android:onClick="onClickSubmitRating"
+            android:text="@string/submit"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.941"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/viewPicturesStore" />
 
-    <TextView
-        android:id="@+id/avgRatingText"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="550dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/averageRating"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/avgRatingText"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="550dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/averageRating"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/star5Text"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="590dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes5star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/star5Text"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="590dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes5star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/star4Text"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="630dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes4star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/star4Text"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="630dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes4star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/star3Text"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="670dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes3star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/star3Text"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="670dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes3star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/star2Text"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="710dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes2star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/star2Text"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="710dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes2star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-    <TextView
-        android:id="@+id/star1Text"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="750dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes1star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
+        <TextView
+            android:id="@+id/star1Text"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="750dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes1star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/pantryItemToolbar" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </ScrollView>

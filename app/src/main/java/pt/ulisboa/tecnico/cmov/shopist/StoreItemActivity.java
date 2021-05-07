@@ -18,24 +18,17 @@ import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
@@ -53,11 +46,23 @@ public class StoreItemActivity extends AppCompatActivity {
     public EditText barcodeNumber;
     public EditText price;
     public Item item;
+    public ActivityResultLauncher<Intent> editResultLauncher;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
-    public ActivityResultLauncher<Intent> editResultLauncher;
 
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,64 +102,52 @@ public class StoreItemActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db.collection("Item").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                item = document.toObject(Item.class);
-                                getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
-                                barcodeNumber.setText(item.barcode);
-                                for (String s : item.stores.keySet()) {
-                                    if (storeId.equals(s)) {
-                                        price.setText(String.valueOf(item.stores.get(s)));
-                                    } else {
-                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                if (task.isSuccessful()) {
-                                                    DocumentSnapshot document = task.getResult();
-                                                    if (document.exists()) {
-                                                        StoreList sl = document.toObject(StoreList.class);
-                                                        float[] results = new float[1];
-                                                        db.collection("StoreList").document(id).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    DocumentSnapshot document = task.getResult();
-                                                                    if (document.exists()) {
-                                                                        StoreList storeList = document.toObject(StoreList.class);
-                                                                        Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
-                                                                                Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                results);
-                                                                        //Less than 20 meters
-                                                                        if (results[0] < 20f) {
-                                                                            price.setText(String.valueOf(item.stores.get(s)));
-                                                                        }
-                                                                    }
-                                                                }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            item = document.toObject(Item.class);
+                            getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
+                            barcodeNumber.setText(item.barcode);
+                            for (String s : item.stores.keySet()) {
+                                if (storeId.equals(s)) {
+                                    price.setText(String.valueOf(item.stores.get(s)));
+                                } else {
+                                    db.collection("StoreList").document(s).get(source).addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            DocumentSnapshot document1 = task1.getResult();
+                                            if (document1.exists()) {
+                                                StoreList sl = document1.toObject(StoreList.class);
+                                                float[] results = new float[1];
+                                                db.collection("StoreList").document(id).get(source).addOnCompleteListener(task11 -> {
+                                                    if (task11.isSuccessful()) {
+                                                        DocumentSnapshot document11 = task11.getResult();
+                                                        if (document11.exists()) {
+                                                            StoreList storeList = document11.toObject(StoreList.class);
+                                                            Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
+                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                    results);
+                                                            //Less than 20 meters
+                                                            if (results[0] < 20f) {
+                                                                price.setText(String.valueOf(item.stores.get(s)));
                                                             }
-                                                        });
+                                                        }
                                                     }
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                                db.collection("StoreItem").whereEqualTo("itemId", id).whereEqualTo("storeId", storeId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task2) {
-                                        if (task2.isSuccessful()) {
-                                            for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                StoreItem pi = document2.toObject(StoreItem.class);
-                                                itemStoreQuantity.setText(String.valueOf(pi.quantity));
-                                                itemCartQuantity.setText(String.valueOf(pi.cartQuantity));
+                                                });
                                             }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
+                            db.collection("StoreItem").whereEqualTo("itemId", id).whereEqualTo("storeId", storeId).get(source).addOnCompleteListener(task2 -> {
+                                if (task2.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                        StoreItem pi = document2.toObject(StoreItem.class);
+                                        itemStoreQuantity.setText(String.valueOf(pi.quantity));
+                                        itemCartQuantity.setText(String.valueOf(pi.cartQuantity));
+                                    }
+                                }
+                            });
                         }
                     }
                 });
@@ -182,80 +175,71 @@ public class StoreItemActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item2) {
         switch (item2.getItemId()) {
             case R.id.shareItem:
-                db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                StoreList storeList = document.toObject(StoreList.class);
-                                String price2;
-                                if (price.getText().toString().equals("")) {
-                                    price2 = "0.00";
-                                } else {
-                                    price2 = price.getText().toString();
-                                }
-                                Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                                String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
-                                shareable += getString(R.string.itHasTheBarcode) + item.barcode + getString(R.string.andIsSoldAt);
-                                shareable += storeList.name + getString(R.string.forString) + price2 + getString(R.string.euro);
-                                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareable);
-                                sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
-                                File storageDir;
-                                FirebaseStorage storage;
-                                StorageReference storageRef;
-                                storage = FirebaseStorage.getInstance();
-                                storageRef = storage.getReference();
-                                StorageReference imagesRef;
-                                if (!barcodeNumber.getText().toString().equals("")) {
-                                    storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + barcodeNumber.getText().toString());
-                                    imagesRef = storageRef.child(barcodeNumber.getText().toString());
-                                } else {
-                                    storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
-                                    imagesRef = storageRef.child(id);
-                                }
-                                imagesRef.listAll()
-                                        .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                                            @Override
-                                            public void onSuccess(ListResult listResult) {
-                                                if (listResult.getItems().size() == 0) {
-                                                    sharingIntent.setType("text/plain");
-                                                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                                } else {
-                                                    for (StorageReference item : listResult.getItems()) {
-                                                        Boolean exists = false;
-                                                        for (File f : storageDir.listFiles()) {
-                                                            if (f.getName().equals(item.getName())) {
-                                                                exists = true;
-                                                                sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                                                Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
-                                                                sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                                                                sharingIntent.setType("image/jpeg");
-                                                                sharingIntent.setData(screenshotUri);
-                                                                startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                                                break;
-                                                            }
-                                                        }
-                                                        if (!exists) {
-                                                            File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
-                                                            item.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                                                                @Override
-                                                                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                                                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                                                                    Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
-                                                                    sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
-                                                                    sharingIntent.setType("image/jpeg");
-                                                                    sharingIntent.setData(screenshotUri);
-                                                                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
-                                                                }
-                                                            });
-                                                        }
+                db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            StoreList storeList = document.toObject(StoreList.class);
+                            String price2;
+                            if (price.getText().toString().equals("")) {
+                                price2 = "0.00";
+                            } else {
+                                price2 = price.getText().toString();
+                            }
+                            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                            String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
+                            shareable += getString(R.string.itHasTheBarcode) + item.barcode + getString(R.string.andIsSoldAt);
+                            shareable += storeList.name + getString(R.string.forString) + price2 + getString(R.string.euro);
+                            sharingIntent.putExtra(Intent.EXTRA_TEXT, shareable);
+                            sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
+                            File storageDir;
+                            FirebaseStorage storage;
+                            StorageReference storageRef;
+                            storage = FirebaseStorage.getInstance();
+                            storageRef = storage.getReference();
+                            StorageReference imagesRef;
+                            if (!barcodeNumber.getText().toString().equals("")) {
+                                storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + barcodeNumber.getText().toString());
+                                imagesRef = storageRef.child(barcodeNumber.getText().toString());
+                            } else {
+                                storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id);
+                                imagesRef = storageRef.child(id);
+                            }
+                            imagesRef.listAll()
+                                    .addOnSuccessListener(listResult -> {
+                                        if (listResult.getItems().size() == 0) {
+                                            sharingIntent.setType("text/plain");
+                                            startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
+                                        } else {
+                                            for (StorageReference item : listResult.getItems()) {
+                                                boolean exists = false;
+                                                for (File f : storageDir.listFiles()) {
+                                                    if (f.getName().equals(item.getName())) {
+                                                        exists = true;
+                                                        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                        Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), f);
+                                                        sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                                        sharingIntent.setType("image/jpeg");
+                                                        sharingIntent.setData(screenshotUri);
+                                                        startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
                                                         break;
                                                     }
                                                 }
+                                                if (!exists) {
+                                                    File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + id).getAbsolutePath() + "/" + item.getName());
+                                                    item.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                                        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                                        Uri screenshotUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName(), localFile);
+                                                        sharingIntent.putExtra(Intent.EXTRA_STREAM, screenshotUri);
+                                                        sharingIntent.setType("image/jpeg");
+                                                        sharingIntent.setData(screenshotUri);
+                                                        startActivity(Intent.createChooser(sharingIntent, getString(R.string.shareUsing)));
+                                                    });
+                                                }
+                                                break;
                                             }
-                                        });
-                            }
+                                        }
+                                    });
                         }
                     }
                 });
@@ -281,18 +265,5 @@ public class StoreItemActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         finish();
-    }
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
     }
 }

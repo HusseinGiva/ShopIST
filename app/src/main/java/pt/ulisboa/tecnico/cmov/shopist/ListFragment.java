@@ -2,7 +2,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -13,7 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -23,9 +21,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,7 +29,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
@@ -53,21 +47,18 @@ public class ListFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private List<String> pantryIds = new ArrayList<>();
-    private List<String> storeIds = new ArrayList<>();
-    private List<String> names = new ArrayList<>();
-    private List<String> drive_times = new ArrayList<>();
-    private List<Integer> n_items = new ArrayList<>();
-    private ListView list;
+    private final List<String> pantryIds = new ArrayList<>();
+    private final List<String> storeIds = new ArrayList<>();
+    private final List<String> names = new ArrayList<>();
+    private final List<String> drive_times = new ArrayList<>();
+    private final List<Integer> n_items = new ArrayList<>();
     ListAdapter listAdapter = null;
-
+    private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
 
     private Location lastKnownLocation = null;
-    private FusedLocationProviderClient fusedLocationProviderClient;
-
 
 
     public ListFragment() {
@@ -92,6 +83,19 @@ public class ListFragment extends Fragment {
         return fragment;
     }
 
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +105,7 @@ public class ListFragment extends Fragment {
             String mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        if(isConnected(getActivity().getApplicationContext()))
+        if (isConnected(getActivity().getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -109,25 +113,22 @@ public class ListFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
 
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-            locationResult.addOnCompleteListener(getActivity(), new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    if (task.isSuccessful()) {
-                        lastKnownLocation = task.getResult();
-                        if (lastKnownLocation != null) {
-                            Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                    lastKnownLocation.getLongitude());
-                        }else {
-                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
-                        }
+            locationResult.addOnCompleteListener(getActivity(), task -> {
+                if (task.isSuccessful()) {
+                    lastKnownLocation = task.getResult();
+                    if (lastKnownLocation != null) {
+                        Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
+                                lastKnownLocation.getLongitude());
                     } else {
                         Log.d("ADD_LIST", "Current location is null. Using defaults.");
                     }
+                } else {
+                    Log.d("ADD_LIST", "Current location is null. Using defaults.");
                 }
             });
         } else {
@@ -177,9 +178,9 @@ public class ListFragment extends Fragment {
                                             pantryIds.add(document.getId());
 
                                             pantry.driveTime = null;
-                                            drive_times.add(pantry.driveTime);
+                                            drive_times.add(null);
 
-                                            if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
+                                            if (lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null) {
                                                 String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                                                         lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
                                                         "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
@@ -193,11 +194,11 @@ public class ListFragment extends Fragment {
                                                     @Override
                                                     public void run() {
                                                         if (pantry.driveTime != null) {
-                                                            Log.d("LIST", String.valueOf(pantry.driveTime));
-                                                            try{
+                                                            Log.d("LIST", pantry.driveTime);
+                                                            try {
                                                                 drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
                                                                 list.invalidateViews();
-                                                            }catch (ArrayIndexOutOfBoundsException e){
+                                                            } catch (ArrayIndexOutOfBoundsException e) {
 
                                                             }
 
@@ -233,9 +234,9 @@ public class ListFragment extends Fragment {
                                             storeIds.add(document.getId());
 
                                             store.driveTime = null;
-                                            drive_times.add(store.driveTime);
+                                            drive_times.add(null);
 
-                                            if(lastKnownLocation != null && store.latitude != null && store.longitude != null){
+                                            if (lastKnownLocation != null && store.latitude != null && store.longitude != null) {
                                                 String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                                                         lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
                                                         "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
@@ -249,11 +250,11 @@ public class ListFragment extends Fragment {
                                                     @Override
                                                     public void run() {
                                                         if (store.driveTime != null) {
-                                                            Log.d("LIST", String.valueOf(store.driveTime));
-                                                            try{
+                                                            Log.d("LIST", store.driveTime);
+                                                            try {
                                                                 drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
                                                                 list.invalidateViews();
-                                                            }catch (ArrayIndexOutOfBoundsException e){
+                                                            } catch (ArrayIndexOutOfBoundsException e) {
 
                                                             }
 
@@ -304,7 +305,7 @@ public class ListFragment extends Fragment {
 
         HomeActivity ha = (HomeActivity) getActivity();
 
-        if(ha.getTypeSelected().equals(getResources().getString(R.string.pantry))) {
+        if (ha.getTypeSelected().equals(getResources().getString(R.string.pantry))) {
             db.collection("PantryList")
                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                     .get(source)
@@ -319,9 +320,9 @@ public class ListFragment extends Fragment {
                                     pantryIds.add(document.getId());
 
                                     pantry.driveTime = null;
-                                    drive_times.add(pantry.driveTime);
+                                    drive_times.add(null);
 
-                                    if(lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null){
+                                    if (lastKnownLocation != null && pantry.latitude != null && pantry.longitude != null) {
                                         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                                                 lastKnownLocation.getLongitude() + "&destinations=" + pantry.latitude + "," + pantry.longitude +
                                                 "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
@@ -335,7 +336,7 @@ public class ListFragment extends Fragment {
                                             @Override
                                             public void run() {
                                                 if (pantry.driveTime != null) {
-                                                    Log.d("LIST", String.valueOf(pantry.driveTime));
+                                                    Log.d("LIST", pantry.driveTime);
                                                     drive_times.set(pantryIds.indexOf(document.getId()), pantry.driveTime);
                                                     list.invalidateViews();
                                                     timerHandler.removeCallbacks(this);
@@ -354,8 +355,7 @@ public class ListFragment extends Fragment {
                             }
                         }
                     });
-        }
-        else if(ha.getTypeSelected().equals(getResources().getString(R.string.store))) {
+        } else if (ha.getTypeSelected().equals(getResources().getString(R.string.store))) {
             db.collection("StoreList")
                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                     .get(source)
@@ -370,9 +370,9 @@ public class ListFragment extends Fragment {
                                     storeIds.add(document.getId());
 
                                     store.driveTime = null;
-                                    drive_times.add(store.driveTime);
+                                    drive_times.add(null);
 
-                                    if(lastKnownLocation != null && store.latitude != null && store.longitude != null){
+                                    if (lastKnownLocation != null && store.latitude != null && store.longitude != null) {
                                         String url = "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" + lastKnownLocation.getLatitude() + "," +
                                                 lastKnownLocation.getLongitude() + "&destinations=" + store.latitude + "," + store.longitude +
                                                 "&key=AIzaSyCMZvnATlqHjaigRVtypLf06ukJxanwXl8";
@@ -386,11 +386,11 @@ public class ListFragment extends Fragment {
                                             @Override
                                             public void run() {
                                                 if (store.driveTime != null) {
-                                                    Log.d("LIST", String.valueOf(store.driveTime));
-                                                    try{
+                                                    Log.d("LIST", store.driveTime);
+                                                    try {
                                                         drive_times.set(storeIds.indexOf(document.getId()), store.driveTime);
                                                         list.invalidateViews();
-                                                    }catch (ArrayIndexOutOfBoundsException e){
+                                                    } catch (ArrayIndexOutOfBoundsException e) {
 
                                                     }
 
@@ -410,18 +410,5 @@ public class ListFragment extends Fragment {
                         }
                     });
         }
-    }
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
     }
 }

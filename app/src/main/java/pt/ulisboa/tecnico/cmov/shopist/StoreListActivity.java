@@ -10,15 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,13 +24,11 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListActivity extends AppCompatActivity {
 
-    private String id;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    TabLayout tabLayout;
-
     private static String latitude = null;
     private static String longitude = null;
+    TabLayout tabLayout;
+    private String id;
+    private FirebaseFirestore db;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -57,7 +51,6 @@ public class StoreListActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
 
         db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
 
         id = getIntent().getStringExtra("ID");
 
@@ -104,24 +97,21 @@ public class StoreListActivity extends AppCompatActivity {
 
         db.collection("StoreList").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d("TAG", "DocumentSnapshot data: " + document.getData());
-                                StoreList store = document.toObject(StoreList.class);
-                                latitude = store.latitude;
-                                longitude = store.longitude;
-                                getSupportActionBar().setTitle(store.name);
-                            } else {
-                                Log.d("TAG", "No such document");
-                            }
-
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
+                            StoreList store = document.toObject(StoreList.class);
+                            latitude = store.latitude;
+                            longitude = store.longitude;
+                            getSupportActionBar().setTitle(store.name);
                         } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
+                            Log.d("TAG", "No such document");
                         }
+
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
     }

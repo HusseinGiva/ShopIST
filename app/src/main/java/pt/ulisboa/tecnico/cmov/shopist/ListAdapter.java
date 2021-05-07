@@ -40,7 +40,7 @@ public class ListAdapter extends ArrayAdapter<String> {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         View view = convertView;
-        ListViewHolder holder = null;
+        ListViewHolder holder;
 
         if (view == null) {
             LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -52,26 +52,22 @@ public class ListAdapter extends ArrayAdapter<String> {
         }
 
         holder.listName.setText(list_names.get(position));
-        if(drive_times.get(position) != null)
+        if (drive_times.get(position) != null)
             holder.driveTime.setText(drive_times.get(position));
         else
             holder.driveTime.setText(getContext().getResources().getString(R.string.no_drivetime));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        view.setOnClickListener(v -> {
 
-                if(tabSelected.equals(getContext().getResources().getString(R.string.pantry))) {
-                    Intent intent = new Intent(context, PantryListActivity.class);
-                    intent.putExtra("ID", pantryIds.get(position));
-                    context.startActivity(intent);
-                }
-                else if(tabSelected.equals(getContext().getResources().getString(R.string.store))) {
-                    Intent intent = new Intent(context, StoreListActivity.class);
-                    intent.putExtra("ID", storeIds.get(position));
-                    context.startActivity(intent);
-                }
+            if (tabSelected.equals(getContext().getResources().getString(R.string.pantry))) {
+                Intent intent = new Intent(context, PantryListActivity.class);
+                intent.putExtra("ID", pantryIds.get(position));
+                context.startActivity(intent);
+            } else if (tabSelected.equals(getContext().getResources().getString(R.string.store))) {
+                Intent intent = new Intent(context, StoreListActivity.class);
+                intent.putExtra("ID", storeIds.get(position));
+                context.startActivity(intent);
             }
         });
 

@@ -14,20 +14,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -45,18 +40,16 @@ public class CartFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "ID";
+    List<String> itemIds = new ArrayList<>();
+    List<String> store_item_names = new ArrayList<>();
+    List<Integer> store_item_quantities = new ArrayList<>();
+    List<Float> item_prices = new ArrayList<>();
+    View view;
     private String id;
     private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
-
-    List<String> itemIds = new ArrayList<>();
-    List<String> store_item_names = new ArrayList<>();
-    List<Integer> store_item_quantities = new ArrayList<>();
-    List<Float> item_prices = new ArrayList<>();
-
-    View view;
 
     public CartFragment() {
         // Required empty public constructor
@@ -77,6 +70,19 @@ public class CartFragment extends Fragment {
         args.putString(ARG_PARAM1, param1);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
     }
 
     @Override
@@ -108,17 +114,13 @@ public class CartFragment extends Fragment {
         StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list, (StoreListActivity) getActivity(), (TextView) view.findViewById(R.id.total_cost));
         list.setAdapter(a);
 
-        view.findViewById(R.id.checkout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(store_item_names.size() == 0) {
-                    Toast.makeText(getContext(), "You have no items in the cart.", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Intent intent = new Intent(getContext(), CheckoutActivity.class);
-                    intent.putExtra("ID", id);
-                    startActivity(intent);
-                }
+        view.findViewById(R.id.checkout).setOnClickListener(v -> {
+            if (store_item_names.size() == 0) {
+                Toast.makeText(getContext(), "You have no items in the cart.", Toast.LENGTH_LONG).show();
+            } else {
+                Intent intent = new Intent(getContext(), CheckoutActivity.class);
+                intent.putExtra("ID", id);
+                startActivity(intent);
             }
         });
 
@@ -137,117 +139,102 @@ public class CartFragment extends Fragment {
         async_operations[0]++;
         db.collection("StoreList").document(id)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                Log.d("TAG", "DocumentSnapshot data: " + document.getData());
-                                StoreList store = document.toObject(StoreList.class);
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
+                            StoreList store = document.toObject(StoreList.class);
 
-                                async_operations[0]++;
-                                db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            async_operations[0]++;
+                            db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task13 -> {
 
-                                        if (task.isSuccessful()) {
-                                            itemIds.clear();
-                                            store_item_names.clear();
-                                            store_item_quantities.clear();
-                                            item_prices.clear();
-                                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                                StoreItem si = document.toObject(StoreItem.class);
-                                                if (si.cartQuantity == 0) continue;
+                                if (task13.isSuccessful()) {
+                                    itemIds.clear();
+                                    store_item_names.clear();
+                                    store_item_quantities.clear();
+                                    item_prices.clear();
+                                    for (QueryDocumentSnapshot document13 : task13.getResult()) {
+                                        StoreItem si = document13.toObject(StoreItem.class);
+                                        if (si.cartQuantity == 0) continue;
 
-                                                async_operations[0]++;
-                                                db.collection("Item").document(si.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                        if (task.isSuccessful()) {
-                                                            DocumentSnapshot document = task.getResult();
-                                                            if (document.exists()) {
-                                                                Item i = document.toObject(Item.class);
-                                                                String storeId = si.storeId;
-                                                                if (i.stores.containsKey(storeId)) {
-                                                                    itemIds.add(si.itemId);
-                                                                    store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                    store_item_quantities.add(si.cartQuantity);
-                                                                    item_prices.add(i.stores.get(storeId));
-                                                                    total_cost[0] += si.cartQuantity * i.stores.get(storeId);
-                                                                    textView.setText(String.valueOf(total_cost[0]) + " €");
-                                                                } else {
-                                                                    async_operations[0]++;
-                                                                    db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                        @Override
-                                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                            if (task.isSuccessful()) {
-                                                                                DocumentSnapshot document = task.getResult();
-                                                                                if (document.exists()) {
-                                                                                    StoreList sl = document.toObject(StoreList.class);
-                                                                                    for (String s : i.stores.keySet()) {
-                                                                                        async_operations[0]++;
-                                                                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                                            @Override
-                                                                                            public void onComplete(@NonNull Task<DocumentSnapshot> task2) {
-                                                                                                if (task2.isSuccessful()) {
-                                                                                                    DocumentSnapshot document2 = task2.getResult();
-                                                                                                    if (document2.exists()) {
-                                                                                                        StoreList sl2 = document2.toObject(StoreList.class);
-                                                                                                        float[] results = new float[1];
-                                                                                                        Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                                                Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
-                                                                                                                results);
-                                                                                                        //Less than 20 meters
-                                                                                                        if (results[0] < 20f) {
-                                                                                                            itemIds.add(si.itemId);
-                                                                                                            store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                                                            store_item_quantities.add(si.cartQuantity);
-                                                                                                            item_prices.add(i.stores.get(s));
-                                                                                                            total_cost[0] += si.cartQuantity * i.stores.get(s);
-                                                                                                            textView.setText(String.valueOf(total_cost[0]) + " €");
-                                                                                                        }
-                                                                                                    }
-                                                                                                    async_operations[0]--;
-                                                                                                }
-                                                                                            }
-                                                                                        });
+                                        async_operations[0]++;
+                                        db.collection("Item").document(si.itemId).get().addOnCompleteListener(task12 -> {
+                                            if (task12.isSuccessful()) {
+                                                DocumentSnapshot document12 = task12.getResult();
+                                                if (document12.exists()) {
+                                                    Item i = document12.toObject(Item.class);
+                                                    String storeId = si.storeId;
+                                                    if (i.stores.containsKey(storeId)) {
+                                                        itemIds.add(si.itemId);
+                                                        store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
+                                                        store_item_quantities.add(si.cartQuantity);
+                                                        item_prices.add(i.stores.get(storeId));
+                                                        total_cost[0] += si.cartQuantity * i.stores.get(storeId);
+                                                        textView.setText(total_cost[0] + " €");
+                                                    } else {
+                                                        async_operations[0]++;
+                                                        db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task1 -> {
+                                                            if (task1.isSuccessful()) {
+                                                                DocumentSnapshot document1 = task1.getResult();
+                                                                if (document1.exists()) {
+                                                                    StoreList sl = document1.toObject(StoreList.class);
+                                                                    for (String s : i.stores.keySet()) {
+                                                                        async_operations[0]++;
+                                                                        db.collection("StoreList").document(s).get(source).addOnCompleteListener(task2 -> {
+                                                                            if (task2.isSuccessful()) {
+                                                                                DocumentSnapshot document2 = task2.getResult();
+                                                                                if (document2.exists()) {
+                                                                                    StoreList sl2 = document2.toObject(StoreList.class);
+                                                                                    float[] results = new float[1];
+                                                                                    Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                            Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
+                                                                                            results);
+                                                                                    //Less than 20 meters
+                                                                                    if (results[0] < 20f) {
+                                                                                        itemIds.add(si.itemId);
+                                                                                        store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
+                                                                                        store_item_quantities.add(si.cartQuantity);
+                                                                                        item_prices.add(i.stores.get(s));
+                                                                                        total_cost[0] += si.cartQuantity * i.stores.get(s);
+                                                                                        textView.setText(total_cost[0] + " €");
                                                                                     }
-                                                                                    async_operations[0]--;
                                                                                 }
+                                                                                async_operations[0]--;
                                                                             }
-                                                                        }
-                                                                    });
+                                                                        });
+                                                                    }
+                                                                    async_operations[0]--;
                                                                 }
-                                                                async_operations[0]--;
-                                                            } else {
-                                                                Log.d("TAG", "No such document");
                                                             }
-
-
-                                                        } else {
-                                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                                        }
+                                                        });
                                                     }
-                                                });
+                                                    async_operations[0]--;
+                                                } else {
+                                                    Log.d("TAG", "No such document");
+                                                }
+
+
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task12.getException());
                                             }
-                                            async_operations[0]--;
-
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
-                                        }
-
+                                        });
                                     }
-                                });
-                                async_operations[0]--;
+                                    async_operations[0]--;
 
-                            } else {
-                                Log.d("TAG", "No such document");
-                            }
+                                } else {
+                                    Log.d("TAG", "Error getting documents: ", task13.getException());
+                                }
+
+                            });
+                            async_operations[0]--;
 
                         } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
+                            Log.d("TAG", "No such document");
                         }
+
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -259,8 +246,7 @@ public class CartFragment extends Fragment {
                 if (async_operations[0] == 0) {
                     sort();
                     list.invalidateViews();
-                }
-                else {
+                } else {
                     timerHandler.postDelayed(this, 100);
                 }
             }
@@ -271,27 +257,14 @@ public class CartFragment extends Fragment {
     public void sort() {
 
         List<String> ids_base = new ArrayList<>(itemIds);
-        Collections.sort(itemIds, Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+        itemIds.sort(Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
 
         List<Integer> quantities_base = new ArrayList<>(store_item_quantities);
-        Collections.sort(store_item_quantities, Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+        store_item_quantities.sort(Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
 
         List<Float> prices_base = new ArrayList<>(item_prices);
-        Collections.sort(item_prices, Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
+        item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
 
-        Collections.sort(store_item_names, Comparator.comparing(String::toLowerCase));
-    }
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
+        store_item_names.sort(Comparator.comparing(String::toLowerCase));
     }
 }
