@@ -8,13 +8,6 @@ public class Item {
     public Map<String, String> users = new HashMap<>();
     public Map<String, Float> stores = new HashMap<>();
     public Map<String, Integer> ratings = new HashMap<>();
-    public double average_rating;
-    public long one_star_votes;
-    public long two_star_votes;
-    public long three_star_votes;
-    public long four_star_votes;
-    public long five_star_votes;
-    public long user_vote;
 
     public Item(String name, String barcode, String userId, String id, Float price) {
         this.barcode = barcode;

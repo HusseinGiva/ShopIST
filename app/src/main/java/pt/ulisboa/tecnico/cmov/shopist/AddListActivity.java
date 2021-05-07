@@ -219,7 +219,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     }
 
     public void onClickSaveList(View view) {
-        EditText e = (EditText) findViewById(R.id.listName);
+        EditText e = findViewById(R.id.listName);
         if (e.getText().toString().equals("")) {
             Toast.makeText(this, R.string.pleaseInsertListName, Toast.LENGTH_SHORT).show();
             return;
