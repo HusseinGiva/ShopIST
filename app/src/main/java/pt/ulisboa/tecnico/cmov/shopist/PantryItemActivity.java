@@ -179,12 +179,12 @@ public class PantryItemActivity extends AppCompatActivity {
         try {
             userRatingNumber = Integer.parseInt(userRatingText);
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Invalid rating", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.invalidRating, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (userRatingNumber < 1 || userRatingNumber > 5) {
-            Toast.makeText(this, "Rating must be between 1 and 5!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.ratingMustBeBetween1And5, Toast.LENGTH_SHORT).show();
             return;
         }
 

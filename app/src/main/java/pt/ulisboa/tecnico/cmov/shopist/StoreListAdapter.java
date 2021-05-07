@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
@@ -72,7 +73,9 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         holder.storeListPosition.setText(String.valueOf(position + 1));
         holder.storeListItemName.setText(item_names.get(position));
         holder.storeListItemQuantity.setText(item_quantities.get(position).toString());
-        holder.itemPrice.setText(item_prices.get(position).toString() + " €");
+        DecimalFormat df = new DecimalFormat("###.##");
+        Double value = Math.round(item_prices.get(position)*100.0)/100.0;
+        holder.itemPrice.setText(df.format(value));
 
         final String q = (String) holder.storeListItemQuantity.getText();
 
@@ -156,20 +159,20 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         view.findViewById(R.id.moveToCart).setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-            builder.setTitle("Move to cart");
+            builder.setTitle(R.string.moveToCart);
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
             view1.findViewById(R.id.decrement_move_to_cart_quantity).setOnClickListener(v1 -> {
-                EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
+                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
                 if (quantity == 0) return;
                 e.setText(String.valueOf(quantity - 1));
             });
 
             view1.findViewById(R.id.increment_move_to_cart_quantity).setOnClickListener(v12 -> {
-                EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
+                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
                 int max_quantity = Integer.parseInt(q);
                 if (quantity == max_quantity) return;
@@ -179,7 +182,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             builder.setView(view1);
             builder.setPositiveButton(R.string.ok, (dialog, id) -> {
                 // User clicked OK button
-                EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
+                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
                 db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                         .get().addOnCompleteListener(task -> {

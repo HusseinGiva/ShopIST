@@ -20,6 +20,7 @@
         android:id="@+id/move_to_cart_quantity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:importantForAutofill="no"
         android:inputType="number"
         android:text="0"
         app:layout_constraintBottom_toBottomOf="parent"

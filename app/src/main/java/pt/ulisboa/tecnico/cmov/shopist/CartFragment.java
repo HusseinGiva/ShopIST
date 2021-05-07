@@ -116,7 +116,7 @@ public class CartFragment extends Fragment {
 
         view.findViewById(R.id.checkout).setOnClickListener(v -> {
             if (store_item_names.size() == 0) {
-                Toast.makeText(getContext(), "You have no items in the cart.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), R.string.youHaveNoItemsInCart, Toast.LENGTH_LONG).show();
             } else {
                 Intent intent = new Intent(getContext(), CheckoutActivity.class);
                 intent.putExtra("ID", id);
@@ -130,7 +130,7 @@ public class CartFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        TextView textView = (TextView) view.findViewById(R.id.total_cost);
+        TextView textView = view.findViewById(R.id.total_cost);
         textView.setText("0 €");
         float[] total_cost = {0};
 
@@ -171,7 +171,7 @@ public class CartFragment extends Fragment {
                                                         store_item_quantities.add(si.cartQuantity);
                                                         item_prices.add(i.stores.get(storeId));
                                                         total_cost[0] += si.cartQuantity * i.stores.get(storeId);
-                                                        textView.setText(total_cost[0] + " €");
+                                                        textView.setText(String.valueOf(total_cost[0]));
                                                     } else {
                                                         async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task1 -> {
@@ -197,7 +197,7 @@ public class CartFragment extends Fragment {
                                                                                         store_item_quantities.add(si.cartQuantity);
                                                                                         item_prices.add(i.stores.get(s));
                                                                                         total_cost[0] += si.cartQuantity * i.stores.get(s);
-                                                                                        textView.setText(total_cost[0] + " €");
+                                                                                        textView.setText(String.valueOf(total_cost[0]));
                                                                                     }
                                                                                 }
                                                                                 async_operations[0]--;
