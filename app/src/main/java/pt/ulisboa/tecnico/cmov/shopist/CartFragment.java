@@ -1,15 +1,18 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -24,6 +27,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
@@ -45,6 +50,13 @@ public class CartFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
+
+    List<String> itemIds = new ArrayList<>();
+    List<String> store_item_names = new ArrayList<>();
+    List<Integer> store_item_quantities = new ArrayList<>();
+    List<Float> item_prices = new ArrayList<>();
+
+    View view;
 
     public CartFragment() {
         // Required empty public constructor
@@ -89,12 +101,40 @@ public class CartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_cart, container, false);
+        view = inflater.inflate(R.layout.fragment_cart, container, false);
+
         list = view.findViewById(R.id.store_list);
 
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list, (StoreListActivity) getActivity(), (TextView) view.findViewById(R.id.total_cost));
+        list.setAdapter(a);
+
+        view.findViewById(R.id.checkout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(store_item_names.size() == 0) {
+                    Toast.makeText(getContext(), "You have no items in the cart.", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Intent intent = new Intent(getContext(), CheckoutActivity.class);
+                    intent.putExtra("ID", id);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         TextView textView = (TextView) view.findViewById(R.id.total_cost);
+        textView.setText("0 €");
         float[] total_cost = {0};
 
+        int[] async_operations = {0};
+
+        async_operations[0]++;
         db.collection("StoreList").document(id)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -106,21 +146,21 @@ public class CartFragment extends Fragment {
                                 Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                                 StoreList store = document.toObject(StoreList.class);
 
+                                async_operations[0]++;
                                 db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
                                         if (task.isSuccessful()) {
-                                            List<String> itemIds = new ArrayList<String>();
-                                            List<String> store_item_names = new ArrayList<>();
-                                            List<Integer> store_item_quantities = new ArrayList<>();
-                                            List<Float> item_prices = new ArrayList<>();
-                                            StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list, (StoreListActivity) getActivity(), textView);
-                                            list.setAdapter(a);
+                                            itemIds.clear();
+                                            store_item_names.clear();
+                                            store_item_quantities.clear();
+                                            item_prices.clear();
                                             for (QueryDocumentSnapshot document : task.getResult()) {
                                                 StoreItem si = document.toObject(StoreItem.class);
                                                 if (si.cartQuantity == 0) continue;
-                                                itemIds.add(si.itemId);
+
+                                                async_operations[0]++;
                                                 db.collection("Item").document(si.itemId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -128,15 +168,16 @@ public class CartFragment extends Fragment {
                                                             DocumentSnapshot document = task.getResult();
                                                             if (document.exists()) {
                                                                 Item i = document.toObject(Item.class);
-                                                                store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                store_item_quantities.add(si.cartQuantity);
                                                                 String storeId = si.storeId;
                                                                 if (i.stores.containsKey(storeId)) {
+                                                                    itemIds.add(si.itemId);
+                                                                    store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
+                                                                    store_item_quantities.add(si.cartQuantity);
                                                                     item_prices.add(i.stores.get(storeId));
                                                                     total_cost[0] += si.cartQuantity * i.stores.get(storeId);
                                                                     textView.setText(String.valueOf(total_cost[0]) + " €");
-                                                                    list.invalidateViews();
                                                                 } else {
+                                                                    async_operations[0]++;
                                                                     db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                                         @Override
                                                                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -145,6 +186,7 @@ public class CartFragment extends Fragment {
                                                                                 if (document.exists()) {
                                                                                     StoreList sl = document.toObject(StoreList.class);
                                                                                     for (String s : i.stores.keySet()) {
+                                                                                        async_operations[0]++;
                                                                                         db.collection("StoreList").document(s).get(source).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                                                             @Override
                                                                                             public void onComplete(@NonNull Task<DocumentSnapshot> task2) {
@@ -158,21 +200,26 @@ public class CartFragment extends Fragment {
                                                                                                                 results);
                                                                                                         //Less than 20 meters
                                                                                                         if (results[0] < 20f) {
+                                                                                                            itemIds.add(si.itemId);
+                                                                                                            store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
+                                                                                                            store_item_quantities.add(si.cartQuantity);
                                                                                                             item_prices.add(i.stores.get(s));
                                                                                                             total_cost[0] += si.cartQuantity * i.stores.get(s);
                                                                                                             textView.setText(String.valueOf(total_cost[0]) + " €");
-                                                                                                            list.invalidateViews();
                                                                                                         }
                                                                                                     }
+                                                                                                    async_operations[0]--;
                                                                                                 }
                                                                                             }
                                                                                         });
                                                                                     }
+                                                                                    async_operations[0]--;
                                                                                 }
                                                                             }
                                                                         }
                                                                     });
                                                                 }
+                                                                async_operations[0]--;
                                                             } else {
                                                                 Log.d("TAG", "No such document");
                                                             }
@@ -184,6 +231,7 @@ public class CartFragment extends Fragment {
                                                     }
                                                 });
                                             }
+                                            async_operations[0]--;
 
                                         } else {
                                             Log.d("TAG", "Error getting documents: ", task.getException());
@@ -191,7 +239,7 @@ public class CartFragment extends Fragment {
 
                                     }
                                 });
-
+                                async_operations[0]--;
 
                             } else {
                                 Log.d("TAG", "No such document");
@@ -203,7 +251,35 @@ public class CartFragment extends Fragment {
                     }
                 });
 
-        return view;
+        Handler timerHandler = new Handler();
+        Runnable timerRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (async_operations[0] == 0) {
+                    sort();
+                    list.invalidateViews();
+                }
+                else {
+                    timerHandler.postDelayed(this, 100);
+                }
+            }
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
+    }
+
+    public void sort() {
+
+        List<String> ids_base = new ArrayList<>(itemIds);
+        Collections.sort(itemIds, Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+
+        List<Integer> quantities_base = new ArrayList<>(store_item_quantities);
+        Collections.sort(store_item_quantities, Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+
+        List<Float> prices_base = new ArrayList<>(item_prices);
+        Collections.sort(item_prices, Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
+
+        Collections.sort(store_item_names, Comparator.comparing(String::toLowerCase));
     }
 
     public static boolean isConnected(Context getApplicationContext) {

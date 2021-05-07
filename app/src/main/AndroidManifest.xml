@@ -16,7 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:replace="android:icon,android:theme">
-        <activity android:name=".StoreItemActivity"></activity>
+        <activity
+            android:name=".CheckoutActivity"
+            android:parentActivityName=".StoreListActivity" />
+        <activity android:name=".StoreItemActivity"/>
         <activity
             android:name=".ShareListActivity"
             android:parentActivityName=".PantryListActivity" />
