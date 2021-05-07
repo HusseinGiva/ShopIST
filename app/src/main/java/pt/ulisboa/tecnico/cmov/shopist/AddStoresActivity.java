@@ -76,7 +76,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
                 adapt.isRead = true;
                 getSupportActionBar().setTitle(R.string.viewStores);
             }
-            if (getIntent().getParcelableArrayExtra("STORES") != null) {
+            if (getIntent().getParcelableArrayListExtra("STORES") != null) {
                 stores = getIntent().getParcelableArrayListExtra("STORES");
                 if (!stores.isEmpty()) {
                     for (StoreViewAddItem item : stores) {

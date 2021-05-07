@@ -336,39 +336,44 @@ public class AddItemActivity extends AppCompatActivity {
                                                 }
                                             });
                                 }
-                            }
-                        });
-                db.collection("StoreList")
-                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                        .get(source)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    StoreList store = document.toObject(StoreList.class);
-                                    if (!storeViewAddItems.isEmpty()) {
-                                        Boolean present = false;
-                                        for (StoreViewAddItem item : storeViewAddItems) {
-
-                                            if (item.name.equals(store.name)) {
-                                                present = true;
+                                db.collection("StoreList")
+                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .get(source)
+                                        .addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                    StoreList store = document2.toObject(StoreList.class);
+                                                    if (!storeViewAddItems.isEmpty()) {
+                                                        Boolean present = false;
+                                                        for (StoreViewAddItem item2 : storeViewAddItems) {
+                                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                                                float[] results = new float[1];
+                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                                        results);
+                                                                //Less than 20 meters
+                                                                if (results[0] < 20f) {
+                                                                    present = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (!present) {
+                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                            storeViewAddItem.latitude = store.latitude;
+                                                            storeViewAddItem.longitude = store.longitude;
+                                                            storeViewAddItems.add(storeViewAddItem);
+                                                        }
+                                                    } else {
+                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                        storeViewAddItem.latitude = store.latitude;
+                                                        storeViewAddItem.longitude = store.longitude;
+                                                        storeViewAddItems.add(storeViewAddItem);
+                                                    }
+                                                }
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
                                             }
-                                        }
-                                        if (!present) {
-                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                            storeViewAddItem.latitude = store.latitude;
-                                            storeViewAddItem.longitude = store.longitude;
-                                            storeViewAddItems.add(storeViewAddItem);
-                                        }
-
-                                    } else {
-                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                        storeViewAddItem.latitude = store.latitude;
-                                        storeViewAddItem.longitude = store.longitude;
-                                        storeViewAddItems.add(storeViewAddItem);
-                                    }
-                                }
-                            } else {
-                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                        });
                             }
                         });
                 getSupportActionBar().setTitle(R.string.editProduct);
@@ -1430,6 +1435,7 @@ public class AddItemActivity extends AppCompatActivity {
         if (getIntent().getStringExtra("MODE").equals("update")) {
             intent.putExtra("MODE", "update");
             intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
+            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
             storesResultLauncher.launch(intent);
         } else if (getIntent().getStringExtra("MODE").equals("add")) {
             intent.putExtra("MODE", "add");
@@ -1665,6 +1671,44 @@ public class AddItemActivity extends AppCompatActivity {
                                             });
 
                                 }
+                                db.collection("StoreList")
+                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .get(source)
+                                        .addOnCompleteListener(task2 -> {
+                                            if (task2.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                    StoreList store = document2.toObject(StoreList.class);
+                                                    if (!storeViewAddItems.isEmpty()) {
+                                                        Boolean present = false;
+                                                        for (StoreViewAddItem item2 : storeViewAddItems) {
+                                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                                                float[] results = new float[1];
+                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                                        results);
+                                                                //Less than 20 meters
+                                                                if (results[0] < 20f) {
+                                                                    present = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        if (!present) {
+                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                            storeViewAddItem.latitude = store.latitude;
+                                                            storeViewAddItem.longitude = store.longitude;
+                                                            storeViewAddItems.add(storeViewAddItem);
+                                                        }
+                                                    } else {
+                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                        storeViewAddItem.latitude = store.latitude;
+                                                        storeViewAddItem.longitude = store.longitude;
+                                                        storeViewAddItems.add(storeViewAddItem);
+                                                    }
+                                                }
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+                                        });
                             }
                         } else {
                             Log.d("TAG", "Error getting documents: ", task.getException());
