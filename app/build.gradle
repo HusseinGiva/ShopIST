@@ -55,6 +55,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-functions'
+
     implementation 'com.google.mlkit:barcode-scanning:16.1.1'
 
     def camerax_version = "1.0.0-rc05"

@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
@@ -27,9 +28,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.functions.FirebaseFunctions;
+import com.google.firebase.functions.FirebaseFunctionsException;
+import com.google.firebase.functions.HttpsCallableResult;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -52,6 +58,7 @@ public class ListFragment extends Fragment {
     private final List<String> names = new ArrayList<>();
     private final List<String> drive_times = new ArrayList<>();
     private final List<Integer> n_items = new ArrayList<>();
+    private final List<Double> queue_times = new ArrayList<>();
     ListAdapter listAdapter = null;
     private ListView list;
     private FirebaseFirestore db;
@@ -59,6 +66,8 @@ public class ListFragment extends Fragment {
     private Source source;
 
     private Location lastKnownLocation = null;
+    private FirebaseFunctions mFunctions;
+
 
 
     public ListFragment() {
@@ -112,6 +121,7 @@ public class ListFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        mFunctions = FirebaseFunctions.getInstance();
 
         FusedLocationProviderClient fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
@@ -144,7 +154,7 @@ public class ListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
         list = view.findViewById(R.id.list);
-        listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, getResources().getString(R.string.pantry), pantryIds, storeIds);
+        listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, queue_times, getResources().getString(R.string.pantry), pantryIds, storeIds);
         list.setAdapter(listAdapter);
 
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
@@ -160,6 +170,7 @@ public class ListFragment extends Fragment {
                 names.clear();
                 drive_times.clear();
                 n_items.clear();
+                queue_times.clear();
                 pantryIds.clear();
                 storeIds.clear();
                 if (tab.getText().equals(getResources().getString(R.string.pantry))) {
@@ -233,6 +244,23 @@ public class ListFragment extends Fragment {
                                             n_items.add((int) store.number_of_items);
                                             storeIds.add(document.getId());
 
+                                            //Add queue time
+                                            computeQueueWaitTime(document.getId())
+                                                    .addOnCompleteListener(task1 -> {
+                                                        if (!task1.isSuccessful()) {
+                                                            Exception e = task1.getException();
+                                                            if (e instanceof FirebaseFunctionsException) {
+                                                                FirebaseFunctionsException ffe = (FirebaseFunctionsException) e;
+                                                                FirebaseFunctionsException.Code code = ffe.getCode();
+                                                                Object details = ffe.getDetails();
+                                                            }
+                                                        }else{
+                                                            Log.d("TAG", task1.getResult());
+                                                            queue_times.add(Double.parseDouble(task1.getResult()));
+                                                            list.invalidateViews();
+                                                        }
+                                                    });
+
                                             store.driveTime = null;
                                             drive_times.add(null);
 
@@ -300,6 +328,7 @@ public class ListFragment extends Fragment {
         names.clear();
         drive_times.clear();
         n_items.clear();
+        queue_times.clear();
         pantryIds.clear();
         storeIds.clear();
 
@@ -369,6 +398,23 @@ public class ListFragment extends Fragment {
                                     n_items.add((int) store.number_of_items);
                                     storeIds.add(document.getId());
 
+                                    //add queue time
+                                    computeQueueWaitTime(document.getId())
+                                            .addOnCompleteListener(task1 -> {
+                                                if (!task1.isSuccessful()) {
+                                                    Exception e = task1.getException();
+                                                    if (e instanceof FirebaseFunctionsException) {
+                                                        FirebaseFunctionsException ffe = (FirebaseFunctionsException) e;
+                                                        FirebaseFunctionsException.Code code = ffe.getCode();
+                                                        Object details = ffe.getDetails();
+                                                    }
+                                                }else{
+                                                    Log.d("TAG", task1.getResult());
+                                                    queue_times.add(Double.parseDouble(task1.getResult()));
+                                                    list.invalidateViews();
+                                                }
+                                            });
+
                                     store.driveTime = null;
                                     drive_times.add(null);
 
@@ -411,4 +457,25 @@ public class ListFragment extends Fragment {
                     });
         }
     }
+
+    private Task<String> computeQueueWaitTime(String storeId) {
+        // Create the arguments to the callable function.
+        Map<String, Object> data = new HashMap<>();
+        data.put("store", storeId);
+
+        return mFunctions
+                .getHttpsCallable("computeQueueWaitTime")
+                .call(data)
+                .continueWith(new Continuation<HttpsCallableResult, String>() {
+                    @Override
+                    public String then(@NonNull Task<HttpsCallableResult> task) throws Exception {
+                        // This continuation runs on either success or failure, but if the task
+                        // has failed then getResult() will throw an Exception which will be
+                        // propagated down.
+                        HashMap result = (HashMap) task.getResult().getData();
+                        return String.valueOf(result.get("result"));
+                    }
+                });
+    }
+
 }

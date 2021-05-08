@@ -15,12 +15,13 @@ public class ListAdapter extends ArrayAdapter<String> {
     List<String> list_names;
     List<String> drive_times;
     List<Integer> n_items;
+    List<Double> queue_times;
     String list_type;
     String tabSelected;
     List<String> pantryIds;
     List<String> storeIds;
 
-    public ListAdapter(Context context, String list_type, List<String> list_names, List<String> drive_times, List<Integer> n_items,
+    public ListAdapter(Context context, String list_type, List<String> list_names, List<String> drive_times, List<Integer> n_items, List<Double> queue_times,
                        String tabSelected, List<String> pantryIds, List<String> storeIds) {
         super(context, R.layout.list_item, R.id.list_name, list_names);
         this.context = context;
@@ -29,6 +30,7 @@ public class ListAdapter extends ArrayAdapter<String> {
         this.list_names = list_names;
         this.drive_times = drive_times;
         this.n_items = n_items;
+        this.queue_times = queue_times;
 
         this.tabSelected = tabSelected;
         this.pantryIds = pantryIds;
@@ -57,6 +59,20 @@ public class ListAdapter extends ArrayAdapter<String> {
         else
             holder.driveTime.setText(getContext().getResources().getString(R.string.no_drivetime));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
+        if(tabSelected.equals(getContext().getResources().getString(R.string.pantry))){
+            holder.queue_wait_time_text.setVisibility(View.INVISIBLE);
+            holder.queue_wait_time.setVisibility(View.INVISIBLE);
+        }else if(position < queue_times.size()) {
+            holder.queue_wait_time_text.setVisibility(View.VISIBLE);
+            holder.queue_wait_time.setVisibility(View.VISIBLE);
+            double p1 = queue_times.get(position) % 60;
+            double p2 = queue_times.get(position) / 60;
+            double p3 = p2 % 60;
+            p2 = p2 / 60;
+            holder.queue_wait_time.setText(String.format("%02d", (int) p2) + ":" + String.format("%02d", (int) p3) + ":" + String.format("%02d", (int) p1));
+        }
+
+
 
         view.setOnClickListener(v -> {
 

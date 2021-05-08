@@ -107,4 +107,5 @@
     <string name="ratingMustBeBetween1And5">Rating Deve Ser Entre 1 e 5</string>
     <string name="whereToStoreItem">Onde Guardar Produto:</string>
     <string name="quantity">Quantidade</string>
+    <string name="queueWaitTime">"Tempo de espera na fila: "</string>
 </resources>
