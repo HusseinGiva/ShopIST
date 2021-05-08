@@ -45,6 +45,8 @@ public class CartFragment extends Fragment {
     List<String> store_item_names = new ArrayList<>();
     List<Integer> store_item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
+    List<String> imageIds = new ArrayList<>();
+
     View view;
     private String id;
     private ListView list;
@@ -112,7 +114,7 @@ public class CartFragment extends Fragment {
 
         list = view.findViewById(R.id.store_list);
 
-        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, list, (StoreListActivity) getActivity(), (TextView) view.findViewById(R.id.total_cost));
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, imageIds, list, (StoreListActivity) getActivity(), (TextView) view.findViewById(R.id.total_cost));
         list.setAdapter(a);
 
         view.findViewById(R.id.checkout).setOnClickListener(v -> {
@@ -155,6 +157,7 @@ public class CartFragment extends Fragment {
                                     store_item_names.clear();
                                     store_item_quantities.clear();
                                     item_prices.clear();
+                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document13 : task13.getResult()) {
                                         StoreItem si = document13.toObject(StoreItem.class);
                                         if (si.cartQuantity == 0) continue;
@@ -168,6 +171,8 @@ public class CartFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         itemIds.add(si.itemId);
+                                                        if (i.barcode.equals("")) imageIds.add(si.itemId);
+                                                        else imageIds.add(i.barcode);
                                                         store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                         store_item_quantities.add(si.cartQuantity);
                                                         item_prices.add(i.stores.get(storeId));
@@ -205,6 +210,8 @@ public class CartFragment extends Fragment {
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         itemIds.add(si.itemId);
+                                                                                        if (i.barcode.equals("")) imageIds.add(si.itemId);
+                                                                                        else imageIds.add(i.barcode);
                                                                                         store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                                         store_item_quantities.add(si.cartQuantity);
                                                                                         item_prices.add(i.stores.get(s));
@@ -287,6 +294,9 @@ public class CartFragment extends Fragment {
 
         List<Float> prices_base = new ArrayList<>(item_prices);
         item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
+
+        List<String> img_base = new ArrayList<>(imageIds);
+        imageIds.sort(Comparator.comparing(i -> store_item_names.get(img_base.indexOf(i)).toLowerCase()));
 
         store_item_names.sort(Comparator.comparing(String::toLowerCase));
     }

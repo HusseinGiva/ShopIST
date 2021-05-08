@@ -3,7 +3,10 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -11,13 +14,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -33,13 +46,15 @@ public class StoreListAdapter extends ArrayAdapter<String> {
     List<Float> item_prices;
     String storeId;
     List<String> itemIds;
+    List<String> imageIds;
     ListView list;
     boolean cart;
     TextView totalCost;
     private Source source;
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
-                            boolean cart, String storeId, List<String> itemIds, ListView list, StoreListActivity activity, TextView totalCost) {
+                            boolean cart, String storeId, List<String> itemIds, List<String> imageIds, ListView list,
+                            StoreListActivity activity, TextView totalCost) {
         super(context, R.layout.store_list_item, R.id.store_list_item_name, item_names);
         this.context = context;
 
@@ -49,6 +64,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         this.cart = cart;
         this.storeId = storeId;
         this.itemIds = itemIds;
+        this.imageIds = imageIds;
 
         this.list = list;
 
@@ -103,6 +119,40 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         } else {
             holder.itemPrice.setVisibility(View.VISIBLE);
             holder.euro.setVisibility(View.VISIBLE);
+        }
+
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position));
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        StorageReference imagesRef = storageRef.child(imageIds.get(position));
+
+        File[] files = storageDir.listFiles();
+        ImageView i = view.findViewById(R.id.store_list_item_image);
+
+        assert files != null;
+        if(files.length == 0) {
+            imagesRef.listAll()
+                    .addOnSuccessListener(listResult -> {
+                        List<StorageReference> pics = listResult.getItems();
+                        if(pics.size() == 0) {
+                            i.setImageResource(R.drawable.ist_logo);
+                        }
+                        else {
+                            pics.get(0).getBytes(1024 * 1024).addOnCompleteListener(new OnCompleteListener<byte[]>() {
+                                @Override
+                                public void onComplete(@NonNull Task<byte[]> task) {
+                                    if(task.isSuccessful()) {
+                                        InputStream is = new ByteArrayInputStream(task.getResult());
+                                        Drawable d = Drawable.createFromStream(is, "img");
+                                        i.setImageDrawable(d);
+                                    }
+                                }
+                            });
+                        }
+                    });
+        }
+        else {
+            i.setImageURI(Uri.fromFile(files[0]));
         }
 
         view.setOnClickListener(v -> {

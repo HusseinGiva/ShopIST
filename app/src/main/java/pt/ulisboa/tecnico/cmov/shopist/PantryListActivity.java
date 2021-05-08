@@ -46,6 +46,7 @@ public class PantryListActivity extends AppCompatActivity {
     List<String> pantry_item_names = new ArrayList<>();
     List<Integer> pantry_item_quantities = new ArrayList<>();
     List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
+    List<String> imageIds = new ArrayList<>();
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -92,7 +93,7 @@ public class PantryListActivity extends AppCompatActivity {
 
         list = findViewById(R.id.pantry_list);
 
-        PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id, list);
+        PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, imageIds, id, list);
         list.setAdapter(a);
     }
 
@@ -123,6 +124,7 @@ public class PantryListActivity extends AppCompatActivity {
                                     pantry_item_names.clear();
                                     pantry_item_quantities.clear();
                                     pantry_item_ideal_quantities.clear();
+                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         PantryItem pi = document1.toObject(PantryItem.class);
                                         async_operations[0]++;
@@ -135,6 +137,8 @@ public class PantryListActivity extends AppCompatActivity {
                                                     pantry_item_quantities.add(pi.quantity);
                                                     pantry_item_ideal_quantities.add(pi.idealQuantity);
                                                     itemIds.add(document11.getId());
+                                                    if (i.barcode.equals("")) imageIds.add(pi.itemId);
+                                                    else imageIds.add(i.barcode);
                                                     async_operations[0]--;
                                                 } else {
                                                     Log.d("TAG", "No such document");
@@ -191,6 +195,9 @@ public class PantryListActivity extends AppCompatActivity {
 
         List<Integer> ideal_quantities_base = new ArrayList<>(pantry_item_ideal_quantities);
         pantry_item_ideal_quantities.sort(Comparator.comparing(i -> pantry_item_names.get(ideal_quantities_base.indexOf(i)).toLowerCase()));
+
+        List<String> img_base = new ArrayList<>(imageIds);
+        imageIds.sort(Comparator.comparing(i -> pantry_item_names.get(img_base.indexOf(i)).toLowerCase()));
 
         pantry_item_names.sort(Comparator.comparing(String::toLowerCase));
     }

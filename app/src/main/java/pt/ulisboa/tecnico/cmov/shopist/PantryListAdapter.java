@@ -2,11 +2,16 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import androidx.annotation.NonNull;
@@ -17,7 +22,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +42,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     List<Integer> item_quantities;
     List<Integer> item_ideal_quantities;
     List<String> itemIds;
+    List<String> imageIds;
     String pantryId;
 
     ListView list;
@@ -39,13 +52,14 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     private final FirebaseFirestore db;
 
     public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities,
-                             List<Integer> item_ideal_quantities, List<String> itemIds, String pantryId, ListView list) {
+                             List<Integer> item_ideal_quantities, List<String> itemIds, List<String> imageIds, String pantryId, ListView list) {
         super(context, R.layout.pantry_list_item, R.id.pantry_list_item_name, item_names);
         this.context = context;
         this.item_names = item_names;
         this.item_quantities = item_quantities;
         this.item_ideal_quantities = item_ideal_quantities;
         this.itemIds = itemIds;
+        this.imageIds = imageIds;
         this.pantryId = pantryId;
         this.list = list;
 
@@ -88,6 +102,40 @@ public class PantryListAdapter extends ArrayAdapter<String> {
         holder.pantryListPosition.setText(String.valueOf(position + 1));
         holder.pantryListItemName.setText(item_names.get(position));
         holder.pantryListItemQuantity.setText(item_quantities.get(position).toString() + " / " + item_ideal_quantities.get(position).toString());
+
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position));
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+        StorageReference imagesRef = storageRef.child(imageIds.get(position));
+
+        File[] files = storageDir.listFiles();
+        ImageView i = view.findViewById(R.id.pantry_list_item_image);
+
+        assert files != null;
+        if(files.length == 0) {
+            imagesRef.listAll()
+                    .addOnSuccessListener(listResult -> {
+                        List<StorageReference> pics = listResult.getItems();
+                        if(pics.size() == 0) {
+                            i.setImageResource(R.drawable.ist_logo);
+                        }
+                        else {
+                            pics.get(0).getBytes(1024 * 1024).addOnCompleteListener(new OnCompleteListener<byte[]>() {
+                                @Override
+                                public void onComplete(@NonNull Task<byte[]> task) {
+                                    if(task.isSuccessful()) {
+                                        InputStream is = new ByteArrayInputStream(task.getResult());
+                                        Drawable d = Drawable.createFromStream(is, "img");
+                                        i.setImageDrawable(d);
+                                    }
+                                }
+                            });
+                        }
+                    });
+        }
+        else {
+            i.setImageURI(Uri.fromFile(files[0]));
+        }
 
         view.setOnClickListener(v -> {
             Intent intent = new Intent(context, PantryItemActivity.class);

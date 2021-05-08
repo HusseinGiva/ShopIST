@@ -40,6 +40,7 @@ public class StoreListFragment extends Fragment {
     List<String> store_item_names = new ArrayList<>();
     List<Integer> store_item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
+    List<String> imageIds = new ArrayList<>();
 
     public StoreListFragment() {
     }
@@ -89,7 +90,7 @@ public class StoreListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_store_list, container, false);
         list = view.findViewById(R.id.store_list);
 
-        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, list, (StoreListActivity) getActivity(), null);
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, imageIds, list, (StoreListActivity) getActivity(), null);
         list.setAdapter(a);
 
         return view;
@@ -119,6 +120,7 @@ public class StoreListFragment extends Fragment {
                                     store_item_names.clear();
                                     store_item_quantities.clear();
                                     item_prices.clear();
+                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         StoreItem si = document1.toObject(StoreItem.class);
                                         if (si.quantity == 0) continue;
@@ -132,6 +134,8 @@ public class StoreListFragment extends Fragment {
                                                     store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                     store_item_quantities.add(si.quantity);
                                                     itemIds.add(document112.getId());
+                                                    if (i.barcode.equals("")) imageIds.add(si.itemId);
+                                                    else imageIds.add(i.barcode);
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         item_prices.add(i.stores.get(storeId));
@@ -222,6 +226,9 @@ public class StoreListFragment extends Fragment {
 
         List<Float> prices_base = new ArrayList<>(item_prices);
         item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
+
+        List<String> img_base = new ArrayList<>(imageIds);
+        imageIds.sort(Comparator.comparing(i -> store_item_names.get(img_base.indexOf(i)).toLowerCase()));
 
         store_item_names.sort(Comparator.comparing(String::toLowerCase));
     }
