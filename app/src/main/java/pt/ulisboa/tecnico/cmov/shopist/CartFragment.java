@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -131,7 +132,7 @@ public class CartFragment extends Fragment {
     public void onResume() {
         super.onResume();
         TextView textView = view.findViewById(R.id.total_cost);
-        textView.setText("0 €");
+        textView.setText("0");
         float[] total_cost = {0};
 
         int[] async_operations = {0};
@@ -171,7 +172,9 @@ public class CartFragment extends Fragment {
                                                         store_item_quantities.add(si.cartQuantity);
                                                         item_prices.add(i.stores.get(storeId));
                                                         total_cost[0] += si.cartQuantity * i.stores.get(storeId);
-                                                        textView.setText(String.valueOf(total_cost[0]));
+                                                        DecimalFormat df = new DecimalFormat("###.##");
+                                                        Double value = Math.round(total_cost[0] * 100.0) / 100.0;
+                                                        textView.setText(String.valueOf(df.format(value)));
                                                     } else {
                                                         async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task1 -> {
@@ -197,7 +200,9 @@ public class CartFragment extends Fragment {
                                                                                         store_item_quantities.add(si.cartQuantity);
                                                                                         item_prices.add(i.stores.get(s));
                                                                                         total_cost[0] += si.cartQuantity * i.stores.get(s);
-                                                                                        textView.setText(String.valueOf(total_cost[0]));
+                                                                                        DecimalFormat df = new DecimalFormat("###.##");
+                                                                                        Double value = Math.round(total_cost[0] * 100.0) / 100.0;
+                                                                                        textView.setText(String.valueOf(df.format(value)));
                                                                                     }
                                                                                 }
                                                                                 async_operations[0]--;

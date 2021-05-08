@@ -3,6 +3,8 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +76,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         holder.storeListItemName.setText(item_names.get(position));
         holder.storeListItemQuantity.setText(item_quantities.get(position).toString());
         DecimalFormat df = new DecimalFormat("###.##");
-        Double value = Math.round(item_prices.get(position)*100.0)/100.0;
+        Double value = Math.round(item_prices.get(position) * 100.0) / 100.0;
         holder.itemPrice.setText(df.format(value));
 
         final String q = (String) holder.storeListItemQuantity.getText();
@@ -95,65 +97,67 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             if (!cart && quantity == 0) return;
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                     .get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                String field;
-                                if (cart) field = "cartQuantity";
-                                else field = "quantity";
-                                db.collection("StoreItem").document(document_1.getId()).update(field, quantity - 1)
-                                        .addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
-                                                if (cart) {
-                                                    String s_total_cost = (String) totalCost.getText();
-                                                    String[] a_total_cost = s_total_cost.split(" ");
-                                                    float total_cost = Float.parseFloat(a_total_cost[0]);
-                                                    total_cost -= item_prices.get(position);
-                                                    totalCost.setText(String.valueOf(total_cost));
-                                                    if (quantity == 1) {
-                                                        activity.goToCart();
-                                                        return;
-                                                    }
-                                                }
-                                                item_quantities.set(position, quantity - 1);
-                                                list.invalidateViews();
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                        String field;
+                        if (cart) field = "cartQuantity";
+                        else field = "quantity";
+                        db.collection("StoreItem").document(document_1.getId()).update(field, quantity - 1)
+                                .addOnCompleteListener(task1 -> {
+                                    if (task1.isSuccessful()) {
+                                        if (cart) {
+                                            String s_total_cost = (String) totalCost.getText();
+                                            String[] a_total_cost = s_total_cost.split(" ");
+                                            float total_cost = Float.parseFloat(a_total_cost[0]);
+                                            total_cost -= item_prices.get(position);
+                                            Double value2 = Math.round(total_cost * 100.0) / 100.0;
+                                            totalCost.setText(String.valueOf(df.format(value2)));
+                                            if (quantity == 1) {
+                                                activity.goToCart();
+                                                return;
                                             }
-                                        });
-                                return;
-                            }
-                        }
-                    });
+                                        }
+                                        item_quantities.set(position, quantity - 1);
+                                        list.invalidateViews();
+                                    }
+                                });
+                        return;
+                    }
+                }
+            });
         });
 
         view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> {
             final int quantity = Integer.parseInt(q);
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                     .get().addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                StoreItem si = document_1.toObject(StoreItem.class);
-                                String field;
-                                if (cart) {
-                                    if (quantity == si.quantity) return;
-                                    field = "cartQuantity";
-                                } else field = "quantity";
-                                db.collection("StoreItem").document(document_1.getId()).update(field, quantity + 1)
-                                        .addOnCompleteListener(task12 -> {
-                                            if (task12.isSuccessful()) {
-                                                if (cart) {
-                                                    String s_total_cost = (String) totalCost.getText();
-                                                    String[] a_total_cost = s_total_cost.split(" ");
-                                                    float total_cost = Float.parseFloat(a_total_cost[0]);
-                                                    total_cost += item_prices.get(position);
-                                                    totalCost.setText(String.valueOf(total_cost));
-                                                }
-                                                item_quantities.set(position, quantity + 1);
-                                                list.invalidateViews();
-                                            }
-                                        });
-                                return;
-                            }
-                        }
-                    });
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                        StoreItem si = document_1.toObject(StoreItem.class);
+                        String field;
+                        if (cart) {
+                            if (quantity == si.quantity) return;
+                            field = "cartQuantity";
+                        } else field = "quantity";
+                        db.collection("StoreItem").document(document_1.getId()).update(field, quantity + 1)
+                                .addOnCompleteListener(task12 -> {
+                                    if (task12.isSuccessful()) {
+                                        if (cart) {
+                                            String s_total_cost = (String) totalCost.getText();
+                                            String[] a_total_cost = s_total_cost.split(" ");
+                                            float total_cost = Float.parseFloat(a_total_cost[0]);
+                                            total_cost += item_prices.get(position);
+                                            Double value2 = Math.round(total_cost * 100.0) / 100.0;
+                                            totalCost.setText(String.valueOf(df.format(value2)));
+                                        }
+                                        item_quantities.set(position, quantity + 1);
+                                        list.invalidateViews();
+                                    }
+                                });
+                        return;
+                    }
+                }
+            });
         });
 
         view.findViewById(R.id.moveToCart).setOnClickListener(v -> {
@@ -164,15 +168,37 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
+            EditText e = view1.findViewById(R.id.move_to_cart_quantity);
+            e.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String str = s.toString();
+                    if (!str.equals("")) {
+                        int quantity = Integer.parseInt(String.valueOf(e.getText()));
+                        int max_quantity = Integer.parseInt(q);
+                        if (quantity > max_quantity) {
+                            e.setText(String.valueOf(max_quantity));
+                        }
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
+
             view1.findViewById(R.id.decrement_move_to_cart_quantity).setOnClickListener(v1 -> {
-                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
                 if (quantity == 0) return;
                 e.setText(String.valueOf(quantity - 1));
             });
 
             view1.findViewById(R.id.increment_move_to_cart_quantity).setOnClickListener(v12 -> {
-                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
                 int max_quantity = Integer.parseInt(q);
                 if (quantity == max_quantity) return;
@@ -182,22 +208,27 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             builder.setView(view1);
             builder.setPositiveButton(R.string.ok, (dialog, id) -> {
                 // User clicked OK button
-                EditText e = view1.findViewById(R.id.move_to_cart_quantity);
-                int quantity = Integer.parseInt(String.valueOf(e.getText()));
+                int quantity;
+                if (e.getText().toString().equals("")) {
+                    quantity = 0;
+                }
+                else {
+                    quantity = Integer.parseInt(e.getText().toString());
+                }
                 db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                         .get().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                    db.collection("StoreItem").document(document_1.getId()).update("cartQuantity", quantity)
-                                            .addOnCompleteListener(task13 -> {
-                                                if (task13.isSuccessful()) {
-                                                    activity.goToCart();
-                                                }
-                                            });
-                                    return;
-                                }
-                            }
-                        });
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                            db.collection("StoreItem").document(document_1.getId()).update("cartQuantity", quantity)
+                                    .addOnCompleteListener(task13 -> {
+                                        if (task13.isSuccessful()) {
+                                            activity.goToCart();
+                                        }
+                                    });
+                            return;
+                        }
+                    }
+                });
             });
             builder.setNegativeButton(R.string.cancel, (dialog, id) -> {
                 // User cancelled the dialog
