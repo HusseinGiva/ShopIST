@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
@@ -33,6 +35,11 @@ public class StoreListFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
+
+    List<String> itemIds = new ArrayList<>();
+    List<String> store_item_names = new ArrayList<>();
+    List<Integer> store_item_quantities = new ArrayList<>();
+    List<Float> item_prices = new ArrayList<>();
 
     public StoreListFragment() {
     }
@@ -82,6 +89,9 @@ public class StoreListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_store_list, container, false);
         list = view.findViewById(R.id.store_list);
 
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, list, (StoreListActivity) getActivity(), null);
+        list.setAdapter(a);
+
         return view;
     }
 
@@ -89,6 +99,9 @@ public class StoreListFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        int[] async_operations = {0};
+
+        async_operations[0]++;
         db.collection("StoreList").document(id)
                 .get(source)
                 .addOnCompleteListener(task -> {
@@ -98,15 +111,19 @@ public class StoreListFragment extends Fragment {
                             Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             StoreList store = document.toObject(StoreList.class);
 
+                            async_operations[0]++;
                             db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task1 -> {
 
                                 if (task1.isSuccessful()) {
-                                    ArrayList<String> itemIds = new ArrayList<>();
-                                    List<String> store_item_names = new ArrayList<>();
-                                    List<Integer> store_item_quantities = new ArrayList<>();
-                                    List<Float> item_prices = new ArrayList<>();
+                                    itemIds.clear();
+                                    store_item_names.clear();
+                                    store_item_quantities.clear();
+                                    item_prices.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         StoreItem si = document1.toObject(StoreItem.class);
+                                        if (si.quantity == 0) continue;
+
+                                        async_operations[0]++;
                                         db.collection("Item").document(si.itemId).get(source).addOnCompleteListener(task112 -> {
                                             if (task112.isSuccessful()) {
                                                 DocumentSnapshot document112 = task112.getResult();
@@ -118,14 +135,15 @@ public class StoreListFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         item_prices.add(i.stores.get(storeId));
-                                                        list.invalidateViews();
                                                     } else {
+                                                        async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task11 -> {
                                                             if (task11.isSuccessful()) {
                                                                 DocumentSnapshot document11 = task11.getResult();
                                                                 if (document11.exists()) {
                                                                     StoreList sl = document11.toObject(StoreList.class);
                                                                     for (String s : i.stores.keySet()) {
+                                                                        async_operations[0]++;
                                                                         db.collection("StoreList").document(s).get(source).addOnCompleteListener(task2 -> {
                                                                             if (task2.isSuccessful()) {
                                                                                 DocumentSnapshot document2 = task2.getResult();
@@ -138,16 +156,18 @@ public class StoreListFragment extends Fragment {
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         item_prices.add(i.stores.get(s));
-                                                                                        list.invalidateViews();
                                                                                     }
+                                                                                    async_operations[0]--;
                                                                                 }
                                                                             }
                                                                         });
                                                                     }
+                                                                    async_operations[0]--;
                                                                 }
                                                             }
                                                         });
                                                     }
+                                                    async_operations[0]--;
                                                 } else {
                                                     Log.d("TAG", "No such document");
                                                 }
@@ -158,16 +178,15 @@ public class StoreListFragment extends Fragment {
                                             }
                                         });
                                     }
-                                    StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, list, (StoreListActivity) getActivity(), null);
-                                    list.setAdapter(a);
 
+                                    async_operations[0]--;
                                 } else {
                                     Log.d("TAG", "Error getting documents: ", task1.getException());
                                 }
 
                             });
 
-
+                            async_operations[0]--;
                         } else {
                             Log.d("TAG", "No such document");
                         }
@@ -176,5 +195,34 @@ public class StoreListFragment extends Fragment {
                         Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
+
+        Handler timerHandler = new Handler();
+        Runnable timerRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (async_operations[0] == 0) {
+                    sort();
+                    list.invalidateViews();
+                } else {
+                    timerHandler.postDelayed(this, 100);
+                }
+            }
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
+    }
+
+    public void sort() {
+
+        List<String> ids_base = new ArrayList<>(itemIds);
+        itemIds.sort(Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+
+        List<Integer> quantities_base = new ArrayList<>(store_item_quantities);
+        store_item_quantities.sort(Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+
+        List<Float> prices_base = new ArrayList<>(item_prices);
+        item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
+
+        store_item_names.sort(Comparator.comparing(String::toLowerCase));
     }
 }

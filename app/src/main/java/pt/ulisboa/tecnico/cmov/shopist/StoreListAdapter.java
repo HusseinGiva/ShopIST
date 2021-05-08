@@ -143,6 +143,10 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                                 return;
                                             }
                                         }
+                                        else if(quantity == 1) {
+                                            activity.goToStore();
+                                            return;
+                                        }
                                         item_quantities.set(position, quantity - 1);
                                         list.invalidateViews();
                                     }
