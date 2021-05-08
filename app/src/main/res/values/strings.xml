@@ -98,7 +98,7 @@
     <string name="shareUsing">Share Using</string>
     <string name="checkoutThisProduct">"Hey, checkout this product: "</string>
     <string name="itHasTheBarcode">". It has the barcode "</string>
-    <string name="andIsSoldAt">" and is sold at "</string>
+    <string name="andIsSoldAt">". It is sold at "</string>
     <string name="forString">" for "</string>
     <string name="needs">Needs</string>
     <string name="youHaveNoItemsInCart">You Have No Products In The Cart</string>

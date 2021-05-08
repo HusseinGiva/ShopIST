@@ -98,7 +98,7 @@
     <string name="targetQuantityBiggerPantryQuantity">A Quantidade Ideal Deve Ser Maior Que A Quantidade Despensa</string>
     <string name="checkoutThisProduct">"Dá uma vista de olhos neste produto: "</string>
     <string name="itHasTheBarcode">". Tem o código de barras "</string>
-    <string name="andIsSoldAt">" e é vendido em "</string>
+    <string name="andIsSoldAt">". É vendido em "</string>
     <string name="forString">" por "</string>
     <string name="needs">Precisa</string>
     <string name="youHaveNoItemsInCart">Não Tem Produtos No Carrinho</string>

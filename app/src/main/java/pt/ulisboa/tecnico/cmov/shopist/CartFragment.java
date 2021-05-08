@@ -175,6 +175,16 @@ public class CartFragment extends Fragment {
                                                         DecimalFormat df = new DecimalFormat("###.##");
                                                         Double value = Math.round(total_cost[0] * 100.0) / 100.0;
                                                         textView.setText(String.valueOf(df.format(value)));
+                                                        if (value == 0) {
+                                                            textView.setVisibility(View.INVISIBLE);
+                                                            TextView euro = view.findViewById(R.id.textView7);
+                                                            euro.setVisibility(View.INVISIBLE);
+                                                        }
+                                                        else {
+                                                            textView.setVisibility(View.VISIBLE);
+                                                            TextView euro = view.findViewById(R.id.textView7);
+                                                            euro.setVisibility(View.VISIBLE);
+                                                        }
                                                     } else {
                                                         async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task1 -> {
@@ -203,6 +213,16 @@ public class CartFragment extends Fragment {
                                                                                         DecimalFormat df = new DecimalFormat("###.##");
                                                                                         Double value = Math.round(total_cost[0] * 100.0) / 100.0;
                                                                                         textView.setText(String.valueOf(df.format(value)));
+                                                                                        if (value == 0) {
+                                                                                            textView.setVisibility(View.INVISIBLE);
+                                                                                            TextView euro = view.findViewById(R.id.textView7);
+                                                                                            euro.setVisibility(View.INVISIBLE);
+                                                                                        }
+                                                                                        else {
+                                                                                            textView.setVisibility(View.VISIBLE);
+                                                                                            TextView euro = view.findViewById(R.id.textView7);
+                                                                                            euro.setVisibility(View.VISIBLE);
+                                                                                        }
                                                                                     }
                                                                                 }
                                                                                 async_operations[0]--;

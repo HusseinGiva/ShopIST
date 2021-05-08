@@ -111,7 +111,9 @@ public class StoreItemActivity extends AppCompatActivity {
                             barcodeNumber.setText(item.barcode);
                             for (String s : item.stores.keySet()) {
                                 if (storeId.equals(s)) {
-                                    price.setText(String.valueOf(item.stores.get(s)));
+                                    if (item.stores.get(s) != 0) {
+                                        price.setText(String.valueOf(item.stores.get(s)));
+                                    }
                                 } else {
                                     db.collection("StoreList").document(s).get(source).addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
@@ -180,16 +182,18 @@ public class StoreItemActivity extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             StoreList storeList = document.toObject(StoreList.class);
-                            String price2;
-                            if (price.getText().toString().equals("")) {
-                                price2 = "0.00";
-                            } else {
-                                price2 = price.getText().toString();
-                            }
                             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                             String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
-                            shareable += getString(R.string.itHasTheBarcode) + item.barcode + getString(R.string.andIsSoldAt);
-                            shareable += storeList.name + getString(R.string.forString) + price2 + getString(R.string.euro);
+                            if (item.barcode != null && !item.barcode.equals("")) {
+                                shareable += getString(R.string.itHasTheBarcode) + item.barcode;
+                            }
+                            shareable += getString(R.string.andIsSoldAt) + storeList.name;
+                            if (price.getText().toString().equals("") || Float.parseFloat(price.getText().toString()) == 0) {
+                                shareable += ".";
+                            }
+                            else {
+                                shareable += getString(R.string.forString) + price.getText().toString() + getString(R.string.euro);
+                            }
                             sharingIntent.putExtra(Intent.EXTRA_TEXT, shareable);
                             sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                             File storageDir;

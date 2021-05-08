@@ -54,7 +54,12 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
 
         holder.pantryName.setText(pantryNames.get(position));
         holder.quantityNeeded.setText(String.valueOf(quantitiesNeeded.get(position)));
-        holder.pantryQuantity.setText(pantryQuantities.get(position));
+        if (pantryQuantities.get(position).equals("")) {
+            holder.pantryQuantity.setText("0");
+        }
+        else {
+            holder.pantryQuantity.setText(pantryQuantities.get(position));
+        }
 
         EditText et = (EditText) view.findViewById(R.id.checkout_pantry_quantity);
         et.addTextChangedListener(new TextWatcher() {
@@ -67,13 +72,12 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Map<String, String> m = quantitiesPerPantry.get(itemIds.get(item_position));
                 String str = s.toString();
-
                 try {
                     int previous_n = Integer.parseInt(m.get(pantryIds.get(position)));
                     int n = Integer.parseInt(str);
-                    if (n <= 0) {
+                    if (n < 0) {
                         m.put(pantryIds.get(position), "0");
-                        et.setText("");
+                        et.setText("0");
                     } else if (quantity_sum() - previous_n + n <= item_quantities.get(item_position)) {
                         m.put(pantryIds.get(position), String.valueOf(n));
                     } else {

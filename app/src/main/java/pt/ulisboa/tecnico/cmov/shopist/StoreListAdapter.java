@@ -78,6 +78,14 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         DecimalFormat df = new DecimalFormat("###.##");
         Double value = Math.round(item_prices.get(position) * 100.0) / 100.0;
         holder.itemPrice.setText(df.format(value));
+        if (value == 0) {
+            holder.itemPrice.setVisibility(View.INVISIBLE);
+            holder.euro.setVisibility(View.INVISIBLE);
+        }
+        else {
+            holder.itemPrice.setVisibility(View.VISIBLE);
+            holder.euro.setVisibility(View.VISIBLE);
+        }
 
         final String q = (String) holder.storeListItemQuantity.getText();
 

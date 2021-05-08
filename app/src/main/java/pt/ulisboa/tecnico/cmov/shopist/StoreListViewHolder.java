@@ -8,11 +8,13 @@ public class StoreListViewHolder {
     TextView storeListItemName;
     TextView storeListItemQuantity;
     TextView itemPrice;
+    TextView euro;
 
     StoreListViewHolder(View v) {
         storeListPosition = v.findViewById(R.id.store_list_position);
         storeListItemName = v.findViewById(R.id.store_list_item_name);
         storeListItemQuantity = v.findViewById(R.id.store_list_item_quantity);
         itemPrice = v.findViewById(R.id.item_price);
+        euro = v.findViewById(R.id.textView6);
     }
 }

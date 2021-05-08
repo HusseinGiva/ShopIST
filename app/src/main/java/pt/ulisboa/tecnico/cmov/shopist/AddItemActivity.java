@@ -1269,8 +1269,47 @@ public class AddItemActivity extends AppCompatActivity {
         if (getIntent().getStringExtra("MODE").equals("update")) {
             intent.putExtra("MODE", "update");
             intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
-            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-            storesResultLauncher.launch(intent);
+            db.collection("StoreList")
+                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                    .get(source)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                StoreList store = document.toObject(StoreList.class);
+                                if (!storeViewAddItems.isEmpty()) {
+                                    boolean present = false;
+                                    for (StoreViewAddItem item : storeViewAddItems) {
+                                        if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
+                                            float[] results = new float[1];
+                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                    Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
+                                                    results);
+                                            //Less than 20 meters
+                                            if (results[0] < 20f) {
+                                                present = true;
+                                            }
+                                        }
+                                    }
+                                    if (!present) {
+                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, false);
+                                        storeViewAddItem.latitude = store.latitude;
+                                        storeViewAddItem.longitude = store.longitude;
+                                        storeViewAddItems.add(storeViewAddItem);
+                                    }
+
+                                } else {
+                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, false);
+                                    storeViewAddItem.latitude = store.latitude;
+                                    storeViewAddItem.longitude = store.longitude;
+                                    storeViewAddItems.add(storeViewAddItem);
+                                }
+                            }
+                            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+                            storesResultLauncher.launch(intent);
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    });
         } else if (getIntent().getStringExtra("MODE").equals("add")) {
             intent.putExtra("MODE", "add");
             db.collection("StoreList")
@@ -1283,8 +1322,15 @@ public class AddItemActivity extends AppCompatActivity {
                                 if (!storeViewAddItems.isEmpty()) {
                                     boolean present = false;
                                     for (StoreViewAddItem item : storeViewAddItems) {
-                                        if (item.storeId.equals(document.getId())) {
-                                            present = true;
+                                        if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
+                                            float[] results = new float[1];
+                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                    Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
+                                                    results);
+                                            //Less than 20 meters
+                                            if (results[0] < 20f) {
+                                                present = true;
+                                            }
                                         }
                                     }
                                     if (!present) {

@@ -241,7 +241,9 @@ public class PantryItemActivity extends AppCompatActivity {
             case R.id.shareItem:
                 Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                 String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
-                shareable += getString(R.string.itHasTheBarcode) + item.barcode;
+                if (item.barcode != null && !item.barcode.equals("")) {
+                    shareable += getString(R.string.itHasTheBarcode) + item.barcode;
+                }
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareable);
                 sharingIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.shareUsing));
                 File storageDir;

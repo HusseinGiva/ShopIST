@@ -123,7 +123,7 @@ public class CheckoutActivity extends AppCompatActivity {
             public void run() {
                 if (async_operations[0] == 0) {
                     everything_loaded = true;
-                    ab.setTitle("Checkout    " + (current_item + 1) + " / " + item_names.size());
+                    ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
 
                     if (current_item == item_names.size() - 1) {
                         confirm.setVisibility(View.VISIBLE);
@@ -135,6 +135,20 @@ public class CheckoutActivity extends AppCompatActivity {
                     name.setText(item_names.get(current_item));
                     quantity.setText(String.valueOf(item_quantities.get(current_item)));
                     price.setText(String.valueOf(item_prices.get(current_item)));
+                    if (item_prices.get(current_item) == 0) {
+                        price.setVisibility(View.INVISIBLE);
+                        TextView euro = findViewById(R.id.euroCheckout);
+                        TextView priceCheckout = findViewById(R.id.priceCheckout);
+                        euro.setVisibility(View.INVISIBLE);
+                        priceCheckout.setVisibility(View.INVISIBLE);
+                    }
+                    else {
+                        price.setVisibility(View.VISIBLE);
+                        TextView euro = findViewById(R.id.euroCheckout);
+                        TextView priceCheckout = findViewById(R.id.priceCheckout);
+                        euro.setVisibility(View.VISIBLE);
+                        priceCheckout.setVisibility(View.VISIBLE);
+                    }
 
                     updateList();
                 } else {
@@ -154,13 +168,27 @@ public class CheckoutActivity extends AppCompatActivity {
             name.setText(item_names.get(current_item));
             quantity.setText(String.valueOf(item_quantities.get(current_item)));
             price.setText(String.valueOf(item_prices.get(current_item)));
+            if (item_prices.get(current_item) == 0) {
+                price.setVisibility(View.INVISIBLE);
+                TextView euro = findViewById(R.id.euroCheckout);
+                TextView priceCheckout = findViewById(R.id.priceCheckout);
+                euro.setVisibility(View.INVISIBLE);
+                priceCheckout.setVisibility(View.INVISIBLE);
+            }
+            else {
+                price.setVisibility(View.VISIBLE);
+                TextView euro = findViewById(R.id.euroCheckout);
+                TextView priceCheckout = findViewById(R.id.priceCheckout);
+                euro.setVisibility(View.VISIBLE);
+                priceCheckout.setVisibility(View.VISIBLE);
+            }
 
             if (current_item == item_names.size() - 1) {
                 next.setVisibility(View.INVISIBLE);
                 confirm.setVisibility(View.VISIBLE);
             }
 
-            ab.setTitle("Checkout    " + (current_item + 1) + " / " + item_names.size());
+            ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
             updateList();
         });
 
@@ -175,12 +203,26 @@ public class CheckoutActivity extends AppCompatActivity {
             name.setText(item_names.get(current_item));
             quantity.setText(String.valueOf(item_quantities.get(current_item)));
             price.setText(String.valueOf(item_prices.get(current_item)));
+            if (item_prices.get(current_item) == 0) {
+                price.setVisibility(View.INVISIBLE);
+                TextView euro = findViewById(R.id.euroCheckout);
+                TextView priceCheckout = findViewById(R.id.priceCheckout);
+                euro.setVisibility(View.INVISIBLE);
+                priceCheckout.setVisibility(View.INVISIBLE);
+            }
+            else {
+                price.setVisibility(View.VISIBLE);
+                TextView euro = findViewById(R.id.euroCheckout);
+                TextView priceCheckout = findViewById(R.id.priceCheckout);
+                euro.setVisibility(View.VISIBLE);
+                priceCheckout.setVisibility(View.VISIBLE);
+            }
 
             if (current_item == 0) {
                 previous.setVisibility(View.INVISIBLE);
             }
 
-            ab.setTitle("Checkout    " + (current_item + 1) + " / " + item_names.size());
+            ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
             updateList();
         });
 
