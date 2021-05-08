@@ -56,8 +56,7 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
         holder.quantityNeeded.setText(String.valueOf(quantitiesNeeded.get(position)));
         if (pantryQuantities.get(position).equals("")) {
             holder.pantryQuantity.setText("0");
-        }
-        else {
+        } else {
             holder.pantryQuantity.setText(pantryQuantities.get(position));
         }
 

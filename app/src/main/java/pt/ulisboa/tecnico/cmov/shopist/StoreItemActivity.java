@@ -190,8 +190,7 @@ public class StoreItemActivity extends AppCompatActivity {
                             shareable += getString(R.string.andIsSoldAt) + storeList.name;
                             if (price.getText().toString().equals("") || Float.parseFloat(price.getText().toString()) == 0) {
                                 shareable += ".";
-                            }
-                            else {
+                            } else {
                                 shareable += getString(R.string.forString) + price.getText().toString() + getString(R.string.euro);
                             }
                             sharingIntent.putExtra(Intent.EXTRA_TEXT, shareable);

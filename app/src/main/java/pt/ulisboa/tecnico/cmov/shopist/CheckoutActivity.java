@@ -163,8 +163,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         TextView priceCheckout = findViewById(R.id.priceCheckout);
                         euro.setVisibility(View.INVISIBLE);
                         priceCheckout.setVisibility(View.INVISIBLE);
-                    }
-                    else {
+                    } else {
                         price.setVisibility(View.VISIBLE);
                         TextView euro = findViewById(R.id.euroCheckout);
                         TextView priceCheckout = findViewById(R.id.priceCheckout);
@@ -196,8 +195,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 TextView priceCheckout = findViewById(R.id.priceCheckout);
                 euro.setVisibility(View.INVISIBLE);
                 priceCheckout.setVisibility(View.INVISIBLE);
-            }
-            else {
+            } else {
                 price.setVisibility(View.VISIBLE);
                 TextView euro = findViewById(R.id.euroCheckout);
                 TextView priceCheckout = findViewById(R.id.priceCheckout);
@@ -231,8 +229,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 TextView priceCheckout = findViewById(R.id.priceCheckout);
                 euro.setVisibility(View.INVISIBLE);
                 priceCheckout.setVisibility(View.INVISIBLE);
-            }
-            else {
+            } else {
                 price.setVisibility(View.VISIBLE);
                 TextView euro = findViewById(R.id.euroCheckout);
                 TextView priceCheckout = findViewById(R.id.priceCheckout);

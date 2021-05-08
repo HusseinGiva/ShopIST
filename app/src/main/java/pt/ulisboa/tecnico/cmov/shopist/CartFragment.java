@@ -179,8 +179,7 @@ public class CartFragment extends Fragment {
                                                             textView.setVisibility(View.INVISIBLE);
                                                             TextView euro = view.findViewById(R.id.textView7);
                                                             euro.setVisibility(View.INVISIBLE);
-                                                        }
-                                                        else {
+                                                        } else {
                                                             textView.setVisibility(View.VISIBLE);
                                                             TextView euro = view.findViewById(R.id.textView7);
                                                             euro.setVisibility(View.VISIBLE);
@@ -217,8 +216,7 @@ public class CartFragment extends Fragment {
                                                                                             textView.setVisibility(View.INVISIBLE);
                                                                                             TextView euro = view.findViewById(R.id.textView7);
                                                                                             euro.setVisibility(View.INVISIBLE);
-                                                                                        }
-                                                                                        else {
+                                                                                        } else {
                                                                                             textView.setVisibility(View.VISIBLE);
                                                                                             TextView euro = view.findViewById(R.id.textView7);
                                                                                             euro.setVisibility(View.VISIBLE);

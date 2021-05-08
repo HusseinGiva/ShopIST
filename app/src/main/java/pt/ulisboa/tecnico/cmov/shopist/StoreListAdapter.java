@@ -25,33 +25,18 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 
 public class StoreListAdapter extends ArrayAdapter<String> {
 
+    private final FirebaseFirestore db;
+    private final StoreListActivity activity;
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
     List<Float> item_prices;
     String storeId;
     List<String> itemIds;
-
     ListView list;
-
     boolean cart;
     TextView totalCost;
-    private final FirebaseFirestore db;
-    private final StoreListActivity activity;
     private Source source;
-
-    public static boolean isConnected(Context getApplicationContext) {
-        boolean status = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
-            // connected to the internet
-            status = true;
-        }
-
-
-        return status;
-    }
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
                             boolean cart, String storeId, List<String> itemIds, ListView list, StoreListActivity activity, TextView totalCost) {
@@ -78,6 +63,19 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         this.totalCost = totalCost;
     }
 
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -102,8 +100,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         if (value == 0) {
             holder.itemPrice.setVisibility(View.INVISIBLE);
             holder.euro.setVisibility(View.INVISIBLE);
-        }
-        else {
+        } else {
             holder.itemPrice.setVisibility(View.VISIBLE);
             holder.euro.setVisibility(View.VISIBLE);
         }
@@ -240,8 +237,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                 int quantity;
                 if (e.getText().toString().equals("")) {
                     quantity = 0;
-                }
-                else {
+                } else {
                     quantity = Integer.parseInt(e.getText().toString());
                 }
                 db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
