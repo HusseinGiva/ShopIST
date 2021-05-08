@@ -105,8 +105,6 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             holder.euro.setVisibility(View.VISIBLE);
         }
 
-        final String q = (String) holder.storeListItemQuantity.getText();
-
         view.setOnClickListener(v -> {
             Intent intent = new Intent(context, StoreItemActivity.class);
             intent.putExtra("ID", itemIds.get(position));
@@ -119,8 +117,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         }
 
         view.findViewById(R.id.decrement_item_quantity).setOnClickListener(v -> {
-            final int quantity = Integer.parseInt(q);
-            if (!cart && quantity == 0) return;
+            if (!cart && item_quantities.get(position) == 0) return;
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                     .get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -128,7 +125,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                         String field;
                         if (cart) field = "cartQuantity";
                         else field = "quantity";
-                        db.collection("StoreItem").document(document_1.getId()).update(field, quantity - 1)
+                        db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) - 1)
                                 .addOnCompleteListener(task1 -> {
                                     if (task1.isSuccessful()) {
                                         if (cart) {
@@ -138,16 +135,16 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                             total_cost -= item_prices.get(position);
                                             Double value2 = Math.round(total_cost * 100.0) / 100.0;
                                             totalCost.setText(String.valueOf(df.format(value2)));
-                                            if (quantity == 1) {
+                                            if (item_quantities.get(position) == 1) {
                                                 activity.goToCart();
                                                 return;
                                             }
                                         }
-                                        else if(quantity == 1) {
+                                        else if(item_quantities.get(position) == 1) {
                                             activity.goToStore();
                                             return;
                                         }
-                                        item_quantities.set(position, quantity - 1);
+                                        item_quantities.set(position, item_quantities.get(position) - 1);
                                         list.invalidateViews();
                                     }
                                 });
@@ -158,7 +155,6 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         });
 
         view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> {
-            final int quantity = Integer.parseInt(q);
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                     .get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -166,10 +162,10 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                         StoreItem si = document_1.toObject(StoreItem.class);
                         String field;
                         if (cart) {
-                            if (quantity == si.quantity) return;
+                            if (item_quantities.get(position) == si.quantity) return;
                             field = "cartQuantity";
                         } else field = "quantity";
-                        db.collection("StoreItem").document(document_1.getId()).update(field, quantity + 1)
+                        db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) + 1)
                                 .addOnCompleteListener(task12 -> {
                                     if (task12.isSuccessful()) {
                                         if (cart) {
@@ -180,7 +176,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                             Double value2 = Math.round(total_cost * 100.0) / 100.0;
                                             totalCost.setText(String.valueOf(df.format(value2)));
                                         }
-                                        item_quantities.set(position, quantity + 1);
+                                        item_quantities.set(position, item_quantities.get(position) + 1);
                                         list.invalidateViews();
                                     }
                                 });
@@ -209,7 +205,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                     String str = s.toString();
                     if (!str.equals("")) {
                         int quantity = Integer.parseInt(String.valueOf(e.getText()));
-                        int max_quantity = Integer.parseInt(q);
+                        int max_quantity = item_quantities.get(position);
                         if (quantity > max_quantity) {
                             e.setText(String.valueOf(max_quantity));
                         }
@@ -230,7 +226,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
 
             view1.findViewById(R.id.increment_move_to_cart_quantity).setOnClickListener(v12 -> {
                 int quantity = Integer.parseInt(String.valueOf(e.getText()));
-                int max_quantity = Integer.parseInt(q);
+                int max_quantity = item_quantities.get(position);
                 if (quantity == max_quantity) return;
                 e.setText(String.valueOf(Integer.parseInt(String.valueOf(e.getText())) + 1));
             });

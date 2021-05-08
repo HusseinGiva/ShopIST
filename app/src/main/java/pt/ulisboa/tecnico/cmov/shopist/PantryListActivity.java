@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,6 +24,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -39,6 +41,11 @@ public class PantryListActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
+
+    List<String> itemIds = new ArrayList<>();
+    List<String> pantry_item_names = new ArrayList<>();
+    List<Integer> pantry_item_quantities = new ArrayList<>();
+    List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -84,12 +91,18 @@ public class PantryListActivity extends AppCompatActivity {
         id = getIntent().getStringExtra("ID");
 
         list = findViewById(R.id.pantry_list);
+
+        PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id, list);
+        list.setAdapter(a);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        int[] async_operations = {0};
+
+        async_operations[0]++;
         db.collection("PantryList").document(id)
                 .get(source)
                 .addOnCompleteListener(task -> {
@@ -102,15 +115,17 @@ public class PantryListActivity extends AppCompatActivity {
                             longitude = pantry.longitude;
                             getSupportActionBar().setTitle(pantry.name);
 
+                            async_operations[0]++;
                             db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
 
                                 if (task1.isSuccessful()) {
-                                    ArrayList<String> itemIds = new ArrayList<>();
-                                    List<String> pantry_item_names = new ArrayList<>();
-                                    List<Integer> pantry_item_quantities = new ArrayList<>();
-                                    List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
+                                    itemIds.clear();
+                                    pantry_item_names.clear();
+                                    pantry_item_quantities.clear();
+                                    pantry_item_ideal_quantities.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         PantryItem pi = document1.toObject(PantryItem.class);
+                                        async_operations[0]++;
                                         db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task11 -> {
                                             if (task11.isSuccessful()) {
                                                 DocumentSnapshot document11 = task11.getResult();
@@ -120,7 +135,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                     pantry_item_quantities.add(pi.quantity);
                                                     pantry_item_ideal_quantities.add(pi.idealQuantity);
                                                     itemIds.add(document11.getId());
-                                                    list.invalidateViews();
+                                                    async_operations[0]--;
                                                 } else {
                                                     Log.d("TAG", "No such document");
                                                 }
@@ -131,16 +146,15 @@ public class PantryListActivity extends AppCompatActivity {
                                             }
                                         });
                                     }
-                                    PantryListAdapter a = new PantryListAdapter(PantryListActivity.this, pantry_item_names, pantry_item_quantities, pantry_item_ideal_quantities, itemIds, id);
-                                    list.setAdapter(a);
 
+                                    async_operations[0]--;
                                 } else {
                                     Log.d("TAG", "Error getting documents: ", task1.getException());
                                 }
 
                             });
 
-
+                            async_operations[0]--;
                         } else {
                             Log.d("TAG", "No such document");
                         }
@@ -150,6 +164,35 @@ public class PantryListActivity extends AppCompatActivity {
                     }
                 });
 
+        Handler timerHandler = new Handler();
+        Runnable timerRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (async_operations[0] == 0) {
+                    sort();
+                    list.invalidateViews();
+                } else {
+                    timerHandler.postDelayed(this, 100);
+                }
+            }
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
+
+    }
+
+    public void sort() {
+
+        List<String> ids_base = new ArrayList<>(itemIds);
+        itemIds.sort(Comparator.comparing(i -> pantry_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+
+        List<Integer> quantities_base = new ArrayList<>(pantry_item_quantities);
+        pantry_item_quantities.sort(Comparator.comparing(i -> pantry_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+
+        List<Integer> ideal_quantities_base = new ArrayList<>(pantry_item_ideal_quantities);
+        pantry_item_ideal_quantities.sort(Comparator.comparing(i -> pantry_item_names.get(ideal_quantities_base.indexOf(i)).toLowerCase()));
+
+        pantry_item_names.sort(Comparator.comparing(String::toLowerCase));
     }
 
     @Override
