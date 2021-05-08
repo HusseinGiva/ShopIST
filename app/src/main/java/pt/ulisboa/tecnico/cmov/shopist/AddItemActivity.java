@@ -273,7 +273,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 for (String storeId : item.stores.keySet()) {
                                     db.collection("StoreList")
                                             .document(storeId)
-                                            .get()
+                                            .get(source)
                                             .addOnCompleteListener(task2 -> {
                                                 if (task2.isSuccessful()) {
                                                     DocumentSnapshot document2 = task2.getResult();
@@ -485,7 +485,7 @@ public class AddItemActivity extends AppCompatActivity {
                             if (getIntent().getStringExtra("MODE").equals("update")) {
                                 db.collection("Item")
                                         .document(getIntent().getStringExtra("ItemId"))
-                                        .get()
+                                        .get(source)
                                         .addOnCompleteListener(task16 -> {
                                             if (task16.isSuccessful()) {
                                                 DocumentSnapshot document14 = task16.getResult();
@@ -499,7 +499,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     for (StoreViewAddItem store : storeViewAddItems) {
                                                         if (store.isChecked) {
                                                             item.stores.put(store.storeId, store.price);
-                                                            db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task161 -> {
+                                                            db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task161 -> {
                                                                 if (task161.isSuccessful()) {
                                                                     if (task161.getResult().size() != 0) {
                                                                         for (QueryDocumentSnapshot document141 : task161.getResult()) {
@@ -546,7 +546,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                 imagesRef.putFile(file);
                                             }
                                             db.collection("StoreList").document(getIntent().getStringExtra("ID"))
-                                                    .get()
+                                                    .get(source)
                                                     .addOnCompleteListener(task17 -> {
                                                         if (task17.isSuccessful()) {
                                                             DocumentSnapshot document15 = task17.getResult();
@@ -567,7 +567,7 @@ public class AddItemActivity extends AppCompatActivity {
                                         if (getIntent().getStringExtra("MODE").equals("update")) {
                                             db.collection("Item")
                                                     .document(getIntent().getStringExtra("ItemId"))
-                                                    .get()
+                                                    .get(source)
                                                     .addOnCompleteListener(task1819 -> {
                                                         if (task1819.isSuccessful()) {
                                                             DocumentSnapshot document16 = task1819.getResult();
@@ -581,7 +581,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 for (StoreViewAddItem store : storeViewAddItems) {
                                                                     if (store.isChecked) {
                                                                         item.stores.put(store.storeId, store.price);
-                                                                        db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task1818 -> {
+                                                                        db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task1818 -> {
                                                                             if (task1818.isSuccessful()) {
                                                                                 if (task1818.getResult().size() != 0) {
                                                                                     for (QueryDocumentSnapshot document1615 : task1818.getResult()) {
@@ -628,7 +628,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                             imagesRef.putFile(file);
                                                         }
                                                         db.collection("StoreList").document(getIntent().getStringExtra("ID"))
-                                                                .get()
+                                                                .get(source)
                                                                 .addOnCompleteListener(task1817 -> {
                                                                     if (task1817.isSuccessful()) {
                                                                         DocumentSnapshot document16 = task1817.getResult();
@@ -689,7 +689,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                             item.stores.put(store.storeId, store.price);
                                                         }
                                                         if (getIntent().getStringExtra("MODE").equals("update")) {
-                                                            db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task1815 -> {
+                                                            db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task1815 -> {
                                                                 if (task1815.isSuccessful()) {
                                                                     if (task1815.getResult().size() != 0) {
                                                                         for (QueryDocumentSnapshot document1613 : task1815.getResult()) {
@@ -717,7 +717,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                 }
                                                 if (getIntent().getStringExtra("MODE").equals("add")) {
                                                     db.collection("StoreList").document(getIntent().getStringExtra("ID"))
-                                                            .get()
+                                                            .get(source)
                                                             .addOnCompleteListener(task1814 -> {
                                                                 if (task1814.isSuccessful()) {
                                                                     DocumentSnapshot document1612 = task1814.getResult();
@@ -736,7 +736,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     if (getIntent().getStringExtra("MODE").equals("update")) {
                                         db.collection("Item")
                                                 .document(getIntent().getStringExtra("ItemId"))
-                                                .get()
+                                                .get(source)
                                                 .addOnCompleteListener(task1813 -> {
                                                     if (task1813.isSuccessful()) {
                                                         DocumentSnapshot document16 = task1813.getResult();
@@ -750,7 +750,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                             for (StoreViewAddItem store : storeViewAddItems) {
                                                                 if (store.isChecked) {
                                                                     item.stores.put(store.storeId, store.price);
-                                                                    db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task1812 -> {
+                                                                    db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task1812 -> {
                                                                         if (task1812.isSuccessful()) {
                                                                             if (task1812.getResult().size() != 0) {
                                                                                 for (QueryDocumentSnapshot document161 : task1812.getResult()) {
@@ -797,7 +797,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                         imagesRef.putFile(file);
                                                     }
                                                     db.collection("StoreList").document(getIntent().getStringExtra("ID"))
-                                                            .get()
+                                                            .get(source)
                                                             .addOnCompleteListener(task181 -> {
                                                                 if (task181.isSuccessful()) {
                                                                     DocumentSnapshot document16 = task181.getResult();
@@ -822,7 +822,7 @@ public class AddItemActivity extends AppCompatActivity {
                 if (getIntent().getStringExtra("MODE").equals("update")) {
                     db.collection("Item")
                             .document(getIntent().getStringExtra("ItemId"))
-                            .get()
+                            .get(source)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     DocumentSnapshot document = task.getResult();
@@ -833,7 +833,7 @@ public class AddItemActivity extends AppCompatActivity {
                                         item.barcode = barcodeNumber.getText().toString();
                                         item.stores.clear();
                                         db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
-                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task117 -> {
+                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task117 -> {
                                             if (task117.isSuccessful()) {
                                                 if (task117.getResult().size() != 0) {
                                                     for (QueryDocumentSnapshot document113 : task117.getResult()) {
@@ -841,7 +841,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                         for (StoreViewAddItem store : storeViewAddItems) {
                                                             if (store.isChecked) {
                                                                 item.stores.put(store.storeId, store.price);
-                                                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task116 -> {
+                                                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task116 -> {
                                                                     if (task116.isSuccessful()) {
                                                                         if (task116.getResult().size() != 0) {
                                                                             for (QueryDocumentSnapshot document112 : task116.getResult()) {
@@ -896,7 +896,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                 imagesRef.putFile(file);
                                             }
                                             db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                    .get()
+                                                    .get(source)
                                                     .addOnCompleteListener(task -> {
                                                         if (task.isSuccessful()) {
                                                             DocumentSnapshot document = task.getResult();
@@ -918,7 +918,7 @@ public class AddItemActivity extends AppCompatActivity {
                             if (getIntent().getStringExtra("MODE").equals("update")) {
                                 db.collection("Item")
                                         .document(getIntent().getStringExtra("ItemId"))
-                                        .get()
+                                        .get(source)
                                         .addOnCompleteListener(task115 -> {
                                             if (task115.isSuccessful()) {
                                                 DocumentSnapshot document = task115.getResult();
@@ -929,7 +929,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     item.barcode = barcodeNumber.getText().toString();
                                                     item.stores.clear();
                                                     db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
-                                                    db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task114 -> {
+                                                    db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task114 -> {
                                                         if (task114.isSuccessful()) {
                                                             if (task114.getResult().size() != 0) {
                                                                 for (QueryDocumentSnapshot document111 : task114.getResult()) {
@@ -937,7 +937,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     for (StoreViewAddItem store : storeViewAddItems) {
                                                                         if (store.isChecked) {
                                                                             item.stores.put(store.storeId, store.price);
-                                                                            db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task113 -> {
+                                                                            db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task113 -> {
                                                                                 if (task113.isSuccessful()) {
                                                                                     if (task113.getResult().size() != 0) {
                                                                                         for (QueryDocumentSnapshot document110 : task113.getResult()) {
@@ -992,7 +992,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                             imagesRef.putFile(file);
                                                         }
                                                         db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                                .get()
+                                                                .get(source)
                                                                 .addOnCompleteListener(task112 -> {
                                                                     if (task112.isSuccessful()) {
                                                                         DocumentSnapshot document = task112.getResult();
@@ -1014,7 +1014,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     item.users.put(mAuth.getCurrentUser().getUid(), name.getText().toString());
                                     db.collection("Item").document(itemId).update("users", item.users);
                                     if (getIntent().getStringExtra("MODE").equals("update")) {
-                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task111 -> {
+                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task111 -> {
                                             if (task111.isSuccessful()) {
                                                 if (task111.getResult().size() != 0) {
                                                     for (QueryDocumentSnapshot document19 : task111.getResult()) {
@@ -1059,7 +1059,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 } else {
                                                                     item.stores.put(store.storeId, store.price);
                                                                 }
-                                                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task19 -> {
+                                                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task19 -> {
                                                                     if (task19.isSuccessful()) {
                                                                         if (task19.getResult().size() != 0) {
                                                                             for (QueryDocumentSnapshot document17 : task19.getResult()) {
@@ -1141,7 +1141,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                         imagesRef.putFile(file);
                                                     }
                                                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                            .get()
+                                                            .get(source)
                                                             .addOnCompleteListener(task14 -> {
                                                                 if (task14.isSuccessful()) {
                                                                     DocumentSnapshot document12 = task14.getResult();
@@ -1162,7 +1162,7 @@ public class AddItemActivity extends AppCompatActivity {
                         if (getIntent().getStringExtra("MODE").equals("update")) {
                             db.collection("Item")
                                     .document(getIntent().getStringExtra("ItemId"))
-                                    .get()
+                                    .get(source)
                                     .addOnCompleteListener(task13 -> {
                                         if (task13.isSuccessful()) {
                                             DocumentSnapshot document = task13.getResult();
@@ -1173,7 +1173,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                 item.barcode = barcodeNumber.getText().toString();
                                                 item.stores.clear();
                                                 db.collection("Item").document(itemId).update("users", item.users, "barcode", item.barcode);
-                                                db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task12 -> {
+                                                db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task12 -> {
                                                     if (task12.isSuccessful()) {
                                                         if (task12.getResult().size() != 0) {
                                                             for (QueryDocumentSnapshot document1 : task12.getResult()) {
@@ -1181,7 +1181,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 for (StoreViewAddItem store : storeViewAddItems) {
                                                                     if (store.isChecked) {
                                                                         item.stores.put(store.storeId, store.price);
-                                                                        db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get().addOnCompleteListener(task121 -> {
+                                                                        db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task121 -> {
                                                                             if (task121.isSuccessful()) {
                                                                                 if (task121.getResult().size() != 0) {
                                                                                     for (QueryDocumentSnapshot document11 : task121.getResult()) {
@@ -1236,7 +1236,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                         imagesRef.putFile(file);
                                                     }
                                                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
-                                                            .get()
+                                                            .get(source)
                                                             .addOnCompleteListener(task1 -> {
                                                                 if (task1.isSuccessful()) {
                                                                     DocumentSnapshot document = task1.getResult();
@@ -1505,7 +1505,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 for (String storeId : item.stores.keySet()) {
                                     db.collection("StoreList")
                                             .document(storeId)
-                                            .get()
+                                            .get(source)
                                             .addOnCompleteListener(task2 -> {
                                                 if (task2.isSuccessful()) {
                                                     DocumentSnapshot document2 = task2.getResult();

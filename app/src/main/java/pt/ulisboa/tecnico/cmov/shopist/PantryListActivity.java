@@ -91,7 +91,7 @@ public class PantryListActivity extends AppCompatActivity {
         super.onResume();
 
         db.collection("PantryList").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -111,7 +111,7 @@ public class PantryListActivity extends AppCompatActivity {
                                     List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         PantryItem pi = document1.toObject(PantryItem.class);
-                                        db.collection("Item").document(pi.itemId).get().addOnCompleteListener(task11 -> {
+                                        db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task11 -> {
                                             if (task11.isSuccessful()) {
                                                 DocumentSnapshot document11 = task11.getResult();
                                                 if (document11.exists()) {

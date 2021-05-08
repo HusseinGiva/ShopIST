@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.io.File;
 
@@ -38,10 +40,29 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     private TextView firstName;
     private TextView lastName;
     private Button btnCreateAccount;
+    private Source source;
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (isConnected(getContext().getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -110,7 +131,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         if (!currentUser.isAnonymous()) {
 
             DocumentReference docRef = db.collection("user").document(currentUser.getUid());
-            docRef.get().addOnCompleteListener(task -> {
+            docRef.get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
@@ -154,13 +175,13 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                                 db.collection("user").document(user.getUid()).delete();
 
-                                db.collection("PantryList").whereArrayContains("users", user.getUid()).get().addOnCompleteListener(task -> {
+                                db.collection("PantryList").whereArrayContains("users", user.getUid()).get(source).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             PantryList pantry = document.toObject(PantryList.class);
                                             if (pantry.users.size() == 1) {
 
-                                                db.collection("PantryItem").whereEqualTo("pantryId", document.getId()).get().addOnCompleteListener(task1 -> {
+                                                db.collection("PantryItem").whereEqualTo("pantryId", document.getId()).get(source).addOnCompleteListener(task1 -> {
                                                     if (task1.isSuccessful()) {
                                                         for (QueryDocumentSnapshot document2 : task1.getResult()) {
                                                             db.collection("PantryItem").document(document2.getId()).delete();
@@ -180,7 +201,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                     }
                                 });
 
-                                db.collection("Item").whereEqualTo("barcode", "").get().addOnCompleteListener(task -> {
+                                db.collection("Item").whereEqualTo("barcode", "").get(source).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Item i = document.toObject(Item.class);

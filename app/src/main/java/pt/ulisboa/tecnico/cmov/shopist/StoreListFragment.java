@@ -90,7 +90,7 @@ public class StoreListFragment extends Fragment {
         super.onResume();
 
         db.collection("StoreList").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -107,7 +107,7 @@ public class StoreListFragment extends Fragment {
                                     List<Float> item_prices = new ArrayList<>();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         StoreItem si = document1.toObject(StoreItem.class);
-                                        db.collection("Item").document(si.itemId).get().addOnCompleteListener(task112 -> {
+                                        db.collection("Item").document(si.itemId).get(source).addOnCompleteListener(task112 -> {
                                             if (task112.isSuccessful()) {
                                                 DocumentSnapshot document112 = task112.getResult();
                                                 if (document112.exists()) {

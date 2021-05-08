@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
                         Log.d(TAG, "signInWithEmail:success");
-                        db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task2 -> {
+                        db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful()) {
                                 DocumentSnapshot document = task2.getResult();
                                 if (document.exists()) {

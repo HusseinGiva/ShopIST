@@ -106,7 +106,7 @@ public class PantryItemActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         db.collection("Item").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -193,7 +193,7 @@ public class PantryItemActivity extends AppCompatActivity {
         );
 
         db.collection("Item").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();

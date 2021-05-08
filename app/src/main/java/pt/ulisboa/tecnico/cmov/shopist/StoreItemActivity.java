@@ -101,7 +101,7 @@ public class StoreItemActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         db.collection("Item").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();

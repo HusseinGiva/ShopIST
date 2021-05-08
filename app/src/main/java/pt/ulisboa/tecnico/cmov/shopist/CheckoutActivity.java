@@ -1,5 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
@@ -18,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,6 +59,20 @@ public class CheckoutActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private boolean everything_loaded = false;
+    private Source source;
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -66,6 +83,11 @@ public class CheckoutActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
+
+        if (isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -87,13 +109,13 @@ public class CheckoutActivity extends AppCompatActivity {
         int[] async_operations = {0};
 
         async_operations[0]++;
-        db.collection("StoreItem").whereEqualTo("storeId", id).get().addOnCompleteListener(task -> {
+        db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document_1 : task.getResult()) {
                     StoreItem si = document_1.toObject(StoreItem.class);
                     if (si.cartQuantity > 0) {
                         async_operations[0]++;
-                        db.collection("Item").document(si.itemId).get().addOnCompleteListener(task1 -> {
+                        db.collection("Item").document(si.itemId).get(source).addOnCompleteListener(task1 -> {
                             if (task1.isSuccessful()) {
                                 DocumentSnapshot document_2 = task1.getResult();
                                 if (document_2.exists()) {
@@ -243,7 +265,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         if (quantity > 0) {
                             async_operations[0]++;
                             db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
-                                    .whereEqualTo("itemId", itemId).get().addOnCompleteListener(task -> {
+                                    .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     if (task.getResult().size() == 0) {
                                         PantryItem pi = new PantryItem(pantryId, itemId, quantity, quantity);
@@ -253,7 +275,7 @@ public class CheckoutActivity extends AppCompatActivity {
                                         });
 
                                         async_operations[0]++;
-                                        db.collection("PantryList").document(pantryId).get().addOnCompleteListener(task13 -> {
+                                        db.collection("PantryList").document(pantryId).get(source).addOnCompleteListener(task13 -> {
                                             if (task13.isSuccessful()) {
                                                 DocumentSnapshot document_1 = task13.getResult();
                                                 PantryList p = document_1.toObject(PantryList.class);
@@ -293,7 +315,7 @@ public class CheckoutActivity extends AppCompatActivity {
 
                     async_operations[0]++;
                     db.collection("StoreItem").whereEqualTo("storeId", id)
-                            .whereEqualTo("itemId", itemId).get().addOnCompleteListener(task -> {
+                            .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document_1 : task.getResult()) {
                                 StoreItem si = document_1.toObject(StoreItem.class);
@@ -359,14 +381,14 @@ public class CheckoutActivity extends AppCompatActivity {
         int[] async_operations = {0};
 
         async_operations[0]++;
-        db.collection("PantryList").get().addOnCompleteListener(task -> {
+        db.collection("PantryList").get(source).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document_1 : task.getResult()) {
                     PantryList pantry = document_1.toObject(PantryList.class);
                     if (!pantry.users.contains(mAuth.getUid())) continue;
                     async_operations[0]++;
                     db.collection("PantryItem").whereEqualTo("pantryId", document_1.getId())
-                            .whereEqualTo("itemId", item_ids.get(current_item)).get().addOnCompleteListener(task1 -> {
+                            .whereEqualTo("itemId", item_ids.get(current_item)).get(source).addOnCompleteListener(task1 -> {
                         if (task1.isSuccessful()) {
                             if (first_time_for_item) {
                                 quantitiesPerPantry.get(item_ids.get(current_item)).put(document_1.getId(), "0");

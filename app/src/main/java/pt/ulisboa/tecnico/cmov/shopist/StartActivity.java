@@ -242,7 +242,7 @@ public class StartActivity extends AppCompatActivity {
 
                                             if (pantries.size() == 1) {
 
-                                                StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                                StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task -> {
                                                     if (task.isSuccessful()) {
 
                                                         DocumentSnapshot document = task.getResult();
@@ -266,7 +266,7 @@ public class StartActivity extends AppCompatActivity {
 
                                             } else {
                                                 stores.size();
-                                                StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                                StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task -> {
                                                     if (task.isSuccessful()) {
                                                         DocumentSnapshot document = task.getResult();
                                                         if (document.exists()) {
@@ -288,7 +288,7 @@ public class StartActivity extends AppCompatActivity {
                                             }
 
                                         } else {
-                                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task -> {
                                                 if (task.isSuccessful()) {
                                                     DocumentSnapshot document = task.getResult();
                                                     if (document.exists()) {
@@ -316,7 +316,7 @@ public class StartActivity extends AppCompatActivity {
 
 
                         } else {
-                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get().addOnCompleteListener(task -> {
+                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     DocumentSnapshot document = task.getResult();
                                     if (document.exists()) {

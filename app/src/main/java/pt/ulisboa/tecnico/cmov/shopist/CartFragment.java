@@ -139,7 +139,7 @@ public class CartFragment extends Fragment {
 
         async_operations[0]++;
         db.collection("StoreList").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -160,7 +160,7 @@ public class CartFragment extends Fragment {
                                         if (si.cartQuantity == 0) continue;
 
                                         async_operations[0]++;
-                                        db.collection("Item").document(si.itemId).get().addOnCompleteListener(task12 -> {
+                                        db.collection("Item").document(si.itemId).get(source).addOnCompleteListener(task12 -> {
                                             if (task12.isSuccessful()) {
                                                 DocumentSnapshot document12 = task12.getResult();
                                                 if (document12.exists()) {

@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -36,6 +38,20 @@ public class StoreListAdapter extends ArrayAdapter<String> {
     TextView totalCost;
     private final FirebaseFirestore db;
     private final StoreListActivity activity;
+    private Source source;
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
                             boolean cart, String storeId, List<String> itemIds, ListView list, StoreListActivity activity, TextView totalCost) {
@@ -50,6 +66,11 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         this.itemIds = itemIds;
 
         this.list = list;
+
+        if (isConnected(getContext().getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
 
@@ -104,7 +125,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             final int quantity = Integer.parseInt(q);
             if (!cart && quantity == 0) return;
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
-                    .get().addOnCompleteListener(task -> {
+                    .get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document_1 : task.getResult()) {
                         String field;
@@ -138,7 +159,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> {
             final int quantity = Integer.parseInt(q);
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
-                    .get().addOnCompleteListener(task -> {
+                    .get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document_1 : task.getResult()) {
                         StoreItem si = document_1.toObject(StoreItem.class);
@@ -224,7 +245,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                     quantity = Integer.parseInt(e.getText().toString());
                 }
                 db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
-                        .get().addOnCompleteListener(task -> {
+                        .get(source).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document_1 : task.getResult()) {
                             db.collection("StoreItem").document(document_1.getId()).update("cartQuantity", quantity)

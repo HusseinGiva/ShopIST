@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -17,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Source;
 
 import java.util.Locale;
 
@@ -29,6 +31,20 @@ public class StoreListActivity extends AppCompatActivity {
     TabLayout tabLayout;
     private String id;
     private FirebaseFirestore db;
+    private Source source;
+
+    public static boolean isConnected(Context getApplicationContext) {
+        boolean status = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getApplicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm != null && cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null) {
+            // connected to the internet
+            status = true;
+        }
+
+
+        return status;
+    }
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -49,6 +65,11 @@ public class StoreListActivity extends AppCompatActivity {
         ActionBar ab = getSupportActionBar();
         assert ab != null;
         ab.setDisplayHomeAsUpEnabled(true);
+
+        if (isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
 
@@ -96,7 +117,7 @@ public class StoreListActivity extends AppCompatActivity {
         super.onResume();
 
         db.collection("StoreList").document(id)
-                .get()
+                .get(source)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();

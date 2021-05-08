@@ -48,6 +48,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -75,6 +76,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     private FirebaseFirestore db;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private FirebaseAuth mAuth;
+    private Source source;
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -93,7 +95,10 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_list);
-
+        if (isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
             RadioButton rb = (RadioButton) findViewById(R.id.radio_pantry);
             rb.setChecked(true);
@@ -263,7 +268,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         DocumentReference document_1 = task.getResult();
                         db.collection("PantryList")
                                 .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                .get()
+                                .get(source)
                                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                     @Override
                                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -298,12 +303,12 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                         async_operations[0]++;
                                                         timerHandler.postDelayed(this, 100);
 
-                                                        db.collection("PantryItem").whereEqualTo("pantryId", pantry_ids.get(pantry_index[0])).get().addOnCompleteListener(task14 -> {
+                                                        db.collection("PantryItem").whereEqualTo("pantryId", pantry_ids.get(pantry_index[0])).get(source).addOnCompleteListener(task14 -> {
                                                             if (task14.isSuccessful()) {
                                                                 for (QueryDocumentSnapshot document_3 : task14.getResult()) {
                                                                     PantryItem pi = document_3.toObject(PantryItem.class);
                                                                     async_operations[0]++;
-                                                                    db.collection("Item").document(pi.itemId).get().addOnCompleteListener(task141 -> {
+                                                                    db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task141 -> {
                                                                         if (task141.isSuccessful()) {
                                                                             DocumentSnapshot document_4 = task141.getResult();
                                                                             if (document_4.exists()) {
@@ -330,7 +335,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                                                     if (pi.idealQuantity - pi.quantity > 0) {
                                                                                         async_operations[0]++;
                                                                                         db.collection("StoreItem").whereEqualTo("itemId", pi.itemId)
-                                                                                                .whereEqualTo("storeId", document_1.getId()).get().addOnCompleteListener(task13 -> {
+                                                                                                .whereEqualTo("storeId", document_1.getId()).get(source).addOnCompleteListener(task13 -> {
                                                                                             if (task13.isSuccessful()) {
                                                                                                 for (QueryDocumentSnapshot document_5 : task13.getResult()) {
                                                                                                     StoreItem si = document_5.toObject(StoreItem.class);

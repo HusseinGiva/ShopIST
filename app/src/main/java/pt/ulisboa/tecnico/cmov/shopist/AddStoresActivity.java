@@ -97,7 +97,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
                                 for (String storeId : item.stores.keySet()) {
                                     db.collection("StoreList")
                                             .document(storeId)
-                                            .get()
+                                            .get(source)
                                             .addOnCompleteListener(task2 -> {
                                                 if (task2.isSuccessful()) {
                                                     DocumentSnapshot document2 = task2.getResult();
