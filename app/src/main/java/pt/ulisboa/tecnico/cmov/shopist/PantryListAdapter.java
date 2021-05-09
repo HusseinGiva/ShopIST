@@ -120,15 +120,12 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                             i.setImageResource(R.drawable.ist_logo);
                         }
                         else {
-                            pics.get(0).getBytes(1024 * 1024).addOnCompleteListener(new OnCompleteListener<byte[]>() {
-                                @Override
-                                public void onComplete(@NonNull Task<byte[]> task) {
-                                    if(task.isSuccessful()) {
-                                        InputStream is = new ByteArrayInputStream(task.getResult());
-                                        Drawable d = Drawable.createFromStream(is, "img");
-                                        i.setImageDrawable(d);
-                                    }
-                                }
+                            String currentPhotoPath;
+                            File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position)).getAbsolutePath() + "/" + pics.get(0).getName());
+                            currentPhotoPath = localFile.getAbsolutePath();
+                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                i.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
+
                             });
                         }
                     });

@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Environment;
@@ -18,19 +17,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.List;
 
@@ -130,28 +123,22 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         ImageView i = view.findViewById(R.id.store_list_item_image);
 
         assert files != null;
-        if(files.length == 0) {
+        if (files.length == 0) {
             imagesRef.listAll()
                     .addOnSuccessListener(listResult -> {
                         List<StorageReference> pics = listResult.getItems();
-                        if(pics.size() == 0) {
-                            i.setImageResource(R.drawable.ist_logo);
-                        }
-                        else {
-                            pics.get(0).getBytes(1024 * 1024).addOnCompleteListener(new OnCompleteListener<byte[]>() {
-                                @Override
-                                public void onComplete(@NonNull Task<byte[]> task) {
-                                    if(task.isSuccessful()) {
-                                        InputStream is = new ByteArrayInputStream(task.getResult());
-                                        Drawable d = Drawable.createFromStream(is, "img");
-                                        i.setImageDrawable(d);
-                                    }
-                                }
+                        if (pics.size() == 0) {
+                            //i.setImageResource(R.drawable.ist_logo);
+                        } else {
+                            String currentPhotoPath;
+                            File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position)).getAbsolutePath() + "/" + pics.get(0).getName());
+                            currentPhotoPath = localFile.getAbsolutePath();
+                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                                i.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
                             });
                         }
                     });
-        }
-        else {
+        } else {
             i.setImageURI(Uri.fromFile(files[0]));
         }
 
@@ -189,8 +176,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                                 activity.goToCart();
                                                 return;
                                             }
-                                        }
-                                        else if(item_quantities.get(position) == 1) {
+                                        } else if (item_quantities.get(position) == 1) {
                                             activity.goToStore();
                                             return;
                                         }
