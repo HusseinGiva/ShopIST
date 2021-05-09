@@ -36,17 +36,16 @@ public class PantryListActivity extends AppCompatActivity {
 
     private static String latitude = null;
     private static String longitude = null;
-    private ListView list;
-    private String id;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    private Source source;
-
     List<String> itemIds = new ArrayList<>();
     List<String> pantry_item_names = new ArrayList<>();
     List<Integer> pantry_item_quantities = new ArrayList<>();
     List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
     List<String> imageIds = new ArrayList<>();
+    private ListView list;
+    private String id;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private Source source;
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -137,7 +136,8 @@ public class PantryListActivity extends AppCompatActivity {
                                                     pantry_item_quantities.add(pi.quantity);
                                                     pantry_item_ideal_quantities.add(pi.idealQuantity);
                                                     itemIds.add(document11.getId());
-                                                    if (i.barcode.equals("")) imageIds.add(pi.itemId);
+                                                    if (i.barcode.equals(""))
+                                                        imageIds.add(pi.itemId);
                                                     else imageIds.add(i.barcode);
                                                     async_operations[0]--;
                                                 } else {

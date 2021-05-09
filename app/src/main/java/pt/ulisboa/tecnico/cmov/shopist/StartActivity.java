@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
@@ -47,8 +48,6 @@ public class StartActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private Source source;
-
-    private SimWifiP2pBroadcastReceiver mReceiver;
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -82,6 +81,11 @@ public class StartActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setCacheSizeBytes(10000000)
+                .build();
+        db.setFirestoreSettings(settings);
+
         //Termite Test - DELETE LATER
         SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
         SimWifiP2pManager mManager = null;
@@ -98,7 +102,7 @@ public class StartActivity extends AppCompatActivity {
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
-        mReceiver = new SimWifiP2pBroadcastReceiver(this);
+        SimWifiP2pBroadcastReceiver mReceiver = new SimWifiP2pBroadcastReceiver(this);
         registerReceiver(mReceiver, filter);
 
         Intent intentBeacon = new Intent(this, SimWifiP2pService.class);

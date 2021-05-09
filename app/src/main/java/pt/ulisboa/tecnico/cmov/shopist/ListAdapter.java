@@ -59,10 +59,10 @@ public class ListAdapter extends ArrayAdapter<String> {
         else
             holder.driveTime.setText(getContext().getResources().getString(R.string.no_drivetime));
         holder.n_items.setText(String.valueOf(n_items.get(position)));
-        if(tabSelected.equals(getContext().getResources().getString(R.string.pantry))){
+        if (tabSelected.equals(getContext().getResources().getString(R.string.pantry))) {
             holder.queue_wait_time_text.setVisibility(View.INVISIBLE);
             holder.queue_wait_time.setVisibility(View.INVISIBLE);
-        }else if(position < queue_times.size()) {
+        } else if (position < queue_times.size()) {
             holder.queue_wait_time_text.setVisibility(View.VISIBLE);
             holder.queue_wait_time.setVisibility(View.VISIBLE);
             double p1 = queue_times.get(position) % 60;
@@ -71,7 +71,6 @@ public class ListAdapter extends ArrayAdapter<String> {
             p2 = p2 / 60;
             holder.queue_wait_time.setText(String.format("%02d", (int) p2) + ":" + String.format("%02d", (int) p3) + ":" + String.format("%02d", (int) p1));
         }
-
 
 
         view.setOnClickListener(v -> {

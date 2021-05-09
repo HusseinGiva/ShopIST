@@ -33,6 +33,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
 
     private final FirebaseFirestore db;
     private final StoreListActivity activity;
+    private final Source source;
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
@@ -43,7 +44,6 @@ public class StoreListAdapter extends ArrayAdapter<String> {
     ListView list;
     boolean cart;
     TextView totalCost;
-    private Source source;
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
                             boolean cart, String storeId, List<String> itemIds, List<String> imageIds, ListView list,
@@ -104,7 +104,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         holder.storeListItemName.setText(item_names.get(position));
         holder.storeListItemQuantity.setText(item_quantities.get(position).toString());
         DecimalFormat df = new DecimalFormat("###.##");
-        Double value = Math.round(item_prices.get(position) * 100.0) / 100.0;
+        double value = Math.round(item_prices.get(position) * 100.0) / 100.0;
         holder.itemPrice.setText(df.format(value));
         if (value == 0) {
             holder.itemPrice.setVisibility(View.INVISIBLE);
@@ -127,15 +127,11 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             imagesRef.listAll()
                     .addOnSuccessListener(listResult -> {
                         List<StorageReference> pics = listResult.getItems();
-                        if (pics.size() == 0) {
-                            //i.setImageResource(R.drawable.ist_logo);
-                        } else {
+                        if (pics.size() != 0) {
                             String currentPhotoPath;
                             File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position)).getAbsolutePath() + "/" + pics.get(0).getName());
                             currentPhotoPath = localFile.getAbsolutePath();
-                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> {
-                                i.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
-                            });
+                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> i.setImageURI(Uri.fromFile(new File(currentPhotoPath))));
                         }
                     });
         } else {
@@ -190,37 +186,35 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             });
         });
 
-        view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> {
-            db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
-                    .get(source).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                        StoreItem si = document_1.toObject(StoreItem.class);
-                        String field;
-                        if (cart) {
-                            if (item_quantities.get(position) == si.quantity) return;
-                            field = "cartQuantity";
-                        } else field = "quantity";
-                        db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) + 1)
-                                .addOnCompleteListener(task12 -> {
-                                    if (task12.isSuccessful()) {
-                                        if (cart) {
-                                            String s_total_cost = (String) totalCost.getText();
-                                            String[] a_total_cost = s_total_cost.split(" ");
-                                            float total_cost = Float.parseFloat(a_total_cost[0]);
-                                            total_cost += item_prices.get(position);
-                                            Double value2 = Math.round(total_cost * 100.0) / 100.0;
-                                            totalCost.setText(String.valueOf(df.format(value2)));
+        view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
+                .get(source).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                            StoreItem si = document_1.toObject(StoreItem.class);
+                            String field;
+                            if (cart) {
+                                if (item_quantities.get(position) == si.quantity) return;
+                                field = "cartQuantity";
+                            } else field = "quantity";
+                            db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) + 1)
+                                    .addOnCompleteListener(task12 -> {
+                                        if (task12.isSuccessful()) {
+                                            if (cart) {
+                                                String s_total_cost = (String) totalCost.getText();
+                                                String[] a_total_cost = s_total_cost.split(" ");
+                                                float total_cost = Float.parseFloat(a_total_cost[0]);
+                                                total_cost += item_prices.get(position);
+                                                Double value2 = Math.round(total_cost * 100.0) / 100.0;
+                                                totalCost.setText(String.valueOf(df.format(value2)));
+                                            }
+                                            item_quantities.set(position, item_quantities.get(position) + 1);
+                                            list.invalidateViews();
                                         }
-                                        item_quantities.set(position, item_quantities.get(position) + 1);
-                                        list.invalidateViews();
-                                    }
-                                });
-                        return;
+                                    });
+                            return;
+                        }
                     }
-                }
-            });
-        });
+                }));
 
         view.findViewById(R.id.moveToCart).setOnClickListener(v -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);

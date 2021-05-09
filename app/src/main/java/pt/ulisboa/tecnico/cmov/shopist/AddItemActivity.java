@@ -125,54 +125,8 @@ public class AddItemActivity extends AppCompatActivity {
                 builder.setCancelable(true);
                 builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
                 builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
-                builder.setPositiveButton(R.string.addPictures, (dialog, which) -> {
-                    Intent intent = new Intent(getApplicationContext(), AddPicturesActivity.class);
-                    intent.putExtra("MODE", "add");
-                    intent.putStringArrayListExtra("PATHS", photoPaths);
-                    picturesResultLauncher.launch(intent);
-                });
-                builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
-                    Intent intent = new Intent(getApplicationContext(), AddStoresActivity.class);
-                    intent.putExtra("MODE", "add");
-                    if (getIntent().getStringExtra("MODE").equals("update")) {
-                        intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
-                    }
-                    db.collection("StoreList")
-                            .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                            .get(source)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        StoreList store = document.toObject(StoreList.class);
-                                        if (!storeViewAddItems.isEmpty()) {
-                                            boolean present = false;
-                                            for (StoreViewAddItem item : storeViewAddItems) {
-                                                if (item.name.equals(store.name)) {
-                                                    present = true;
-                                                    break;
-                                                }
-                                            }
-                                            if (!present) {
-                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                storeViewAddItem.latitude = store.latitude;
-                                                storeViewAddItem.longitude = store.longitude;
-                                                storeViewAddItems.add(storeViewAddItem);
-                                            }
-
-                                        } else {
-                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                            storeViewAddItem.latitude = store.latitude;
-                                            storeViewAddItem.longitude = store.longitude;
-                                            storeViewAddItems.add(storeViewAddItem);
-                                        }
-                                    }
-                                    intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-                                    storesResultLauncher.launch(intent);
-                                } else {
-                                    Log.d("TAG", "Error getting documents: ", task.getException());
-                                }
-                            });
-                });
+                builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
+                builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 return true;
@@ -184,6 +138,7 @@ public class AddItemActivity extends AppCompatActivity {
         pantryQuantity = findViewById(R.id.itemStoreQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
         addPictures = findViewById(R.id.viewPicturesStore);
+        addPictures.setOnClickListener(v -> onClickAddPictures());
         picturesResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -252,6 +207,7 @@ public class AddItemActivity extends AppCompatActivity {
                 });
             }
         } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+            addStores.setOnClickListener(v -> onClickAddStores());
             storesResultLauncher = registerForActivityResult(
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
@@ -261,6 +217,7 @@ public class AddItemActivity extends AppCompatActivity {
                     });
             if (getIntent().getStringExtra("MODE").equals("update")) {
                 String id = getIntent().getStringExtra("ItemId");
+                getSupportActionBar().setTitle(R.string.editProduct);
                 db = FirebaseFirestore.getInstance();
                 mAuth = FirebaseAuth.getInstance();
                 db.collection("Item")
@@ -311,99 +268,19 @@ public class AddItemActivity extends AppCompatActivity {
                                                 }
                                             });
                                 }
-                                db.collection("StoreList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                        .get(source)
-                                        .addOnCompleteListener(task2 -> {
-                                            if (task2.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                    StoreList store = document2.toObject(StoreList.class);
-                                                    if (!storeViewAddItems.isEmpty()) {
-                                                        boolean present = false;
-                                                        for (StoreViewAddItem item2 : storeViewAddItems) {
-                                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
-                                                                float[] results = new float[1];
-                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
-                                                                        results);
-                                                                //Less than 20 meters
-                                                                if (results[0] < 20f) {
-                                                                    present = true;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (!present) {
-                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                            storeViewAddItem.latitude = store.latitude;
-                                                            storeViewAddItem.longitude = store.longitude;
-                                                            storeViewAddItems.add(storeViewAddItem);
-                                                        }
-                                                    } else {
-                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                        storeViewAddItem.latitude = store.latitude;
-                                                        storeViewAddItem.longitude = store.longitude;
-                                                        storeViewAddItems.add(storeViewAddItem);
-                                                    }
-                                                }
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task.getException());
-                                            }
-                                        });
+                                barcodeNumber.setText(item.barcode);
+                                name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
+                                db.collection("PantryItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).whereEqualTo("pantryId", getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(task13 -> {
+                                    if (task13.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document13 : task13.getResult()) {
+                                            PantryItem pantryItem = document13.toObject(PantryItem.class);
+                                            pantryQuantity.setText(String.valueOf(pantryItem.quantity));
+                                            targetQuantity.setText(String.valueOf(pantryItem.idealQuantity));
+                                        }
+                                    }
+                                });
                             }
                         });
-                getSupportActionBar().setTitle(R.string.editProduct);
-                db.collection("Item").document(getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            Item item = document.toObject(Item.class);
-                            barcodeNumber.setText(item.barcode);
-                            name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
-                            db.collection("PantryItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).whereEqualTo("pantryId", getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(task13 -> {
-                                if (task13.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document13 : task13.getResult()) {
-                                        PantryItem pantryItem = document13.toObject(PantryItem.class);
-                                        pantryQuantity.setText(String.valueOf(pantryItem.quantity));
-                                        targetQuantity.setText(String.valueOf(pantryItem.idealQuantity));
-                                    }
-                                }
-                            });
-                            String storeId = getIntent().getStringExtra("ID");
-                            for (String s : item.stores.keySet()) {
-                                if (storeId.equals(s)) {
-                                    targetQuantity.setText(String.valueOf(item.stores.get(s)));
-                                } else {
-                                    db.collection("StoreList").document(s).get(source).addOnCompleteListener(task14 -> {
-                                        if (task14.isSuccessful()) {
-                                            DocumentSnapshot document14 = task14.getResult();
-                                            if (document14.exists()) {
-                                                StoreList sl = document14.toObject(StoreList.class);
-                                                float[] results = new float[1];
-                                                db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task141 -> {
-                                                    if (task141.isSuccessful()) {
-                                                        DocumentSnapshot document141 = task141.getResult();
-                                                        if (document141.exists()) {
-                                                            StoreList storeList = document141.toObject(StoreList.class);
-                                                            if (storeList.latitude != null && storeList.longitude != null && sl.latitude != null && sl.longitude != null) {
-                                                                Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
-                                                                        Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                        results);
-                                                                //Less than 20 meters
-                                                                if (results[0] < 20f) {
-                                                                    targetQuantity.setText(String.valueOf(item.stores.get(s)));
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        }
-                    }
-                });
             } else if (getIntent().getStringExtra("MODE").equals("add")) {
                 db = FirebaseFirestore.getInstance();
                 mAuth = FirebaseAuth.getInstance();
@@ -464,7 +341,7 @@ public class AddItemActivity extends AppCompatActivity {
         } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store)) && targetQuantity.getText().toString().equals("")) {
             targetQuantity.setText("0");
         }
-        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()) < 0) {
+        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry)) && Integer.parseInt(targetQuantity.getText().toString()) < Integer.parseInt(pantryQuantity.getText().toString())) {
             Toast.makeText(this, R.string.targetQuantityBiggerPantryQuantity, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -837,6 +714,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (task117.isSuccessful()) {
                                                 if (task117.getResult().size() != 0) {
                                                     for (QueryDocumentSnapshot document113 : task117.getResult()) {
+                                                        PantryItem pantryItem = document113.toObject(PantryItem.class);
                                                         db.collection("PantryItem").document(document113.getId()).update("quantity", Integer.parseInt(pantryQuantity.getText().toString()), "idealQuantity", Integer.parseInt(targetQuantity.getText().toString()));
                                                         for (StoreViewAddItem store : storeViewAddItems) {
                                                             if (store.isChecked) {
@@ -845,7 +723,13 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     if (task116.isSuccessful()) {
                                                                         if (task116.getResult().size() != 0) {
                                                                             for (QueryDocumentSnapshot document112 : task116.getResult()) {
-                                                                                db.collection("StoreItem").document(document112.getId()).update("quantity", Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                StoreItem storeItem = document112.toObject(StoreItem.class);
+                                                                                int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
+                                                                                int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                if (newQuantity < 0) {
+                                                                                    newQuantity = 0;
+                                                                                }
+                                                                                db.collection("StoreItem").document(document112.getId()).update("quantity", newQuantity);
                                                                             }
                                                                         } else {
                                                                             StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
@@ -933,6 +817,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                         if (task114.isSuccessful()) {
                                                             if (task114.getResult().size() != 0) {
                                                                 for (QueryDocumentSnapshot document111 : task114.getResult()) {
+                                                                    PantryItem pantryItem = document111.toObject(PantryItem.class);
                                                                     db.collection("PantryItem").document(document111.getId()).update("quantity", Integer.parseInt(pantryQuantity.getText().toString()), "idealQuantity", Integer.parseInt(targetQuantity.getText().toString()));
                                                                     for (StoreViewAddItem store : storeViewAddItems) {
                                                                         if (store.isChecked) {
@@ -941,7 +826,13 @@ public class AddItemActivity extends AppCompatActivity {
                                                                                 if (task113.isSuccessful()) {
                                                                                     if (task113.getResult().size() != 0) {
                                                                                         for (QueryDocumentSnapshot document110 : task113.getResult()) {
-                                                                                            db.collection("StoreItem").document(document110.getId()).update("quantity", Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                            StoreItem storeItem = document110.toObject(StoreItem.class);
+                                                                                            int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
+                                                                                            int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                            if (newQuantity < 0) {
+                                                                                                newQuantity = 0;
+                                                                                            }
+                                                                                            db.collection("StoreItem").document(document110.getId()).update("quantity", newQuantity);
                                                                                         }
                                                                                     } else {
                                                                                         StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
@@ -1018,6 +909,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (task111.isSuccessful()) {
                                                 if (task111.getResult().size() != 0) {
                                                     for (QueryDocumentSnapshot document19 : task111.getResult()) {
+                                                        PantryItem pantryItem = document19.toObject(PantryItem.class);
                                                         db.collection("PantryItem").document(document19.getId()).update("quantity", Integer.parseInt(pantryQuantity.getText().toString()), "idealQuantity", Integer.parseInt(targetQuantity.getText().toString()));
                                                         for (StoreViewAddItem store : storeViewAddItems) {
                                                             if (store.isChecked) {
@@ -1063,7 +955,13 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     if (task19.isSuccessful()) {
                                                                         if (task19.getResult().size() != 0) {
                                                                             for (QueryDocumentSnapshot document17 : task19.getResult()) {
-                                                                                db.collection("StoreItem").document(document17.getId()).update("quantity", Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                StoreItem storeItem = document17.toObject(StoreItem.class);
+                                                                                int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
+                                                                                int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                if (newQuantity < 0) {
+                                                                                    newQuantity = 0;
+                                                                                }
+                                                                                db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity);
                                                                             }
                                                                         } else {
                                                                             StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
@@ -1131,8 +1029,40 @@ public class AddItemActivity extends AppCompatActivity {
                                                             } else {
                                                                 item.stores.put(store.storeId, store.price);
                                                             }
-                                                            StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
-                                                            db.collection("StoreItem").add(storeItem);
+                                                            db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).get(source).addOnCompleteListener(task20 -> {
+                                                                if (task20.isSuccessful()) {
+                                                                    if (task20.getResult().size() != 0) {
+                                                                        for (QueryDocumentSnapshot document20 : task20.getResult()) {
+                                                                            db.collection("StoreItem").whereEqualTo("itemId", document20.getId()).get(source).addOnCompleteListener(task19 -> {
+                                                                                if (task19.isSuccessful()) {
+                                                                                    if (task19.getResult().size() != 0) {
+                                                                                        for (QueryDocumentSnapshot document17 : task19.getResult()) {
+                                                                                            StoreItem storeItem = document17.toObject(StoreItem.class);
+                                                                                            int newQuantity = storeItem.quantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                            if (newQuantity < 0) {
+                                                                                                newQuantity = 0;
+                                                                                            }
+                                                                                            db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity);
+                                                                                        }
+                                                                                    } else {
+                                                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                        db.collection("StoreItem").add(storeItem);
+                                                                                    }
+                                                                                } else {
+                                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                    db.collection("StoreItem").add(storeItem);
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                    } else {
+                                                                        StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                        db.collection("StoreItem").add(storeItem);
+                                                                    }
+                                                                } else {
+                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                    db.collection("StoreItem").add(storeItem);
+                                                                }
+                                                            });
                                                         }
                                                     }
                                                     for (String s : photoPaths) {
@@ -1177,6 +1107,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                     if (task12.isSuccessful()) {
                                                         if (task12.getResult().size() != 0) {
                                                             for (QueryDocumentSnapshot document1 : task12.getResult()) {
+                                                                PantryItem pantryItem = document1.toObject(PantryItem.class);
                                                                 db.collection("PantryItem").document(document1.getId()).update("quantity", Integer.parseInt(pantryQuantity.getText().toString()), "idealQuantity", Integer.parseInt(targetQuantity.getText().toString()));
                                                                 for (StoreViewAddItem store : storeViewAddItems) {
                                                                     if (store.isChecked) {
@@ -1185,7 +1116,13 @@ public class AddItemActivity extends AppCompatActivity {
                                                                             if (task121.isSuccessful()) {
                                                                                 if (task121.getResult().size() != 0) {
                                                                                     for (QueryDocumentSnapshot document11 : task121.getResult()) {
-                                                                                        db.collection("StoreItem").document(document11.getId()).update("quantity", Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                        StoreItem storeItem = document11.toObject(StoreItem.class);
+                                                                                        int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
+                                                                                        int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                        if (newQuantity < 0) {
+                                                                                            newQuantity = 0;
+                                                                                        }
+                                                                                        db.collection("StoreItem").document(document11.getId()).update("quantity", newQuantity);
                                                                                     }
                                                                                 } else {
                                                                                     StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
@@ -1225,9 +1162,41 @@ public class AddItemActivity extends AppCompatActivity {
                                                     for (StoreViewAddItem store : storeViewAddItems) {
                                                         if (store.isChecked) {
                                                             item.stores.put(store.storeId, store.price);
-                                                            StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
-                                                            db.collection("StoreItem").add(storeItem);
                                                         }
+                                                        db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).get(source).addOnCompleteListener(task20 -> {
+                                                            if (task20.isSuccessful()) {
+                                                                if (task20.getResult().size() != 0) {
+                                                                    for (QueryDocumentSnapshot document20 : task20.getResult()) {
+                                                                        db.collection("StoreItem").whereEqualTo("itemId", document20.getId()).get(source).addOnCompleteListener(task19 -> {
+                                                                            if (task19.isSuccessful()) {
+                                                                                if (task19.getResult().size() != 0) {
+                                                                                    for (QueryDocumentSnapshot document17 : task19.getResult()) {
+                                                                                        StoreItem storeItem = document17.toObject(StoreItem.class);
+                                                                                        int newQuantity = storeItem.quantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                        if (newQuantity < 0) {
+                                                                                            newQuantity = 0;
+                                                                                        }
+                                                                                        db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity);
+                                                                                    }
+                                                                                } else {
+                                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                    db.collection("StoreItem").add(storeItem);
+                                                                                }
+                                                                            } else {
+                                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                db.collection("StoreItem").add(storeItem);
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                } else {
+                                                                    StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                    db.collection("StoreItem").add(storeItem);
+                                                                }
+                                                            } else {
+                                                                StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                db.collection("StoreItem").add(storeItem);
+                                                            }
+                                                        });
                                                     }
                                                     db.collection("Item").document(itemId).update("stores", item.stores);
                                                     for (String s : photoPaths) {
@@ -1256,7 +1225,7 @@ public class AddItemActivity extends AppCompatActivity {
         }
     }
 
-    public void onClickAddPictures(View view) {
+    public void onClickAddPictures() {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         intent.putStringArrayListExtra("PATHS", photoPaths);
         intent.putExtra("MODE", "add");
@@ -1264,7 +1233,7 @@ public class AddItemActivity extends AppCompatActivity {
         picturesResultLauncher.launch(intent);
     }
 
-    public void onClickAddStores(View view) {
+    public void onClickAddStores() {
         Intent intent = new Intent(this, AddStoresActivity.class);
         if (getIntent().getStringExtra("MODE").equals("update")) {
             intent.putExtra("MODE", "update");
@@ -1428,9 +1397,15 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 if (!storeViewAddItems.isEmpty()) {
                                                                     boolean present = false;
                                                                     for (StoreViewAddItem item : storeViewAddItems) {
-                                                                        if (item.name.equals(store.name)) {
-                                                                            present = true;
-                                                                            break;
+                                                                        if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
+                                                                            float[] results = new float[1];
+                                                                            Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                                    Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
+                                                                                    results);
+                                                                            //Less than 20 meters
+                                                                            if (results[0] < 20f) {
+                                                                                present = true;
+                                                                            }
                                                                         }
                                                                     }
                                                                     if (!present) {

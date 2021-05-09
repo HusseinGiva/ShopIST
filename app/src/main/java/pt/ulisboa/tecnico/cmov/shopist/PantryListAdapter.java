@@ -2,8 +2,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Environment;
@@ -25,18 +23,13 @@ import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
-
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 
 public class PantryListAdapter extends ArrayAdapter<String> {
 
+    private final Source source;
+    private final FirebaseFirestore db;
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
@@ -44,12 +37,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     List<String> itemIds;
     List<String> imageIds;
     String pantryId;
-
     ListView list;
-
-    private Source source;
-
-    private final FirebaseFirestore db;
 
     public PantryListAdapter(Context context, List<String> item_names, List<Integer> item_quantities,
                              List<Integer> item_ideal_quantities, List<String> itemIds, List<String> imageIds, String pantryId, ListView list) {
@@ -112,25 +100,18 @@ public class PantryListAdapter extends ArrayAdapter<String> {
         ImageView i = view.findViewById(R.id.pantry_list_item_image);
 
         assert files != null;
-        if(files.length == 0) {
+        if (files.length == 0) {
             imagesRef.listAll()
                     .addOnSuccessListener(listResult -> {
                         List<StorageReference> pics = listResult.getItems();
-                        if(pics.size() == 0) {
-                            i.setImageResource(R.drawable.ist_logo);
-                        }
-                        else {
+                        if (pics.size() != 0) {
                             String currentPhotoPath;
                             File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position)).getAbsolutePath() + "/" + pics.get(0).getName());
                             currentPhotoPath = localFile.getAbsolutePath();
-                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> {
-                                i.setImageURI(Uri.fromFile(new File(currentPhotoPath)));
-
-                            });
+                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> i.setImageURI(Uri.fromFile(new File(currentPhotoPath))));
                         }
                     });
-        }
-        else {
+        } else {
             i.setImageURI(Uri.fromFile(files[0]));
         }
 
@@ -141,31 +122,28 @@ public class PantryListAdapter extends ArrayAdapter<String> {
             context.startActivity(intent);
         });
 
-        view.findViewById(R.id.decrement_p_item_quantity).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(item_quantities.get(position) == 0) return;
-                db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
-                        .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()) {
-                            for(QueryDocumentSnapshot document_1 : task.getResult()) {
-                                db.collection("PantryItem").document(document_1.getId())
-                                        .update("quantity", item_quantities.get(position) - 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()) {
-                                            item_quantities.set(position, item_quantities.get(position) - 1);
-                                            list.invalidateViews();
-                                        }
+        view.findViewById(R.id.decrement_p_item_quantity).setOnClickListener(v -> {
+            if (item_quantities.get(position) == 0) return;
+            db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
+                    .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                            db.collection("PantryItem").document(document_1.getId())
+                                    .update("quantity", item_quantities.get(position) - 1).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        item_quantities.set(position, item_quantities.get(position) - 1);
+                                        list.invalidateViews();
                                     }
-                                });
-                            }
+                                }
+                            });
                         }
                     }
-                });
-            }
+                }
+            });
         });
 
         view.findViewById(R.id.increment_p_item_quantity).setOnClickListener(new View.OnClickListener() {
@@ -175,28 +153,27 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                         .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()) {
-                            for(QueryDocumentSnapshot document_1 : task.getResult()) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
                                 db.collection("PantryItem").document(document_1.getId())
                                         .update("quantity", item_quantities.get(position) + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()) {
+                                        if (task.isSuccessful()) {
 
-                                            if(item_quantities.get(position).equals(item_ideal_quantities.get(position))) {
+                                            if (item_quantities.get(position).equals(item_ideal_quantities.get(position))) {
                                                 db.collection("PantryItem").document(document_1.getId())
                                                         .update("idealQuantity", item_quantities.get(position) + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful()) {
+                                                        if (task.isSuccessful()) {
                                                             item_quantities.set(position, item_quantities.get(position) + 1);
                                                             item_ideal_quantities.set(position, item_ideal_quantities.get(position) + 1);
                                                             list.invalidateViews();
                                                         }
                                                     }
                                                 });
-                                            }
-                                            else {
+                                            } else {
                                                 item_quantities.set(position, item_quantities.get(position) + 1);
                                                 list.invalidateViews();
                                             }

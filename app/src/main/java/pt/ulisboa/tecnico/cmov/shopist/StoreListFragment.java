@@ -30,17 +30,16 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 public class StoreListFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "ID";
-    private String id;
-    private ListView list;
-    private FirebaseFirestore db;
-    private FirebaseAuth mAuth;
-    private Source source;
-
     List<String> itemIds = new ArrayList<>();
     List<String> store_item_names = new ArrayList<>();
     List<Integer> store_item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
     List<String> imageIds = new ArrayList<>();
+    private String id;
+    private ListView list;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private Source source;
 
     public StoreListFragment() {
     }
@@ -134,7 +133,8 @@ public class StoreListFragment extends Fragment {
                                                     store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                     store_item_quantities.add(si.quantity);
                                                     itemIds.add(document112.getId());
-                                                    if (i.barcode.equals("")) imageIds.add(si.itemId);
+                                                    if (i.barcode.equals(""))
+                                                        imageIds.add(si.itemId);
                                                     else imageIds.add(i.barcode);
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {

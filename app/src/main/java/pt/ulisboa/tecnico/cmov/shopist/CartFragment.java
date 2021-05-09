@@ -171,7 +171,8 @@ public class CartFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         itemIds.add(si.itemId);
-                                                        if (i.barcode.equals("")) imageIds.add(si.itemId);
+                                                        if (i.barcode.equals(""))
+                                                            imageIds.add(si.itemId);
                                                         else imageIds.add(i.barcode);
                                                         store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                         store_item_quantities.add(si.cartQuantity);
@@ -210,8 +211,10 @@ public class CartFragment extends Fragment {
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         itemIds.add(si.itemId);
-                                                                                        if (i.barcode.equals("")) imageIds.add(si.itemId);
-                                                                                        else imageIds.add(i.barcode);
+                                                                                        if (i.barcode.equals(""))
+                                                                                            imageIds.add(si.itemId);
+                                                                                        else
+                                                                                            imageIds.add(i.barcode);
                                                                                         store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
                                                                                         store_item_quantities.add(si.cartQuantity);
                                                                                         item_prices.add(i.stores.get(s));

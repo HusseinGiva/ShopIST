@@ -134,6 +134,7 @@ public class RegisterActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "linkWithCredential:success");
                             FirebaseUser user = task.getResult().getUser();
+                            assert user != null;
                             addUserToFirestore(user, firstNameText, lastNameText, language);
                             updateUI(user, true);
                         } else {

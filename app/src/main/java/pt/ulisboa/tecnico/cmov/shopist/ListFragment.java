@@ -69,7 +69,6 @@ public class ListFragment extends Fragment {
     private FirebaseFunctions mFunctions;
 
 
-
     public ListFragment() {
         // Required empty public constructor
     }
@@ -254,7 +253,7 @@ public class ListFragment extends Fragment {
                                                                 FirebaseFunctionsException.Code code = ffe.getCode();
                                                                 Object details = ffe.getDetails();
                                                             }
-                                                        }else{
+                                                        } else {
                                                             Log.d("TAG", task1.getResult());
                                                             queue_times.add(Double.parseDouble(task1.getResult()));
                                                             list.invalidateViews();
@@ -408,7 +407,7 @@ public class ListFragment extends Fragment {
                                                         FirebaseFunctionsException.Code code = ffe.getCode();
                                                         Object details = ffe.getDetails();
                                                     }
-                                                }else{
+                                                } else {
                                                     Log.d("TAG", task1.getResult());
                                                     queue_times.add(Double.parseDouble(task1.getResult()));
                                                     list.invalidateViews();
