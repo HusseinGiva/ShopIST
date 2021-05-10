@@ -12,6 +12,7 @@ import android.media.Image;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.InputType;
 import android.util.Log;
 import android.util.Size;
@@ -1126,6 +1127,16 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                 });
             }
+        }
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        for (File f: storageDir.listFiles()) {
+            deleteRecursive(f);
+        }
+    }
+
+    void deleteRecursive(File fileOrDirectory) {
+        if (!fileOrDirectory.isDirectory()) {
+            fileOrDirectory.delete();
         }
     }
 
