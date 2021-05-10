@@ -54,6 +54,15 @@ public class CartFragment extends Fragment {
     private FirebaseAuth mAuth;
     private Source source;
 
+    private List<Data> data = new ArrayList<>();
+    private class Data {
+        String itemId;
+        String store_item_name;
+        Integer store_item_quantity;
+        Float item_price;
+        String imageId;
+    }
+
     public CartFragment() {
         // Required empty public constructor
     }
@@ -133,6 +142,9 @@ public class CartFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        data.clear();
+
         TextView textView = view.findViewById(R.id.total_cost);
         textView.setText("0");
         float[] total_cost = {0};
@@ -153,11 +165,6 @@ public class CartFragment extends Fragment {
                             db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task13 -> {
 
                                 if (task13.isSuccessful()) {
-                                    itemIds.clear();
-                                    store_item_names.clear();
-                                    store_item_quantities.clear();
-                                    item_prices.clear();
-                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document13 : task13.getResult()) {
                                         StoreItem si = document13.toObject(StoreItem.class);
                                         if (si.cartQuantity == 0) continue;
@@ -170,13 +177,15 @@ public class CartFragment extends Fragment {
                                                     Item i = document12.toObject(Item.class);
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
-                                                        itemIds.add(si.itemId);
-                                                        if (i.barcode.equals(""))
-                                                            imageIds.add(si.itemId);
-                                                        else imageIds.add(i.barcode);
-                                                        store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                        store_item_quantities.add(si.cartQuantity);
-                                                        item_prices.add(i.stores.get(storeId));
+                                                        Data d = new Data();
+                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        d.store_item_quantity = si.cartQuantity;
+                                                        d.itemId = si.itemId;
+                                                        d.item_price = i.stores.get(storeId);
+                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                        else d.imageId = i.barcode;
+                                                        data.add(d);
+
                                                         total_cost[0] += si.cartQuantity * i.stores.get(storeId);
                                                         DecimalFormat df = new DecimalFormat("###.##");
                                                         double value = Math.round(total_cost[0] * 100.0) / 100.0;
@@ -210,14 +219,15 @@ public class CartFragment extends Fragment {
                                                                                             results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
-                                                                                        itemIds.add(si.itemId);
-                                                                                        if (i.barcode.equals(""))
-                                                                                            imageIds.add(si.itemId);
-                                                                                        else
-                                                                                            imageIds.add(i.barcode);
-                                                                                        store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                                                        store_item_quantities.add(si.cartQuantity);
-                                                                                        item_prices.add(i.stores.get(s));
+                                                                                        Data d = new Data();
+                                                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        d.store_item_quantity = si.cartQuantity;
+                                                                                        d.itemId = si.itemId;
+                                                                                        d.item_price = i.stores.get(storeId);
+                                                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                                                        else d.imageId = i.barcode;
+                                                                                        data.add(d);
+
                                                                                         total_cost[0] += si.cartQuantity * i.stores.get(s);
                                                                                         DecimalFormat df = new DecimalFormat("###.##");
                                                                                         double value = Math.round(total_cost[0] * 100.0) / 100.0;
@@ -289,18 +299,20 @@ public class CartFragment extends Fragment {
 
     public void sort() {
 
-        List<String> ids_base = new ArrayList<>(itemIds);
-        itemIds.sort(Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+        data.sort(Comparator.comparing(i -> i.store_item_name.toLowerCase()));
 
-        List<Integer> quantities_base = new ArrayList<>(store_item_quantities);
-        store_item_quantities.sort(Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+        itemIds.clear();
+        store_item_names.clear();
+        store_item_quantities.clear();
+        item_prices.clear();
+        imageIds.clear();
 
-        List<Float> prices_base = new ArrayList<>(item_prices);
-        item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
-
-        List<String> img_base = new ArrayList<>(imageIds);
-        imageIds.sort(Comparator.comparing(i -> store_item_names.get(img_base.indexOf(i)).toLowerCase()));
-
-        store_item_names.sort(Comparator.comparing(String::toLowerCase));
+        for(Data d : data) {
+            itemIds.add(d.itemId);
+            store_item_names.add(d.store_item_name);
+            store_item_quantities.add(d.store_item_quantity);
+            item_prices.add(d.item_price);
+            imageIds.add(d.imageId);
+        }
     }
 }
