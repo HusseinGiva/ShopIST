@@ -54,7 +54,7 @@ import com.google.firebase.firestore.Source;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -131,7 +131,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.LAT_LNG));
+        autocompleteFragment.setPlaceFields(Collections.singletonList(Place.Field.LAT_LNG));
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {

@@ -1129,7 +1129,7 @@ public class AddItemActivity extends AppCompatActivity {
             }
         }
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        for (File f: storageDir.listFiles()) {
+        for (File f : storageDir.listFiles()) {
             deleteRecursive(f);
         }
     }

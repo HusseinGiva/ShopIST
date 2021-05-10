@@ -12,13 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -125,67 +120,47 @@ public class PantryListAdapter extends ArrayAdapter<String> {
         view.findViewById(R.id.decrement_p_item_quantity).setOnClickListener(v -> {
             if (item_quantities.get(position) == 0) return;
             db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
-                    .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                        db.collection("PantryItem").document(document_1.getId())
+                                .update("quantity", item_quantities.get(position) - 1).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                item_quantities.set(position, item_quantities.get(position) - 1);
+                                list.invalidateViews();
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        view.findViewById(R.id.increment_p_item_quantity).setOnClickListener(v -> db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
+                .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document_1 : task.getResult()) {
                             db.collection("PantryItem").document(document_1.getId())
-                                    .update("quantity", item_quantities.get(position) - 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()) {
-                                        item_quantities.set(position, item_quantities.get(position) - 1);
+                                    .update("quantity", item_quantities.get(position) + 1).addOnCompleteListener(task12 -> {
+                                if (task12.isSuccessful()) {
+
+                                    if (item_quantities.get(position).equals(item_ideal_quantities.get(position))) {
+                                        db.collection("PantryItem").document(document_1.getId())
+                                                .update("idealQuantity", item_quantities.get(position) + 1).addOnCompleteListener(task121 -> {
+                                            if (task121.isSuccessful()) {
+                                                item_quantities.set(position, item_quantities.get(position) + 1);
+                                                item_ideal_quantities.set(position, item_ideal_quantities.get(position) + 1);
+                                                list.invalidateViews();
+                                            }
+                                        });
+                                    } else {
+                                        item_quantities.set(position, item_quantities.get(position) + 1);
                                         list.invalidateViews();
                                     }
                                 }
                             });
                         }
                     }
-                }
-            });
-        });
-
-        view.findViewById(R.id.increment_p_item_quantity).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
-                        .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                db.collection("PantryItem").document(document_1.getId())
-                                        .update("quantity", item_quantities.get(position) + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-
-                                            if (item_quantities.get(position).equals(item_ideal_quantities.get(position))) {
-                                                db.collection("PantryItem").document(document_1.getId())
-                                                        .update("idealQuantity", item_quantities.get(position) + 1).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if (task.isSuccessful()) {
-                                                            item_quantities.set(position, item_quantities.get(position) + 1);
-                                                            item_ideal_quantities.set(position, item_ideal_quantities.get(position) + 1);
-                                                            list.invalidateViews();
-                                                        }
-                                                    }
-                                                });
-                                            } else {
-                                                item_quantities.set(position, item_quantities.get(position) + 1);
-                                                list.invalidateViews();
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    }
-                });
-            }
-        });
+                }));
 
         return view;
     }

@@ -179,8 +179,8 @@ public class CartFragment extends Fragment {
                                                         item_prices.add(i.stores.get(storeId));
                                                         total_cost[0] += si.cartQuantity * i.stores.get(storeId);
                                                         DecimalFormat df = new DecimalFormat("###.##");
-                                                        Double value = Math.round(total_cost[0] * 100.0) / 100.0;
-                                                        textView.setText(String.valueOf(df.format(value)));
+                                                        double value = Math.round(total_cost[0] * 100.0) / 100.0;
+                                                        textView.setText(df.format(value));
                                                         if (value == 0) {
                                                             textView.setVisibility(View.INVISIBLE);
                                                             TextView euro = view.findViewById(R.id.textView7);
@@ -220,8 +220,8 @@ public class CartFragment extends Fragment {
                                                                                         item_prices.add(i.stores.get(s));
                                                                                         total_cost[0] += si.cartQuantity * i.stores.get(s);
                                                                                         DecimalFormat df = new DecimalFormat("###.##");
-                                                                                        Double value = Math.round(total_cost[0] * 100.0) / 100.0;
-                                                                                        textView.setText(String.valueOf(df.format(value)));
+                                                                                        double value = Math.round(total_cost[0] * 100.0) / 100.0;
+                                                                                        textView.setText(df.format(value));
                                                                                         if (value == 0) {
                                                                                             textView.setVisibility(View.INVISIBLE);
                                                                                             TextView euro = view.findViewById(R.id.textView7);
