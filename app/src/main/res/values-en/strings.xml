@@ -108,4 +108,5 @@
     <string name="whereToStoreItem">Where To Store Product:</string>
     <string name="quantity">Quantity</string>
     <string name="queueWaitTime">"Queue Wait Time: "</string>
+    <string name="productSameBarcodeAlreadyList">A product with the same barcode number is already present in this list</string>
 </resources>
