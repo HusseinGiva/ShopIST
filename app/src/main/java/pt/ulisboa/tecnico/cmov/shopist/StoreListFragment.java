@@ -41,6 +41,15 @@ public class StoreListFragment extends Fragment {
     private FirebaseAuth mAuth;
     private Source source;
 
+    private List<Data> data = new ArrayList<>();
+    private class Data {
+        String itemId;
+        String store_item_name;
+        Integer store_item_quantity;
+        Float item_price;
+        String imageId;
+    }
+
     public StoreListFragment() {
     }
 
@@ -98,6 +107,7 @@ public class StoreListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        data.clear();
 
         int[] async_operations = {0};
 
@@ -115,11 +125,6 @@ public class StoreListFragment extends Fragment {
                             db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task1 -> {
 
                                 if (task1.isSuccessful()) {
-                                    itemIds.clear();
-                                    store_item_names.clear();
-                                    store_item_quantities.clear();
-                                    item_prices.clear();
-                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         StoreItem si = document1.toObject(StoreItem.class);
                                         if (si.quantity == 0) continue;
@@ -130,15 +135,16 @@ public class StoreListFragment extends Fragment {
                                                 DocumentSnapshot document112 = task112.getResult();
                                                 if (document112.exists()) {
                                                     Item i = document112.toObject(Item.class);
-                                                    store_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                    store_item_quantities.add(si.quantity);
-                                                    itemIds.add(document112.getId());
-                                                    if (i.barcode.equals(""))
-                                                        imageIds.add(si.itemId);
-                                                    else imageIds.add(i.barcode);
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
-                                                        item_prices.add(i.stores.get(storeId));
+                                                        Data d = new Data();
+                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        d.store_item_quantity = si.quantity;
+                                                        d.itemId = document112.getId();
+                                                        d.item_price = i.stores.get(storeId);
+                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                        else d.imageId = i.barcode;
+                                                        data.add(d);
                                                     } else {
                                                         async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task11 -> {
@@ -159,7 +165,14 @@ public class StoreListFragment extends Fragment {
                                                                                             results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
-                                                                                        item_prices.add(i.stores.get(s));
+                                                                                        Data d = new Data();
+                                                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        d.store_item_quantity = si.quantity;
+                                                                                        d.itemId = document112.getId();
+                                                                                        d.item_price = i.stores.get(storeId);
+                                                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                                                        else d.imageId = i.barcode;
+                                                                                        data.add(d);
                                                                                     }
                                                                                     async_operations[0]--;
                                                                                 }
@@ -218,18 +231,20 @@ public class StoreListFragment extends Fragment {
 
     public void sort() {
 
-        List<String> ids_base = new ArrayList<>(itemIds);
-        itemIds.sort(Comparator.comparing(i -> store_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+        data.sort(Comparator.comparing(i -> i.store_item_name.toLowerCase()));
 
-        List<Integer> quantities_base = new ArrayList<>(store_item_quantities);
-        store_item_quantities.sort(Comparator.comparing(i -> store_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+        itemIds.clear();
+        store_item_names.clear();
+        store_item_quantities.clear();
+        item_prices.clear();
+        imageIds.clear();
 
-        List<Float> prices_base = new ArrayList<>(item_prices);
-        item_prices.sort(Comparator.comparing(i -> store_item_names.get(prices_base.indexOf(i)).toLowerCase()));
-
-        List<String> img_base = new ArrayList<>(imageIds);
-        imageIds.sort(Comparator.comparing(i -> store_item_names.get(img_base.indexOf(i)).toLowerCase()));
-
-        store_item_names.sort(Comparator.comparing(String::toLowerCase));
+        for(Data d : data) {
+            itemIds.add(d.itemId);
+            store_item_names.add(d.store_item_name);
+            store_item_quantities.add(d.store_item_quantity);
+            item_prices.add(d.item_price);
+            imageIds.add(d.imageId);
+        }
     }
 }

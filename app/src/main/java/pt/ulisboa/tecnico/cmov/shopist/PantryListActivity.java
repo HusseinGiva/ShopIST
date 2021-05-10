@@ -47,6 +47,15 @@ public class PantryListActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Source source;
 
+    private List<Data> data = new ArrayList<>();
+    private class Data {
+        String itemId;
+        String pantry_item_name;
+        Integer pantry_item_quantity;
+        Integer pantry_item_ideal_quantity;
+        String imageId;
+    }
+
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
 
@@ -100,6 +109,8 @@ public class PantryListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        data.clear();
+
         int[] async_operations = {0};
 
         async_operations[0]++;
@@ -119,11 +130,6 @@ public class PantryListActivity extends AppCompatActivity {
                             db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
 
                                 if (task1.isSuccessful()) {
-                                    itemIds.clear();
-                                    pantry_item_names.clear();
-                                    pantry_item_quantities.clear();
-                                    pantry_item_ideal_quantities.clear();
-                                    imageIds.clear();
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         PantryItem pi = document1.toObject(PantryItem.class);
                                         async_operations[0]++;
@@ -132,13 +138,16 @@ public class PantryListActivity extends AppCompatActivity {
                                                 DocumentSnapshot document11 = task11.getResult();
                                                 if (document11.exists()) {
                                                     Item i = document11.toObject(Item.class);
-                                                    pantry_item_names.add(i.users.get(mAuth.getCurrentUser().getUid()));
-                                                    pantry_item_quantities.add(pi.quantity);
-                                                    pantry_item_ideal_quantities.add(pi.idealQuantity);
-                                                    itemIds.add(document11.getId());
-                                                    if (i.barcode.equals(""))
-                                                        imageIds.add(pi.itemId);
-                                                    else imageIds.add(i.barcode);
+
+                                                    Data d = new Data();
+                                                    d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                    d.pantry_item_quantity = pi.quantity;
+                                                    d.pantry_item_ideal_quantity = pi.idealQuantity;
+                                                    d.itemId = pi.itemId;
+                                                    if (i.barcode.equals("")) d.imageId = pi.itemId;
+                                                    else d.imageId = i.barcode;
+                                                    data.add(d);
+
                                                     async_operations[0]--;
                                                 } else {
                                                     Log.d("TAG", "No such document");
@@ -187,19 +196,21 @@ public class PantryListActivity extends AppCompatActivity {
 
     public void sort() {
 
-        List<String> ids_base = new ArrayList<>(itemIds);
-        itemIds.sort(Comparator.comparing(i -> pantry_item_names.get(ids_base.indexOf(i)).toLowerCase()));
+        data.sort(Comparator.comparing(i -> i.pantry_item_name.toLowerCase()));
 
-        List<Integer> quantities_base = new ArrayList<>(pantry_item_quantities);
-        pantry_item_quantities.sort(Comparator.comparing(i -> pantry_item_names.get(quantities_base.indexOf(i)).toLowerCase()));
+        itemIds.clear();
+        pantry_item_names.clear();
+        pantry_item_quantities.clear();
+        pantry_item_ideal_quantities.clear();
+        imageIds.clear();
 
-        List<Integer> ideal_quantities_base = new ArrayList<>(pantry_item_ideal_quantities);
-        pantry_item_ideal_quantities.sort(Comparator.comparing(i -> pantry_item_names.get(ideal_quantities_base.indexOf(i)).toLowerCase()));
-
-        List<String> img_base = new ArrayList<>(imageIds);
-        imageIds.sort(Comparator.comparing(i -> pantry_item_names.get(img_base.indexOf(i)).toLowerCase()));
-
-        pantry_item_names.sort(Comparator.comparing(String::toLowerCase));
+        for(Data d : data) {
+            itemIds.add(d.itemId);
+            pantry_item_names.add(d.pantry_item_name);
+            pantry_item_quantities.add(d.pantry_item_quantity);
+            pantry_item_ideal_quantities.add(d.pantry_item_ideal_quantity);
+            imageIds.add(d.imageId);
+        }
     }
 
     @Override
