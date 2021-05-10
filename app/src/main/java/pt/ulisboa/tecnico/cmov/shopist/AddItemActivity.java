@@ -553,23 +553,16 @@ public class AddItemActivity extends AppCompatActivity {
                                                     itemId = document16.getId();
                                                     auxAddItemStoreFunction(item, itemId);
                                                 } else if (getIntent().getStringExtra("MODE").equals("add")) {
-                                                    db.collection("StoreItem").whereEqualTo("storeId", storeViewAddItems.get(0).storeId).get(source).addOnCompleteListener(task2028 -> {
-                                                        if (task2028.isSuccessful()) {
-                                                            if (task2028.getResult().size() != 0) {
-                                                                for (QueryDocumentSnapshot document2028 : task2028.getResult()) {
-                                                                    StoreItem storeItem = document2028.toObject(StoreItem.class);
-                                                                    db.collection("Item").document(storeItem.itemId).get(source).addOnCompleteListener(task2029 -> {
-                                                                        if (task2029.isSuccessful()) {
-                                                                            DocumentSnapshot document2029 = task2029.getResult();
-                                                                            if (document2029.exists()) {
-                                                                                Item item2 = document2029.toObject(Item.class);
-                                                                                if (item2.barcode.equals(barcodeNumber.getText().toString())) {
+                                                    db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).get(source).addOnCompleteListener(task2030 -> {
+                                                        if (task2030.isSuccessful()) {
+                                                            if (task2030.getResult().size() != 0) {
+                                                                for (QueryDocumentSnapshot document2030 : task2030.getResult()) {
+                                                                    db.collection("StoreItem").whereEqualTo("storeId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", document2030.getId()).get(source).addOnCompleteListener(task2031 -> {
+                                                                        if (task2031.isSuccessful()) {
+                                                                            if (task2031.getResult().size() != 0) {
+                                                                                for (QueryDocumentSnapshot document2031 : task2031.getResult()) {
                                                                                     Toast.makeText(this, R.string.productSameBarcodeAlreadyList, Toast.LENGTH_LONG).show();
                                                                                     return;
-                                                                                } else {
-                                                                                    Item item = document16.toObject(Item.class);
-                                                                                    itemId = document16.getId();
-                                                                                    auxAddItemStoreFunction(item, itemId);
                                                                                 }
                                                                             } else {
                                                                                 Item item = document16.toObject(Item.class);
@@ -1002,21 +995,16 @@ public class AddItemActivity extends AppCompatActivity {
                                             }
                                         });
                                     } else if (getIntent().getStringExtra("MODE").equals("add")) {
-                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).get(source).addOnCompleteListener(task2028 -> {
-                                            if (task2028.isSuccessful()) {
-                                                if (task2028.getResult().size() != 0) {
-                                                    for (QueryDocumentSnapshot document2028 : task2028.getResult()) {
-                                                        PantryItem pantryItem = document2028.toObject(PantryItem.class);
-                                                        db.collection("Item").document(pantryItem.itemId).get(source).addOnCompleteListener(task2029 -> {
-                                                            if (task2029.isSuccessful()) {
-                                                                DocumentSnapshot document2029 = task2029.getResult();
-                                                                if (document2029.exists()) {
-                                                                    Item item2 = document2029.toObject(Item.class);
-                                                                    if (item2.barcode.equals(barcodeNumber.getText().toString())) {
+                                        db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).get(source).addOnCompleteListener(task2030 -> {
+                                            if (task2030.isSuccessful()) {
+                                                if (task2030.getResult().size() != 0) {
+                                                    for (QueryDocumentSnapshot document2030 : task2030.getResult()) {
+                                                        db.collection("PantryItem").whereEqualTo("pantryId", getIntent().getStringExtra("ID")).whereEqualTo("itemId", document2030.getId()).get(source).addOnCompleteListener(task2031 -> {
+                                                            if (task2031.isSuccessful()) {
+                                                                if (task2031.getResult().size() != 0) {
+                                                                    for (QueryDocumentSnapshot document2031 : task2031.getResult()) {
                                                                         Toast.makeText(this, R.string.productSameBarcodeAlreadyList, Toast.LENGTH_LONG).show();
                                                                         return;
-                                                                    } else {
-                                                                        auxAddItemPantryFunction(item);
                                                                     }
                                                                 } else {
                                                                     auxAddItemPantryFunction(item);
@@ -1180,6 +1168,7 @@ public class AddItemActivity extends AppCompatActivity {
                 });
             }
         }
+
     }
 
     void deleteRecursive(File fileOrDirectory) {
