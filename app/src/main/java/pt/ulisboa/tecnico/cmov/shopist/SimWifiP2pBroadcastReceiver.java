@@ -47,6 +47,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        isInsideBeacon = false;
 
         if (isConnected(activity.getApplicationContext()))
             source = Source.DEFAULT;
@@ -220,7 +221,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
                         });
 
-            } else if (!ginfo.askIsConnected() && isInsideBeacon) {
+            } else if (!ginfo.askIsConnected()) {
 
                 isInsideBeacon = false;
 
