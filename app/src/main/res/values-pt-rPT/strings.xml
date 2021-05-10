@@ -109,4 +109,5 @@
     <string name="quantity">Quantidade</string>
     <string name="queueWaitTime">"Tempo De Espera Na Fila: "</string>
     <string name="productSameBarcodeAlreadyList">Um produto com o mesmo número de código de barras já existe nesta lista</string>
+    <string name="editList">Editar Lista</string>
 </resources>

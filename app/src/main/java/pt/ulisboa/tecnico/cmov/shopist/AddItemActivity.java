@@ -410,6 +410,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                         StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
                                                         imagesRef.putFile(file);
                                                     }
+                                                    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                    for (File f : storageDir.listFiles()) {
+                                                        deleteRecursive(f);
+                                                    }
                                                     finish();
                                                 }
                                             }
@@ -432,6 +436,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                 Uri file = Uri.fromFile(new File(s));
                                                 StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
                                                 imagesRef.putFile(file);
+                                            }
+                                            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                            for (File f : storageDir.listFiles()) {
+                                                deleteRecursive(f);
                                             }
                                             db.collection("StoreList").document(getIntent().getStringExtra("ID"))
                                                     .get(source)
@@ -492,6 +500,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                                     imagesRef.putFile(file);
                                                                 }
+                                                                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                                for (File f : storageDir.listFiles()) {
+                                                                    deleteRecursive(f);
+                                                                }
                                                                 finish();
                                                             }
                                                         }
@@ -514,6 +526,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                             Uri file = Uri.fromFile(new File(s));
                                                             StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                             imagesRef.putFile(file);
+                                                        }
+                                                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                        for (File f : storageDir.listFiles()) {
+                                                            deleteRecursive(f);
                                                         }
                                                         db.collection("StoreList").document(getIntent().getStringExtra("ID"))
                                                                 .get(source)
@@ -623,6 +639,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                                 imagesRef.putFile(file);
                                                             }
+                                                            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                            for (File f : storageDir.listFiles()) {
+                                                                deleteRecursive(f);
+                                                            }
                                                             finish();
                                                         }
                                                     }
@@ -645,6 +665,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                         Uri file = Uri.fromFile(new File(s));
                                                         StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                         imagesRef.putFile(file);
+                                                    }
+                                                    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                    for (File f : storageDir.listFiles()) {
+                                                        deleteRecursive(f);
                                                     }
                                                     db.collection("StoreList").document(getIntent().getStringExtra("ID"))
                                                             .get(source)
@@ -721,6 +745,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                             StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
                                                             imagesRef.putFile(file);
                                                         }
+                                                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                        for (File f : storageDir.listFiles()) {
+                                                            deleteRecursive(f);
+                                                        }
                                                         finish();
                                                     }
                                                 }
@@ -751,6 +779,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                 Uri file = Uri.fromFile(new File(s));
                                                 StorageReference imagesRef = storageRef.child(itemId + "/" + file.getLastPathSegment());
                                                 imagesRef.putFile(file);
+                                            }
+                                            File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                            for (File f : storageDir.listFiles()) {
+                                                deleteRecursive(f);
                                             }
                                             db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                     .get(source)
@@ -824,6 +856,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                         StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                                         imagesRef.putFile(file);
                                                                     }
+                                                                    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                                    for (File f : storageDir.listFiles()) {
+                                                                        deleteRecursive(f);
+                                                                    }
                                                                     finish();
                                                                 }
                                                             }
@@ -854,6 +890,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                             Uri file = Uri.fromFile(new File(s));
                                                             StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                             imagesRef.putFile(file);
+                                                        }
+                                                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                        for (File f : storageDir.listFiles()) {
+                                                            deleteRecursive(f);
                                                         }
                                                         db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                                 .get(source)
@@ -952,6 +992,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                             StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                             imagesRef.putFile(file);
                                                         }
+                                                        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                        for (File f : storageDir.listFiles()) {
+                                                            deleteRecursive(f);
+                                                        }
                                                         finish();
                                                     }
                                                 }
@@ -1046,6 +1090,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                                     imagesRef.putFile(file);
                                                                 }
+                                                                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                                for (File f : storageDir.listFiles()) {
+                                                                    deleteRecursive(f);
+                                                                }
                                                                 finish();
                                                             }
                                                         }
@@ -1109,6 +1157,10 @@ public class AddItemActivity extends AppCompatActivity {
                                                         StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                                                         imagesRef.putFile(file);
                                                     }
+                                                    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                                    for (File f : storageDir.listFiles()) {
+                                                        deleteRecursive(f);
+                                                    }
                                                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                             .get(source)
                                                             .addOnCompleteListener(task1 -> {
@@ -1128,10 +1180,6 @@ public class AddItemActivity extends AppCompatActivity {
                 });
             }
         }
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        for (File f : storageDir.listFiles()) {
-            deleteRecursive(f);
-        }
     }
 
     void deleteRecursive(File fileOrDirectory) {
@@ -1144,7 +1192,7 @@ public class AddItemActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AddPicturesActivity.class);
         intent.putStringArrayListExtra("PATHS", photoPaths);
         intent.putExtra("MODE", "add");
-        intent.putExtra("ID", barcodeNumber.getText());
+        intent.putExtra("ID", barcodeNumber.getText().toString());
         picturesResultLauncher.launch(intent);
     }
 
@@ -1328,6 +1376,10 @@ public class AddItemActivity extends AppCompatActivity {
                         StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
                         imagesRef.putFile(file);
                     }
+                    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    for (File f : storageDir.listFiles()) {
+                        deleteRecursive(f);
+                    }
                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                             .get(source)
                             .addOnCompleteListener(task14 -> {
@@ -1414,6 +1466,10 @@ public class AddItemActivity extends AppCompatActivity {
             StorageReference imagesRef = storageRef.child(barcodeNumber.getText().toString() + "/" + file.getLastPathSegment());
             imagesRef.putFile(file);
         }
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        for (File f : storageDir.listFiles()) {
+            deleteRecursive(f);
+        }
         if (getIntent().getStringExtra("MODE").equals("add")) {
             db.collection("StoreList").document(getIntent().getStringExtra("ID"))
                     .get(source)
@@ -1475,67 +1531,17 @@ public class AddItemActivity extends AppCompatActivity {
                                     if (barcodeNumber.getText().toString().matches("")) {
                                         barcodeNumber.setText(rawValue);
                                         storeViewAddItems.clear();
-                                        autocompleteStoreList();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                        AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
                                         builder.setCancelable(true);
                                         builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
                                         builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
-                                        builder.setPositiveButton(R.string.addPictures, (dialog, which) -> {
-                                            Intent intent = new Intent(this, AddPicturesActivity.class);
-                                            intent.putExtra("MODE", "add");
-                                            intent.putStringArrayListExtra("PATHS", photoPaths);
-                                            picturesResultLauncher.launch(intent);
-                                        });
+                                        builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
                                         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
-                                            builder.setNeutralButton(R.string.addStores, (dialog, which) -> {
-                                                Intent intent = new Intent(this, AddStoresActivity.class);
-                                                intent.putExtra("MODE", "add");
-                                                if (getIntent().getStringExtra("MODE").equals("update")) {
-                                                    intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
-                                                }
-                                                db.collection("StoreList")
-                                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                        .get(source)
-                                                        .addOnCompleteListener(task -> {
-                                                            if (task.isSuccessful()) {
-                                                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                                                    StoreList store = document.toObject(StoreList.class);
-                                                                    if (!storeViewAddItems.isEmpty()) {
-                                                                        boolean present = false;
-                                                                        for (StoreViewAddItem item : storeViewAddItems) {
-                                                                            if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
-                                                                                float[] results = new float[1];
-                                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                                        Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
-                                                                                        results);
-                                                                                //Less than 20 meters
-                                                                                if (results[0] < 20f) {
-                                                                                    present = true;
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                        if (!present) {
-                                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                                            storeViewAddItem.latitude = store.latitude;
-                                                                            storeViewAddItem.longitude = store.longitude;
-                                                                            storeViewAddItems.add(storeViewAddItem);
-                                                                        }
-
-                                                                    } else {
-                                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                                        storeViewAddItem.latitude = store.latitude;
-                                                                        storeViewAddItem.longitude = store.longitude;
-                                                                        storeViewAddItems.add(storeViewAddItem);
-                                                                    }
-                                                                }
-                                                                intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-                                                                storesResultLauncher.launch(intent);
-                                                            } else {
-                                                                Log.d("TAG", "Error getting documents: ", task.getException());
-                                                            }
-                                                        });
-                                            });
+                                            builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
+                                        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                                            targetQuantity.setText("");
                                         }
+                                        autocompleteStoreList();
                                         AlertDialog dialog = builder.create();
                                         dialog.show();
                                     }
