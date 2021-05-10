@@ -9,7 +9,6 @@ public class PantryList {
     public String latitude;
     public String longitude;
     public String driveTime = null;
-    public boolean created;
     public List<String> users;
 
     public PantryList() {
@@ -21,7 +20,6 @@ public class PantryList {
         this.latitude = latitude;
         this.longitude = longitude;
         this.number_of_items = 0;
-        this.created = true;
         users = new ArrayList<>();
         users.add(userId);
     }
@@ -31,7 +29,6 @@ public class PantryList {
         this.latitude = null;
         this.longitude = null;
         this.number_of_items = 0;
-        this.created = true;
         users = new ArrayList<>();
         users.add(userId);
     }

@@ -7,7 +7,7 @@
         android:title="Manual Entry"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/qrcode"
+        android:id="@+id/scanQr"
         android:icon="@drawable/qr_code"
         android:title="Scan List"
         app:showAsAction="ifRoom" />

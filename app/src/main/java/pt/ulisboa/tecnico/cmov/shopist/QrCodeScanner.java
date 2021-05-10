@@ -82,6 +82,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                     } else {
                         Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(this, AddListActivity.class);
+                        intent.putExtra("MODE", "add");
                         startActivity(intent);
                     }
                     finish();
@@ -101,6 +102,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                     } else {
                         Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(this, AddListActivity.class);
+                        intent.putExtra("MODE", "add");
                         startActivity(intent);
                     }
                     finish();
@@ -111,6 +113,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
         Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, AddListActivity.class);
+        intent.putExtra("MODE", "add");
         startActivity(intent);
         finish();
 

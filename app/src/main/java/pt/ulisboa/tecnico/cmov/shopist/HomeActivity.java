@@ -96,6 +96,7 @@ public class HomeActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.addList) {
             Intent intent = new Intent(this, AddListActivity.class);
             intent.putExtra("TYPE", this.typeSelected);
+            intent.putExtra("MODE", "add");
             startActivity(intent);
             return true;
         }// If we got here, the user's action was not recognized.

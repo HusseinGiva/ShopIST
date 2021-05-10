@@ -237,6 +237,13 @@ public class PantryListActivity extends AppCompatActivity {
                 intent.putExtra("ID", id);
                 startActivity(intent);
                 return true;
+            case R.id.editList:
+                intent = new Intent(this, AddListActivity.class);
+                intent.putExtra("TYPE", getResources().getString(R.string.pantry));
+                intent.putExtra("ID", id);
+                intent.putExtra("MODE", "update");
+                startActivity(intent);
+                return true;
             case R.id.locationList:
                 if (latitude == null || longitude == null) {
                     Toast.makeText(this, R.string.listDoesntHaveLocationSet, Toast.LENGTH_LONG).show();
