@@ -105,8 +105,10 @@ public class StartActivity extends AppCompatActivity {
         SimWifiP2pBroadcastReceiver mReceiver = new SimWifiP2pBroadcastReceiver(this);
         registerReceiver(mReceiver, filter);
 
-        Intent intentBeacon = new Intent(this, SimWifiP2pService.class);
+        Intent intentBeacon = new Intent(StartActivity.this, SimWifiP2pService.class);
         startService(intentBeacon);
+
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
