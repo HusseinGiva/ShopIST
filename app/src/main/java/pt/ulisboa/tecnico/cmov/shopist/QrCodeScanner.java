@@ -4,20 +4,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.zxing.Result;
 
+import java.util.Map;
+
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView.ResultHandler {
@@ -86,6 +96,40 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
                 db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+
+                        db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
+
+                            if (task1.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task1.getResult()) {
+                                    PantryItem pi = document.toObject(PantryItem.class);
+
+                                    db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task2 -> {
+
+                                        if(task2.isSuccessful()){
+
+                                            Item i = task2.getResult().toObject(Item.class);
+
+                                            if(!i.users.containsKey(mAuth.getCurrentUser().getUid())){
+                                                Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
+                                            }
+
+                                        }else {
+                                            Log.d("TAG", "Error getting documents: ", task2.getException());
+                                        }
+
+                                    });
+
+
+                                }
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task1.getException());
+                            }
+
+
+                        });
+
+
                         Intent intent = new Intent(QrCodeScanner.this, PantryListActivity.class);
                         intent.putExtra("ID", id);
                         intent.putExtra("SENDER", "start");

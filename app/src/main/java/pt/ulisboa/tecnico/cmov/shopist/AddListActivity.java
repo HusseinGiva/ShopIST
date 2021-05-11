@@ -56,6 +56,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
@@ -595,6 +596,39 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
                     db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
+
+                            db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
+
+                                if (task1.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task1.getResult()) {
+                                        PantryItem pi = document.toObject(PantryItem.class);
+
+                                        db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task2 -> {
+
+                                            if(task2.isSuccessful()){
+
+                                                Item i = task2.getResult().toObject(Item.class);
+
+                                                if(!i.users.containsKey(mAuth.getCurrentUser().getUid())){
+                                                    Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                    db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
+                                                }
+
+                                            }else {
+                                                Log.d("TAG", "Error getting documents: ", task2.getException());
+                                            }
+
+                                        });
+
+
+                                    }
+                                } else {
+                                    Log.d("TAG", "Error getting documents: ", task1.getException());
+                                }
+
+
+                            });
+
                             Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
                             intent.putExtra("ID", id);
                             intent.putExtra("SENDER", "start");
