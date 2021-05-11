@@ -98,9 +98,7 @@ public class PantryItemActivity extends AppCompatActivity {
         editResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    Intent intent2 = getIntent();
                     finish();
-                    startActivity(intent2);
                 });
 
         db = FirebaseFirestore.getInstance();
