@@ -8,15 +8,21 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Source;
 import com.google.zxing.Result;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView.ResultHandler {
     private ZXingScannerView mScannerView;
+    private Source source;
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -38,6 +44,11 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
         mScannerView = new ZXingScannerView(this);
         // Set the scanner view as the content view
         setContentView(mScannerView);
+
+        if (isConnected(getApplicationContext()))
+            source = Source.DEFAULT;
+        else
+            source = Source.CACHE;
     }
 
     @Override
@@ -77,6 +88,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                     if (task.isSuccessful()) {
                         Intent intent = new Intent(QrCodeScanner.this, PantryListActivity.class);
                         intent.putExtra("ID", id);
+                        intent.putExtra("SENDER", "start");
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     } else {
@@ -93,12 +105,33 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                 if (!isConnected(getApplicationContext()))
                     Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-                db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                db.collection("StoreList").document(id).get(source).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Intent intent = new Intent(QrCodeScanner.this, StoreListActivity.class);
-                        intent.putExtra("ID", id);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+
+                        DocumentSnapshot document = task.getResult();
+
+                        if(document.exists()){
+                            StoreList s = document.toObject(StoreList.class);
+
+                            StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
+
+                            db.collection("StoreList").add(newStore).addOnSuccessListener(documentReference -> {
+                                Intent intent = new Intent(QrCodeScanner.this, StoreListActivity.class);
+                                intent.putExtra("ID", documentReference.getId());
+                                intent.putExtra("SENDER", "start");
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+
+                            });
+
+                        }else{
+                            Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(this, AddListActivity.class);
+                            intent.putExtra("MODE", "add");
+                            startActivity(intent);
+                        }
+
+
                     } else {
                         Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(this, AddListActivity.class);
@@ -107,7 +140,9 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                     }
                     finish();
                 });
+
                 return;
+
             }
         }
 

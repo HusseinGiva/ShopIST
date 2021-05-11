@@ -133,11 +133,11 @@ public class PantryItemActivity extends AppCompatActivity {
 
                             avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
                                     String.format("%.1f", (totalRatings / totalVotes)));
-                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
-                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
-                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
-                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
-                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
 
                             db.collection("PantryItem").whereEqualTo("itemId", id).whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(task2 -> {
                                 if (task2.isSuccessful()) {
@@ -217,11 +217,11 @@ public class PantryItemActivity extends AppCompatActivity {
 
                             avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
                                     String.format("%.1f", (totalRatings / totalVotes)));
-                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
-                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
-                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
-                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
-                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
                         }
                     }
                 });

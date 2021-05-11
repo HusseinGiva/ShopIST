@@ -105,7 +105,7 @@ public class StartActivity extends AppCompatActivity {
         SimWifiP2pBroadcastReceiver mReceiver = new SimWifiP2pBroadcastReceiver(this);
         registerReceiver(mReceiver, filter);
 
-        Intent intentBeacon = new Intent(StartActivity.this, SimWifiP2pService.class);
+        Intent intentBeacon = new Intent(getApplicationContext(), SimWifiP2pService.class);
         startService(intentBeacon);
 
 

@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -32,6 +33,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
@@ -45,6 +47,13 @@ public class StoreItemActivity extends AppCompatActivity {
     public EditText itemCartQuantity;
     public EditText barcodeNumber;
     public EditText price;
+    public EditText userRating;
+    public TextView avgRating;
+    public TextView rating_5;
+    public TextView rating_4;
+    public TextView rating_3;
+    public TextView rating_2;
+    public TextView rating_1;
     public Item item;
     public ActivityResultLauncher<Intent> editResultLauncher;
     private FirebaseFirestore db;
@@ -77,6 +86,13 @@ public class StoreItemActivity extends AppCompatActivity {
         storeId = getIntent().getStringExtra("StoreId");
         itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
         itemCartQuantity = findViewById(R.id.itemCartQuantity);
+        userRating = findViewById(R.id.yourRatingInputStore);
+        avgRating = findViewById(R.id.avgRatingTextStore);
+        rating_5 = findViewById(R.id.star5TextStore);
+        rating_4 = findViewById(R.id.star4TextStore);
+        rating_3 = findViewById(R.id.star3TextStore);
+        rating_2 = findViewById(R.id.star2TextStore);
+        rating_1 = findViewById(R.id.star1TextStore);
         SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
         String language = sharedPref.getString("language", "en");
         if (language.equals("pt")) {
@@ -109,6 +125,31 @@ public class StoreItemActivity extends AppCompatActivity {
                             item = document.toObject(Item.class);
                             getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
                             barcodeNumber.setText(item.barcode);
+
+                            float[] votes = {0, 0, 0, 0, 0};
+                            float totalRatings = 0;
+                            float totalVotes = 0;
+
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+
+                            for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                votes[entry.getValue() - 1]++;
+                                totalRatings += entry.getValue();
+                                totalVotes++;
+                            }
+
+                            if (totalVotes == 0)
+                                totalVotes = 1;
+
+                            avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                    String.format("%.1f", (totalRatings / totalVotes)));
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+
                             for (String s : item.stores.keySet()) {
                                 if (storeId.equals(s)) {
                                     if (item.stores.get(s) != 0) {
@@ -268,5 +309,62 @@ public class StoreItemActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         finish();
+    }
+
+    public void onClickSubmitRating(View view) {
+        String userRatingText = userRating.getText().toString();
+
+        int userRatingNumber;
+
+        try {
+            userRatingNumber = Integer.parseInt(userRatingText);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, R.string.invalidRating, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (userRatingNumber < 1 || userRatingNumber > 5) {
+            Toast.makeText(this, R.string.ratingMustBeBetween1And5, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("Item").document(id).update(
+                "ratings." + mAuth.getCurrentUser().getUid(), userRatingNumber
+        );
+
+        db.collection("Item").document(id)
+                .get(source)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            item = document.toObject(Item.class);
+                            float[] votes = {0, 0, 0, 0, 0};
+                            float totalRatings = 0;
+                            float totalVotes = 0;
+
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
+                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+
+                            for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                votes[entry.getValue() - 1]++;
+                                totalRatings += entry.getValue();
+                                totalVotes++;
+                            }
+
+                            if (totalVotes == 0)
+                                totalVotes = 1;
+
+                            avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                    String.format("%.1f", (totalRatings / totalVotes)));
+                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int)votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int)votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int)votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int)votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+                        }
+                    }
+                });
+
     }
 }

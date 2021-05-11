@@ -597,6 +597,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                         if (task.isSuccessful()) {
                             Intent intent = new Intent(AddListActivity.this, PantryListActivity.class);
                             intent.putExtra("ID", id);
+                            intent.putExtra("SENDER", "start");
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             startActivity(intent);
                             finish();
@@ -612,13 +613,32 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                     if (!isConnected(getApplicationContext()))
                         Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-                    db.collection("StoreList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                    db.collection("StoreList").document(id).get(source).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
-                            intent.putExtra("ID", id);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                            startActivity(intent);
-                            finish();
+
+                            DocumentSnapshot document = task.getResult();
+
+                            if(document.exists()){
+                                StoreList s = document.toObject(StoreList.class);
+
+                                StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
+
+                                db.collection("StoreList").add(newStore).addOnSuccessListener(documentReference -> {
+                                    Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
+                                    intent.putExtra("ID", documentReference.getId());
+                                    intent.putExtra("SENDER", "start");
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                    startActivity(intent);
+                                    finish();
+
+                                });
+
+                            }else{
+                                Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
+                                dialog.cancel();
+                            }
+
+
                         } else {
                             Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
                             dialog.cancel();
