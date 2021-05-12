@@ -11,11 +11,14 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,13 +35,14 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class CheckoutActivity extends AppCompatActivity {
 
-    private final List<String> item_names = new ArrayList<>();
-    private final List<Integer> item_quantities = new ArrayList<>();
-    private final List<Float> item_prices = new ArrayList<>();
-    private final List<String> item_ids = new ArrayList<>();
+    List<String> item_names = new ArrayList<>();
+    List<Integer> item_quantities = new ArrayList<>();
+    List<Float> item_prices = new ArrayList<>();
+    List<String> item_ids = new ArrayList<>();
     // { itemId -> { pantryId -> quantity, ... }, ... }
     private final Map<String, Map<String, String>> quantitiesPerPantry = new HashMap<>();
     List<String> pantryIds = new ArrayList<>();
@@ -60,6 +64,22 @@ public class CheckoutActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private boolean everything_loaded = false;
     private Source source;
+
+    private List<ItemData> itemData = new ArrayList<>();
+    private class ItemData {
+        String itemId;
+        String item_name;
+        Integer item_quantity;
+        Float item_price;
+    }
+
+    private List<PantryData> pantryData = new ArrayList<>();
+    private class PantryData {
+        String pantryId;
+        String pantry_name;
+        Integer quantity_needed;
+        String pantry_quantity;
+    }
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -124,10 +144,12 @@ public class CheckoutActivity extends AppCompatActivity {
                                     float p = 0;
                                     if (i.stores.containsKey(id)) p = i.stores.get(id);
 
-                                    item_names.add(i.users.get(mAuth.getUid()));
-                                    item_quantities.add(si.cartQuantity);
-                                    item_prices.add(p);
-                                    item_ids.add(si.itemId);
+                                    ItemData iData = new ItemData();
+                                    iData.item_name = i.users.get(mAuth.getUid());
+                                    iData.item_quantity = si.cartQuantity;
+                                    iData.item_price = p;
+                                    iData.itemId = si.itemId;
+                                    itemData.add(iData);
                                     async_operations[0]--;
                                 }
                             }
@@ -145,6 +167,15 @@ public class CheckoutActivity extends AppCompatActivity {
             public void run() {
                 if (async_operations[0] == 0) {
                     everything_loaded = true;
+
+                    itemData.sort(Comparator.comparing(i -> i.item_name.toLowerCase()));
+                    for(ItemData i : itemData) {
+                        item_names.add(i.item_name);
+                        item_quantities.add(i.item_quantity);
+                        item_prices.add(i.item_price);
+                        item_ids.add(i.itemId);
+                    }
+
                     ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
 
                     if (current_item == item_names.size() - 1) {
@@ -153,7 +184,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         next.setVisibility(View.VISIBLE);
                     }
 
-                    sort();
+                    pos.setText(String.valueOf(current_item + 1));
                     name.setText(item_names.get(current_item));
                     quantity.setText(String.valueOf(item_quantities.get(current_item)));
                     price.setText(String.valueOf(item_prices.get(current_item)));
@@ -251,6 +282,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 if (!everything_loaded) return;
 
                 int[] async_operations = {0};
+                int[] complete_store_items = {0};
 
                 for (Map.Entry<String, Map<String, String>> entry_1 : quantitiesPerPantry.entrySet()) {
                     String itemId = entry_1.getKey();
@@ -321,9 +353,14 @@ public class CheckoutActivity extends AppCompatActivity {
                                         .update("cartQuantity", si.cartQuantity - total_quantity[0]).addOnCompleteListener(task16 -> {
                                     if (task16.isSuccessful()) async_operations[0]--;
                                 });
+                                int sq = si.quantity - total_quantity[0];
+                                if(sq <= 0) {
+                                    sq = 0;
+                                    complete_store_items[0]++;
+                                }
                                 async_operations[0]++;
                                 db.collection("StoreItem").document(document_1.getId())
-                                        .update("quantity", si.quantity - total_quantity[0]).addOnCompleteListener(task17 -> {
+                                        .update("quantity", sq).addOnCompleteListener(task17 -> {
                                     if (task17.isSuccessful()) async_operations[0]--;
                                 });
                             }
@@ -338,7 +375,26 @@ public class CheckoutActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (async_operations[0] == 0) {
-                            finish();
+                            db.collection("StoreList").document(id).get(source)
+                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    if(task.isSuccessful()) {
+                                        DocumentSnapshot d = task.getResult();
+                                        StoreList s = d.toObject(StoreList.class);
+                                        db.collection("StoreList").document(id)
+                                                .update("number_of_items", s.number_of_items - complete_store_items[0])
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if(task.isSuccessful()) {
+                                                            finish();
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                }
+                            });
                         } else {
                             timerHandler.postDelayed(this, 100);
                         }
@@ -349,25 +405,8 @@ public class CheckoutActivity extends AppCompatActivity {
         });
     }
 
-    public void sort() {
-
-        List<Integer> iq_base = new ArrayList<>(item_quantities);
-        item_quantities.sort(Comparator.comparing(i -> item_names.get(iq_base.indexOf(i)).toLowerCase()));
-
-        List<Float> ip_base = new ArrayList<>(item_prices);
-        item_prices.sort(Comparator.comparing(i -> item_names.get(ip_base.indexOf(i)).toLowerCase()));
-
-        List<String> ii_base = new ArrayList<>(item_ids);
-        item_ids.sort(Comparator.comparing(i -> item_names.get(ii_base.indexOf(i)).toLowerCase()));
-
-        item_names.sort(Comparator.comparing(String::toLowerCase));
-    }
-
     public void updateList() {
-        pantryIds.clear();
-        pantryNames.clear();
-        quantitiesNeeded.clear();
-        pantryQuantities.clear();
+        pantryData.clear();
 
         boolean first_time_for_item = !quantitiesPerPantry.containsKey(item_ids.get(current_item));
         if (first_time_for_item) {
@@ -391,17 +430,21 @@ public class CheckoutActivity extends AppCompatActivity {
                                 quantitiesPerPantry.get(item_ids.get(current_item)).put(document_1.getId(), "0");
                             }
                             if (task1.getResult().size() == 0) {
-                                pantryIds.add(document_1.getId());
-                                pantryNames.add(pantry.name);
-                                quantitiesNeeded.add(0);
-                                pantryQuantities.add(quantitiesPerPantry.get(item_ids.get(current_item)).get(document_1.getId()));
+                                PantryData pd = new PantryData();
+                                pd.pantryId = document_1.getId();
+                                pd.pantry_name = pantry.name;
+                                pd.quantity_needed = 0;
+                                pd.pantry_quantity = quantitiesPerPantry.get(item_ids.get(current_item)).get(document_1.getId());
+                                pantryData.add(pd);
                             } else {
                                 for (QueryDocumentSnapshot document_2 : task1.getResult()) {
                                     PantryItem pi = document_2.toObject(PantryItem.class);
-                                    pantryIds.add(document_1.getId());
-                                    pantryNames.add(pantry.name);
-                                    quantitiesNeeded.add(pi.idealQuantity - pi.quantity);
-                                    pantryQuantities.add(quantitiesPerPantry.get(item_ids.get(current_item)).get(document_1.getId()));
+                                    PantryData pd = new PantryData();
+                                    pd.pantryId = document_1.getId();
+                                    pd.pantry_name = pantry.name;
+                                    pd.quantity_needed = pi.idealQuantity - pi.quantity;
+                                    pd.pantry_quantity = quantitiesPerPantry.get(item_ids.get(current_item)).get(document_1.getId());
+                                    pantryData.add(pd);
                                 }
                             }
                             async_operations[0]--;
@@ -418,16 +461,20 @@ public class CheckoutActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
-                    List<String> pi_base = new ArrayList<>(pantryIds);
-                    pantryIds.sort(Comparator.comparing(i -> pantryNames.get(pi_base.indexOf(i)).toLowerCase()));
 
-                    List<Integer> qn_base = new ArrayList<>(quantitiesNeeded);
-                    quantitiesNeeded.sort(Comparator.comparing(i -> pantryNames.get(qn_base.indexOf(i)).toLowerCase()));
+                    pantryIds.clear();
+                    pantryNames.clear();
+                    quantitiesNeeded.clear();
+                    pantryQuantities.clear();
 
-                    List<String> pq_base = new ArrayList<>(pantryQuantities);
-                    pantryQuantities.sort(Comparator.comparing(i -> pantryNames.get(pq_base.indexOf(i)).toLowerCase()));
+                    pantryData.sort(Comparator.comparing(i -> i.pantry_name.toLowerCase()));
+                    for(PantryData d : pantryData) {
+                        pantryIds.add(d.pantryId);
+                        pantryNames.add(d.pantry_name);
+                        quantitiesNeeded.add(d.quantity_needed);
+                        pantryQuantities.add(d.pantry_quantity);
+                    }
 
-                    pantryNames.sort(Comparator.comparing(String::toLowerCase));
                     list.invalidateViews();
                 } else {
                     timerHandler.postDelayed(this, 100);
