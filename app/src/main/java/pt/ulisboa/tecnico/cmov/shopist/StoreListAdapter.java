@@ -156,7 +156,6 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         }
 
         view.findViewById(R.id.decrement_item_quantity).setOnClickListener(v -> {
-            if (!cart && item_quantities.get(position) == 0) return;
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                     .get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
@@ -217,10 +216,8 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                         for (QueryDocumentSnapshot document_1 : task.getResult()) {
                             StoreItem si = document_1.toObject(StoreItem.class);
                             String field;
-                            if (cart) {
-                                if (item_quantities.get(position) == si.quantity) return;
-                                field = "cartQuantity";
-                            } else field = "quantity";
+                            if (cart) field = "cartQuantity";
+                            else field = "quantity";
                             db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) + 1)
                                     .addOnCompleteListener(task12 -> {
                                         if (task12.isSuccessful()) {
@@ -249,7 +246,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
-            EditText e = view1.findViewById(R.id.move_to_cart_quantity);
+            EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
             e.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -258,12 +255,11 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     String str = s.toString();
-                    if (!str.equals("")) {
-                        int quantity = Integer.parseInt(String.valueOf(e.getText()));
-                        int max_quantity = item_quantities.get(position);
-                        if (quantity > max_quantity) {
-                            e.setText(String.valueOf(max_quantity));
-                        }
+                    try {
+                        int n = Integer.parseInt(str);
+                        if (n < 0) e.setText("0");
+                    } catch (NumberFormatException exp) {
+                        if (!str.equals("")) e.setText("");
                     }
                 }
 
@@ -274,16 +270,21 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             });
 
             view1.findViewById(R.id.decrement_move_to_cart_quantity).setOnClickListener(v1 -> {
-                int quantity = Integer.parseInt(String.valueOf(e.getText()));
-                if (quantity == 0) return;
-                e.setText(String.valueOf(quantity - 1));
+                String s = e.getText().toString();
+                if (s.equals("") || s.equals("0")) e.setText("0");
+                else {
+                    int n = Integer.parseInt(s);
+                    e.setText(String.valueOf(n - 1));
+                }
             });
 
             view1.findViewById(R.id.increment_move_to_cart_quantity).setOnClickListener(v12 -> {
-                int quantity = Integer.parseInt(String.valueOf(e.getText()));
-                int max_quantity = item_quantities.get(position);
-                if (quantity == max_quantity) return;
-                e.setText(String.valueOf(Integer.parseInt(String.valueOf(e.getText())) + 1));
+                String s = e.getText().toString();
+                if (s.equals("")) e.setText("0");
+                else {
+                    int n = Integer.parseInt(s);
+                    e.setText(String.valueOf(n + 1));
+                }
             });
 
             builder.setView(view1);
