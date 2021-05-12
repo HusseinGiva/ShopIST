@@ -14,6 +14,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +49,6 @@ public class StoreItemActivity extends AppCompatActivity {
     public EditText itemCartQuantity;
     public EditText barcodeNumber;
     public EditText price;
-    public EditText userRating;
     public TextView avgRating;
     public TextView rating_5;
     public TextView rating_4;
@@ -59,6 +60,9 @@ public class StoreItemActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
+
+    private String previousRating;
+    private String newRating;
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -86,13 +90,15 @@ public class StoreItemActivity extends AppCompatActivity {
         storeId = getIntent().getStringExtra("StoreId");
         itemStoreQuantity = findViewById(R.id.itemStoreQuantity);
         itemCartQuantity = findViewById(R.id.itemCartQuantity);
-        userRating = findViewById(R.id.yourRatingInputStore);
         avgRating = findViewById(R.id.avgRatingTextStore);
         rating_5 = findViewById(R.id.star5TextStore);
         rating_4 = findViewById(R.id.star4TextStore);
         rating_3 = findViewById(R.id.star3TextStore);
         rating_2 = findViewById(R.id.star2TextStore);
         rating_1 = findViewById(R.id.star1TextStore);
+
+        RadioGroup radioGroup = findViewById(R.id.storeRadioGroup);
+
         SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
         String language = sharedPref.getString("language", "en");
         if (language.equals("pt")) {
@@ -128,8 +134,10 @@ public class StoreItemActivity extends AppCompatActivity {
                             float totalRatings = 0;
                             float totalVotes = 0;
 
-                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
-                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                                previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
+                                ((RadioButton)radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
+                            }
 
                             for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
                                 votes[entry.getValue() - 1]++;
@@ -192,6 +200,13 @@ public class StoreItemActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            // This will get the radiobutton that has changed in its check state
+            RadioButton checkedRadioButton = group.findViewById(checkedId);
+
+            newRating = checkedRadioButton.getText().toString();
+        });
     }
 
     @Override
@@ -306,63 +321,16 @@ public class StoreItemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        if(newRating != null && !newRating.equals(previousRating)){
+            db.collection("Item").document(id).update(
+                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
+            );
+        }
+
+
         finish();
     }
 
-    public void onClickSubmitRating(View view) {
-        String userRatingText = userRating.getText().toString();
 
-        int userRatingNumber;
-
-        try {
-            userRatingNumber = Integer.parseInt(userRatingText);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, R.string.invalidRating, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (userRatingNumber < 1 || userRatingNumber > 5) {
-            Toast.makeText(this, R.string.ratingMustBeBetween1And5, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        db.collection("Item").document(id).update(
-                "ratings." + mAuth.getCurrentUser().getUid(), userRatingNumber
-        );
-
-        db.collection("Item").document(id)
-                .get(source)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            item = document.toObject(Item.class);
-                            float[] votes = {0, 0, 0, 0, 0};
-                            float totalRatings = 0;
-                            float totalVotes = 0;
-
-                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid()))
-                                userRating.setText(item.ratings.get(mAuth.getCurrentUser().getUid()).toString());
-
-                            for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
-                                votes[entry.getValue() - 1]++;
-                                totalRatings += entry.getValue();
-                                totalVotes++;
-                            }
-
-                            if (totalVotes == 0)
-                                totalVotes = 1;
-
-                            avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
-                                    String.format("%.1f", (totalRatings / totalVotes)));
-                            rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
-                            rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int)votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
-                            rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int)votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
-                            rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int)votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
-                            rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int)votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
-                        }
-                    }
-                });
-
-    }
 }

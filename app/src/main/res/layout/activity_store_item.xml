@@ -161,32 +161,46 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <EditText
-        android:id="@+id/yourRatingInputStore"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="360dp"
-        android:duplicateParentState="false"
-        android:ems="10"
-        android:hint="@string/insertRating"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.555"
+    <RadioGroup
+        android:id="@+id/storeRadioGroup"
+        android:layout_width="263dp"
+        android:layout_height="36dp"
+        android:layout_marginStart="143dp"
+        android:layout_marginTop="564dp"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <Button
-        android:id="@+id/submitRatingStore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:onClick="onClickSubmitRating"
-        android:text="@string/submit"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.95"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewPicturesStore" />
+        <RadioButton
+            android:id="@+id/storeRating1selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1" />
+
+        <RadioButton
+            android:id="@+id/storeRating2selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2" />
+
+        <RadioButton
+            android:id="@+id/storeRating3selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3" />
+
+        <RadioButton
+            android:id="@+id/storeRating4selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4" />
+
+        <RadioButton
+            android:id="@+id/storeRating5selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5" />
+    </RadioGroup>
 
     <TextView
         android:id="@+id/avgRatingTextStore"
