@@ -17,6 +17,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
@@ -28,6 +33,7 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListAdapter extends ArrayAdapter<String> {
 
@@ -173,7 +179,26 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                                 return;
                                             }
                                         } else if (item_quantities.get(position) == 1) {
-                                            activity.goToStore();
+                                            db.collection("StoreList").document(storeId).get(source)
+                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                            if(task.isSuccessful()) {
+                                                                DocumentSnapshot document_2 = task.getResult();
+                                                                StoreList s = document_2.toObject(StoreList.class);
+                                                                db.collection("StoreList").document(storeId)
+                                                                        .update("number_of_items", s.number_of_items - 1)
+                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if(task.isSuccessful()) {
+                                                                                    activity.goToStore();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                            }
+                                                        }
+                                                    });
                                             return;
                                         }
                                         item_quantities.set(position, item_quantities.get(position) - 1);

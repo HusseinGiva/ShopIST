@@ -202,6 +202,10 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                                                         db.collection("StoreList").document(document_1.getId())
                                                                 .update("number_of_items", s.number_of_items - 1);
                                                     }
+                                                    else if(si.quantity == 0 && v == 1) {
+                                                        db.collection("StoreList").document(document_1.getId())
+                                                                .update("number_of_items", s.number_of_items + 1);
+                                                    }
                                                 }
                                             }
                                         }
