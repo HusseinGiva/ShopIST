@@ -111,4 +111,11 @@
     <string name="productSameBarcodeAlreadyList">Um produto com o mesmo número de código de barras já existe nesta lista</string>
     <string name="editList">Editar Lista</string>
     <string name="queueWaitTimeInvalid">Não é possível calcular</string>
+    <string name="share">Partilhar</string>
+    <string name="edit">Editar</string>
+    <string name="location">Localização</string>
+    <string name="resetQuantities">Redefinir Quantidades</string>
+    <string name="addProduct">Adicionar Produto</string>
+    <string name="scanList">Digitalizar Lista</string>
+    <string name="addList">Adicionar Lista</string>
 </resources>

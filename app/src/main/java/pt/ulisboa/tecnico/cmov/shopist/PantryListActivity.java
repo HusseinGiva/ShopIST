@@ -223,6 +223,7 @@ public class PantryListActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_share_menu, menu);
+        menu.findItem(R.id.resetList).setVisible(false);
         return true;
     }
 

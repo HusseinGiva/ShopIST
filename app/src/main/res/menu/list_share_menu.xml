@@ -5,31 +5,31 @@
     <item
         android:id="@+id/shareList"
         android:icon="@drawable/baseline_share_24"
-        android:title="Share"
-        app:showAsAction="always" />
+        android:title="@string/share"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/addProduct"
         android:icon="@drawable/baseline_add_24"
-        android:title="Add item"
+        android:title="@string/addProduct"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/locationList"
         android:icon="@drawable/baseline_location_24"
-        android:title="Location"
+        android:title="@string/location"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/editList"
         android:icon="@drawable/baseline_edit_24"
-        android:title="Edit"
+        android:title="@string/edit"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/resetList"
         android:icon="@drawable/baseline_reset_24"
-        android:title="Reset"
+        android:title="@string/resetQuantities"
         app:showAsAction="ifRoom" />
 
 </menu>

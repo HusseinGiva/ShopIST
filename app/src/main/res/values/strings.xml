@@ -111,4 +111,11 @@
     <string name="productSameBarcodeAlreadyList">A product with the same barcode number is already present in this list</string>
     <string name="editList">Edit List</string>
     <string name="queueWaitTimeInvalid">It is not possible to calculate</string>
+    <string name="share">Share</string>
+    <string name="edit">Edit</string>
+    <string name="location">Location</string>
+    <string name="resetQuantities">Reset Quantities</string>
+    <string name="addProduct">Add Product</string>
+    <string name="scanList">Scan List</string>
+    <string name="addList">Add List</string>
 </resources>
