@@ -1299,6 +1299,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     }
                                 } else {
                                     item.stores.put(store.storeId, store.price);
+                                    db.collection("Item").document(itemId).update("stores", item.stores);
                                 }
                                 db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task19 -> {
                                     if (task19.isSuccessful()) {
@@ -1385,6 +1386,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 }
                             } else {
                                 item.stores.put(store.storeId, store.price);
+                                db.collection("Item").document(itemId).update("stores", item.stores);
                             }
                             db.collection("Item").whereEqualTo("barcode", barcodeNumber.getText().toString()).get(source).addOnCompleteListener(task20 -> {
                                 if (task20.isSuccessful()) {
