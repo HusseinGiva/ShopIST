@@ -1359,6 +1359,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                 present = true;
                                             }
                                         }
+                                        else if (item.storeId.equals(document.getId())) {
+                                            present = true;
+                                        }
                                     }
                                     if (!present) {
                                         StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, true);
