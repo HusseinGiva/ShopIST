@@ -392,10 +392,16 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                         if (async_operations[0] == 0) {
                                                             pantry_index[0]++;
                                                             if (pantry_index[0] >= pantries.size()) {
-                                                                db.collection("StoreList").document(document_1.getId()).update("number_of_items", n_new_items[0]);
-                                                        /*Intent intent = new Intent(AddListActivity.this, HomeActivity.class);
-                                                        startActivity(intent);*/
-                                                                finish();
+                                                                db.collection("StoreList").document(document_1.getId())
+                                                                        .update("number_of_items", n_new_items[0])
+                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                if(task.isSuccessful()) {
+                                                                                    finish();
+                                                                                }
+                                                                            }
+                                                                        });
                                                                 return;
                                                             }
 

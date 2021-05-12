@@ -12,8 +12,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -21,10 +27,14 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.List;
 
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
+
 public class PantryListAdapter extends ArrayAdapter<String> {
 
     private final Source source;
     private final FirebaseFirestore db;
+    private FirebaseAuth mAuth;
     Context context;
     List<String> item_names;
     List<Integer> item_quantities;
@@ -52,6 +62,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
             source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     public static boolean isConnected(Context getApplicationContext) {
@@ -126,6 +137,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                         db.collection("PantryItem").document(document_1.getId())
                                 .update("quantity", item_quantities.get(position) - 1).addOnCompleteListener(task1 -> {
                             if (task1.isSuccessful()) {
+                                updateStoreLists(itemIds.get(position), 1);
                                 item_quantities.set(position, item_quantities.get(position) - 1);
                                 list.invalidateViews();
                             }
@@ -153,6 +165,7 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                                             }
                                         });
                                     } else {
+                                        updateStoreLists(itemIds.get(position), -1);
                                         item_quantities.set(position, item_quantities.get(position) + 1);
                                         list.invalidateViews();
                                     }
@@ -163,5 +176,40 @@ public class PantryListAdapter extends ArrayAdapter<String> {
                 }));
 
         return view;
+    }
+
+    public void updateStoreLists(String itemId, int v) {
+        db.collection("StoreList")
+                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                .get(source)
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                                StoreList s = document_1.toObject(StoreList.class);
+                                db.collection("StoreItem").whereEqualTo("storeId", document_1.getId())
+                                        .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                        if(task.isSuccessful()) {
+                                            for(QueryDocumentSnapshot document_2 : task.getResult()) {
+                                                StoreItem si = document_2.toObject(StoreItem.class);
+                                                if(!(v == -1 && si.quantity == 0)) {
+                                                    db.collection("StoreItem").document(document_2.getId())
+                                                            .update("quantity", si.quantity + v);
+                                                    if(si.quantity + v == 0) {
+                                                        db.collection("StoreList").document(document_1.getId())
+                                                                .update("number_of_items", s.number_of_items - 1);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+                });
     }
 }
