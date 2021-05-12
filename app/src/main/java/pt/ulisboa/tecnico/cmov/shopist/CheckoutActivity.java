@@ -2,7 +2,9 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,7 +26,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,6 +48,7 @@ public class CheckoutActivity extends AppCompatActivity {
     List<Integer> item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
     List<String> item_ids = new ArrayList<>();
+    List<String> imageIds = new ArrayList<>();
     // { itemId -> { pantryId -> quantity, ... }, ... }
     private final Map<String, Map<String, String>> quantitiesPerPantry = new HashMap<>();
     List<String> pantryIds = new ArrayList<>();
@@ -55,6 +61,7 @@ public class CheckoutActivity extends AppCompatActivity {
     private TextView pos;
     private ListView list;
     private TextView name;
+    private ImageView image;
     private TextView quantity;
     private TextView price;
     private ImageView next;
@@ -62,6 +69,8 @@ public class CheckoutActivity extends AppCompatActivity {
     private Button confirm;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    FirebaseStorage storage;
+    StorageReference storageRef;
     private boolean everything_loaded = false;
     private Source source;
 
@@ -71,6 +80,7 @@ public class CheckoutActivity extends AppCompatActivity {
         String item_name;
         Integer item_quantity;
         Float item_price;
+        String imageId;
     }
 
     private List<PantryData> pantryData = new ArrayList<>();
@@ -111,10 +121,13 @@ public class CheckoutActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
 
         list = (ListView) findViewById(R.id.checkout_list);
         pos = (TextView) findViewById(R.id.checkout_position);
         name = (TextView) findViewById(R.id.checkout_name);
+        image = (ImageView) findViewById(R.id.checkout_item_image);
         quantity = (TextView) findViewById(R.id.checkout_quantity);
         price = (TextView) findViewById(R.id.checkout_price);
         next = (ImageView) findViewById(R.id.checkout_next);
@@ -149,6 +162,8 @@ public class CheckoutActivity extends AppCompatActivity {
                                     iData.item_quantity = si.cartQuantity;
                                     iData.item_price = p;
                                     iData.itemId = si.itemId;
+                                    if (i.barcode.equals("")) iData.imageId = si.itemId;
+                                    else iData.imageId = i.barcode;
                                     itemData.add(iData);
                                     async_operations[0]--;
                                 }
@@ -174,6 +189,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         item_quantities.add(i.item_quantity);
                         item_prices.add(i.item_price);
                         item_ids.add(i.itemId);
+                        imageIds.add(i.imageId);
                     }
 
                     ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
@@ -201,7 +217,7 @@ public class CheckoutActivity extends AppCompatActivity {
                         euro.setVisibility(View.VISIBLE);
                         priceCheckout.setVisibility(View.VISIBLE);
                     }
-
+                    updateItemImage();
                     updateList();
                 } else {
                     timerHandler.postDelayed(this, 100);
@@ -240,6 +256,7 @@ public class CheckoutActivity extends AppCompatActivity {
             }
 
             ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
+            updateItemImage();
             updateList();
         });
 
@@ -273,6 +290,7 @@ public class CheckoutActivity extends AppCompatActivity {
             }
 
             ab.setTitle(getResources().getString(R.string.checkout) + " " + (current_item + 1) + " / " + item_names.size());
+            updateItemImage();
             updateList();
         });
 
@@ -403,6 +421,29 @@ public class CheckoutActivity extends AppCompatActivity {
                 timerHandler.postDelayed(timerRunnable, 0);
             }
         });
+    }
+
+    public void updateItemImage() {
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(current_item));
+        StorageReference imagesRef = storageRef.child(imageIds.get(current_item));
+
+        File[] files = storageDir.listFiles();
+
+        assert files != null;
+        if (files.length == 0) {
+            imagesRef.listAll()
+                    .addOnSuccessListener(listResult -> {
+                        List<StorageReference> pics = listResult.getItems();
+                        if (pics.size() != 0) {
+                            String currentPhotoPath;
+                            File localFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(current_item)).getAbsolutePath() + "/" + pics.get(0).getName());
+                            currentPhotoPath = localFile.getAbsolutePath();
+                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> image.setImageURI(Uri.fromFile(new File(currentPhotoPath))));
+                        }
+                    });
+        } else {
+            image.setImageURI(Uri.fromFile(files[0]));
+        }
     }
 
     public void updateList() {
