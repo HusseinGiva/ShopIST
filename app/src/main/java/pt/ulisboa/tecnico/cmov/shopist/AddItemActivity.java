@@ -140,6 +140,24 @@ public class AddItemActivity extends AppCompatActivity {
                 return false;
             }
         });
+        barcodeNumber.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                storeViewAddItems.clear();
+                AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
+                builder.setCancelable(true);
+                builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
+                if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+                    builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
+                } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                    targetQuantity.setText("");
+                }
+                autocompleteStoreList();
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
         name = findViewById(R.id.productName);
         pantryQuantity = findViewById(R.id.itemStoreQuantity);
         targetQuantity = findViewById(R.id.itemTargetQuantity);
@@ -1294,6 +1312,9 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (results[0] < 20f) {
                                                 present = true;
                                             }
+                                        }
+                                        else if (item.storeId.equals(document.getId())) {
+                                            present = true;
                                         }
                                     }
                                     if (!present) {
