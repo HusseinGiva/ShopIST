@@ -5,23 +5,37 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListActivity extends AppCompatActivity {
@@ -31,6 +45,7 @@ public class StoreListActivity extends AppCompatActivity {
     TabLayout tabLayout;
     private String id;
     private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
     private Source source;
 
     public static boolean isConnected(Context getApplicationContext) {
@@ -72,6 +87,7 @@ public class StoreListActivity extends AppCompatActivity {
             source = Source.CACHE;
 
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         id = getIntent().getStringExtra("ID");
 
@@ -215,11 +231,127 @@ public class StoreListActivity extends AppCompatActivity {
                 intent.putExtra("LONGITUDE", longitude);
                 startActivity(intent);
                 return true;
+            case R.id.resetList:
+                reset();
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    public void reset() {
+        // Item id -> quantity needed
+        Map<String, Integer> m1 = new HashMap<>();
+        // Item id -> StoreItem id
+        Map<String, String> m2 = new HashMap<>();
+        List<PantryItem> pis = new ArrayList<>();
+
+        int[] async_operations = {0};
+
+        async_operations[0]++;
+        db.collection("StoreItem").whereEqualTo("storeId", id).get(source)
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if(task.isSuccessful()) {
+                            for(QueryDocumentSnapshot document_1 : task.getResult()) {
+                                StoreItem si = document_1.toObject(StoreItem.class);
+                                m1.put(si.itemId, 0);
+                                m2.put(si.itemId, document_1.getId());
+                            }
+
+                            async_operations[0]++;
+                            db.collection("PantryList")
+                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source)
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if(task.isSuccessful()) {
+                                                for(QueryDocumentSnapshot document_2 : task.getResult()) {
+                                                    PantryList p = document_2.toObject(PantryList.class);
+                                                    async_operations[0]++;
+                                                    db.collection("PantryItem")
+                                                            .whereEqualTo("pantryId", document_2.getId())
+                                                            .get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                            if(task.isSuccessful()) {
+                                                                for(QueryDocumentSnapshot document_3 : task.getResult()) {
+                                                                    PantryItem pi = document_3.toObject(PantryItem.class);
+                                                                    pis.add(pi);
+                                                                }
+                                                                async_operations[0]--;
+                                                            }
+                                                        }
+                                                    });
+                                                }
+
+                                                async_operations[0]--;
+                                            }
+                                        }
+                                    });
+
+                            async_operations[0]--;
+                        }
+                    }
+                });
+
+        Handler timerHandler = new Handler();
+        Runnable timerRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (async_operations[0] == 0) {
+                    for(PantryItem pi : pis) {
+                        if(m1.containsKey(pi.itemId)) {
+                            int q = m1.get(pi.itemId);
+                            m1.put(pi.itemId, q + pi.idealQuantity - pi.quantity);
+                        }
+                    }
+                    int[] n_items = {0};
+                    for(Map.Entry<String, Integer> kvp : m1.entrySet()) {
+                        int q = kvp.getValue();
+                        String siId = m2.get(kvp.getKey());
+
+                        if(q > 0) n_items[0]++;
+
+                        async_operations[0]++;
+                        db.collection("StoreItem").document(siId).update("quantity", q)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isSuccessful()) async_operations[0]--;
+                                    }
+                                });
+                    }
+
+                    Handler timerHandler = new Handler();
+                    Runnable timerRunnable = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (async_operations[0] == 0) {
+                                db.collection("StoreList").document(id).update("number_of_items", n_items[0])
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                goToStore();
+                                            }
+                                        });
+                            } else {
+                                timerHandler.postDelayed(this, 100);
+                            }
+                        }
+                    };
+                    timerHandler.postDelayed(timerRunnable, 0);
+                } else {
+                    timerHandler.postDelayed(this, 100);
+                }
+            }
+        };
+        timerHandler.postDelayed(timerRunnable, 0);
     }
 }

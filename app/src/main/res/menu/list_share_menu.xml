@@ -24,6 +24,12 @@
         android:id="@+id/editList"
         android:icon="@drawable/baseline_edit_24"
         android:title="Edit"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/resetList"
+        android:icon="@drawable/baseline_reset_24"
+        android:title="Reset"
+        app:showAsAction="ifRoom" />
 
 </menu>
