@@ -112,7 +112,8 @@ public class PantryListActivity extends AppCompatActivity {
         data.clear();
 
         int[] async_operations = {0};
-
+        long[] server_n_items = {0};
+        long[] real_n_items = {0};
         async_operations[0]++;
         db.collection("PantryList").document(id)
                 .get(source)
@@ -122,6 +123,7 @@ public class PantryListActivity extends AppCompatActivity {
                         if (document.exists()) {
                             Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             PantryList pantry = document.toObject(PantryList.class);
+                            server_n_items[0] = pantry.number_of_items;
                             latitude = pantry.latitude;
                             longitude = pantry.longitude;
                             getSupportActionBar().setTitle(pantry.name);
@@ -132,6 +134,7 @@ public class PantryListActivity extends AppCompatActivity {
                                 if (task1.isSuccessful()) {
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         PantryItem pi = document1.toObject(PantryItem.class);
+                                        real_n_items[0]++;
                                         async_operations[0]++;
                                         db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task11 -> {
                                             if (task11.isSuccessful()) {
@@ -183,6 +186,9 @@ public class PantryListActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
+                    if(server_n_items[0] != real_n_items[0]) {
+                        db.collection("PantryList").document(id).update("number_of_items", real_n_items[0]);
+                    }
                     sort();
                     list.invalidateViews();
                 } else {

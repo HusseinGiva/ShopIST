@@ -110,7 +110,8 @@ public class StoreListFragment extends Fragment {
         data.clear();
 
         int[] async_operations = {0};
-
+        long[] server_n_items = {0};
+        long[] real_n_items = {0};
         async_operations[0]++;
         db.collection("StoreList").document(id)
                 .get(source)
@@ -120,6 +121,7 @@ public class StoreListFragment extends Fragment {
                         if (document.exists()) {
                             Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             StoreList store = document.toObject(StoreList.class);
+                            server_n_items[0] = store.number_of_items;
 
                             async_operations[0]++;
                             db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task1 -> {
@@ -128,7 +130,7 @@ public class StoreListFragment extends Fragment {
                                     for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                         StoreItem si = document1.toObject(StoreItem.class);
                                         if (si.quantity == 0) continue;
-
+                                        real_n_items[0]++;
                                         async_operations[0]++;
                                         db.collection("Item").document(si.itemId).get(source).addOnCompleteListener(task112 -> {
                                             if (task112.isSuccessful()) {
@@ -219,6 +221,9 @@ public class StoreListFragment extends Fragment {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
+                    if(server_n_items[0] != real_n_items[0]) {
+                        db.collection("StoreList").document(id).update("number_of_items", real_n_items[0]);
+                    }
                     sort();
                     list.invalidateViews();
                 } else {
