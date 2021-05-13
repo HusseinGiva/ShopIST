@@ -1938,6 +1938,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     present = true;
                                                                 }
                                                             }
+                                                            else if (item2.storeId.equals(document2.getId())) {
+                                                                present = true;
+                                                            }
                                                         }
                                                         if (!present) {
                                                             StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);

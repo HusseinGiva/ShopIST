@@ -171,7 +171,7 @@ public class StoreListFragment extends Fragment {
                                                                                         d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                                                         d.store_item_quantity = si.quantity;
                                                                                         d.itemId = document112.getId();
-                                                                                        d.item_price = i.stores.get(storeId);
+                                                                                        d.item_price = i.stores.get(s);
                                                                                         if (i.barcode.equals("")) d.imageId = si.itemId;
                                                                                         else d.imageId = i.barcode;
                                                                                         data.add(d);
