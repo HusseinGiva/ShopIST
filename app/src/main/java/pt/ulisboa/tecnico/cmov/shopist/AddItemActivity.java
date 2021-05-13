@@ -19,6 +19,7 @@ import android.util.Size;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -122,19 +123,26 @@ public class AddItemActivity extends AppCompatActivity {
         barcodeNumber.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_DONE) {
                 storeViewAddItems.clear();
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
-                builder.setCancelable(true);
-                builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
-                builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
-                builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
                 if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
-                    builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
-                } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-                    targetQuantity.setText("");
+                    autocompleteStoreList();
                 }
-                autocompleteStoreList();
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                if (!barcodeNumber.getText().toString().equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                    builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                    builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
+                    if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+                        builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
+                    } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                        targetQuantity.setText("");
+                    }
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                barcodeNumber.clearFocus();
                 return true;
             } else {
                 return false;
@@ -143,19 +151,23 @@ public class AddItemActivity extends AppCompatActivity {
         barcodeNumber.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) {
                 storeViewAddItems.clear();
-                AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
-                builder.setCancelable(true);
-                builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
-                builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
-                builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
                 if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
-                    builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
-                } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-                    targetQuantity.setText("");
+                    autocompleteStoreList();
                 }
-                autocompleteStoreList();
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                if (!barcodeNumber.getText().toString().equals("")) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
+                    builder.setCancelable(true);
+                    builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                    builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                    builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
+                    if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+                        builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
+                    } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                        targetQuantity.setText("");
+                    }
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
             }
         });
         name = findViewById(R.id.productName);
@@ -1312,8 +1324,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (results[0] < 20f) {
                                                 present = true;
                                             }
-                                        }
-                                        else if (item.storeId.equals(document.getId())) {
+                                        } else if (item.storeId.equals(document.getId())) {
                                             present = true;
                                         }
                                     }
@@ -1358,8 +1369,7 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (results[0] < 20f) {
                                                 present = true;
                                             }
-                                        }
-                                        else if (item.storeId.equals(document.getId())) {
+                                        } else if (item.storeId.equals(document.getId())) {
                                             present = true;
                                         }
                                     }
@@ -1763,6 +1773,8 @@ public class AddItemActivity extends AppCompatActivity {
 
     void onClickClearBarcode() {
         barcodeNumber.setText("");
+        storeViewAddItems.clear();
+        autocompleteStoreList();
     }
 
     void startCamera() {
@@ -1806,19 +1818,23 @@ public class AddItemActivity extends AppCompatActivity {
                                     if (barcodeNumber.getText().toString().matches("")) {
                                         barcodeNumber.setText(rawValue);
                                         storeViewAddItems.clear();
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
-                                        builder.setCancelable(true);
-                                        builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
-                                        builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
-                                        builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
                                         if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
-                                            builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
-                                        } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-                                            targetQuantity.setText("");
+                                            autocompleteStoreList();
                                         }
-                                        autocompleteStoreList();
-                                        AlertDialog dialog = builder.create();
-                                        dialog.show();
+                                        if (!barcodeNumber.getText().toString().equals("")) {
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(AddItemActivity.this);
+                                            builder.setCancelable(true);
+                                            builder.setTitle(R.string.pleaseSubmitPriceDataAndPictures);
+                                            builder.setMessage(R.string.ifPossibleSubmitStoresPricesImages);
+                                            builder.setPositiveButton(R.string.addPictures, (dialog, which) -> onClickAddPictures());
+                                            if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.pantry))) {
+                                                builder.setNeutralButton(R.string.addStores, (dialog, which) -> onClickAddStores());
+                                            } else if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                                                targetQuantity.setText("");
+                                            }
+                                            AlertDialog dialog = builder.create();
+                                            dialog.show();
+                                        }
                                     }
                                 }
                             })
@@ -1855,115 +1871,155 @@ public class AddItemActivity extends AppCompatActivity {
 
     public void autocompleteStoreList() {
         if (storeViewAddItems.isEmpty()) {
-            db.collection("Item")
-                    .whereEqualTo("barcode", barcodeNumber.getText().toString())
-                    .get(source)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Item item = document.toObject(Item.class);
-                                if (item.users.containsKey(mAuth.getCurrentUser().getUid())) {
-                                    name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
+            if (barcodeNumber.getText().toString().equals("")) {
+                db.collection("StoreList")
+                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                        .get(source)
+                        .addOnCompleteListener(task2 -> {
+                            if (task2.isSuccessful()) {
+                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                    StoreList store = document2.toObject(StoreList.class);
+                                    if (!storeViewAddItems.isEmpty()) {
+                                        boolean present = false;
+                                        for (StoreViewAddItem item2 : storeViewAddItems) {
+                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                                float[] results = new float[1];
+                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                        results);
+                                                //Less than 20 meters
+                                                if (results[0] < 20f) {
+                                                    present = true;
+                                                }
+                                            } else if (item2.storeId.equals(document2.getId())) {
+                                                present = true;
+                                            }
+                                        }
+                                        if (!present) {
+                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document2.getId(), store.name, 0f, true);
+                                            storeViewAddItem.latitude = store.latitude;
+                                            storeViewAddItem.longitude = store.longitude;
+                                            storeViewAddItems.add(storeViewAddItem);
+                                        }
+                                    } else {
+                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document2.getId(), store.name, 0f, true);
+                                        storeViewAddItem.latitude = store.latitude;
+                                        storeViewAddItem.longitude = store.longitude;
+                                        storeViewAddItems.add(storeViewAddItem);
+                                    }
                                 }
-                                for (String storeId : item.stores.keySet()) {
-                                    db.collection("StoreList")
-                                            .document(storeId)
-                                            .get(source)
-                                            .addOnCompleteListener(task2 -> {
-                                                if (task2.isSuccessful()) {
-                                                    DocumentSnapshot document2 = task2.getResult();
-                                                    StoreList item2 = document2.toObject(StoreList.class);
-                                                    if (item2.users.contains(mAuth.getCurrentUser().getUid())) {
-                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(storeId, item2.name, item.stores.get(storeId), true);
-                                                        storeViewAddItem.latitude = item2.latitude;
-                                                        storeViewAddItem.longitude = item2.longitude;
-                                                        storeViewAddItems.add(storeViewAddItem);
-                                                        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-                                                            if (document2.getId().equals(getIntent().getStringExtra("ID"))) {
-                                                                targetQuantity.setText(String.valueOf(item.stores.get(storeId)));
+                            }
+                        });
+            } else {
+                db.collection("Item")
+                        .whereEqualTo("barcode", barcodeNumber.getText().toString())
+                        .get(source)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Item item = document.toObject(Item.class);
+                                    if (item.users.containsKey(mAuth.getCurrentUser().getUid())) {
+                                        name.setText(item.users.get(mAuth.getCurrentUser().getUid()));
+                                    }
+                                    for (String storeId : item.stores.keySet()) {
+                                        db.collection("StoreList")
+                                                .document(storeId)
+                                                .get(source)
+                                                .addOnCompleteListener(task2 -> {
+                                                    if (task2.isSuccessful()) {
+                                                        DocumentSnapshot document2 = task2.getResult();
+                                                        StoreList item2 = document2.toObject(StoreList.class);
+                                                        if (item2.users.contains(mAuth.getCurrentUser().getUid())) {
+                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(storeId, item2.name, item.stores.get(storeId), true);
+                                                            storeViewAddItem.latitude = item2.latitude;
+                                                            storeViewAddItem.longitude = item2.longitude;
+                                                            storeViewAddItems.add(storeViewAddItem);
+                                                            if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                                                                if (document2.getId().equals(getIntent().getStringExtra("ID"))) {
+                                                                    targetQuantity.setText(String.valueOf(item.stores.get(storeId)));
+                                                                }
                                                             }
-                                                        }
-                                                    } else if (item2.latitude != null && item2.longitude != null) {
-                                                        db.collection("StoreList")
-                                                                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                                                .get(source)
-                                                                .addOnCompleteListener(task3 -> {
-                                                                    if (task3.isSuccessful()) {
-                                                                        for (QueryDocumentSnapshot document3 : task3.getResult()) {
-                                                                            StoreList item3 = document3.toObject(StoreList.class);
-                                                                            if (item3.latitude != null && item3.longitude != null) {
-                                                                                float[] results = new float[1];
-                                                                                Location.distanceBetween(Double.parseDouble(item3.latitude), Double.parseDouble(item3.longitude),
-                                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
-                                                                                        results);
-                                                                                //Less than 20 meters
-                                                                                if (results[0] < 20f) {
-                                                                                    StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document3.getId(), item3.name, item.stores.get(storeId), true);
-                                                                                    storeViewAddItem.latitude = item3.latitude;
-                                                                                    storeViewAddItem.longitude = item3.longitude;
-                                                                                    storeViewAddItems.add(storeViewAddItem);
-                                                                                    if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
-                                                                                        if (document3.getId().equals(getIntent().getStringExtra("ID"))) {
-                                                                                            targetQuantity.setText(String.valueOf(item.stores.get(storeId)));
+                                                        } else if (item2.latitude != null && item2.longitude != null) {
+                                                            db.collection("StoreList")
+                                                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                                                    .get(source)
+                                                                    .addOnCompleteListener(task3 -> {
+                                                                        if (task3.isSuccessful()) {
+                                                                            for (QueryDocumentSnapshot document3 : task3.getResult()) {
+                                                                                StoreList item3 = document3.toObject(StoreList.class);
+                                                                                if (item3.latitude != null && item3.longitude != null) {
+                                                                                    float[] results = new float[1];
+                                                                                    Location.distanceBetween(Double.parseDouble(item3.latitude), Double.parseDouble(item3.longitude),
+                                                                                            Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                                                            results);
+                                                                                    //Less than 20 meters
+                                                                                    if (results[0] < 20f) {
+                                                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document3.getId(), item3.name, item.stores.get(storeId), true);
+                                                                                        storeViewAddItem.latitude = item3.latitude;
+                                                                                        storeViewAddItem.longitude = item3.longitude;
+                                                                                        storeViewAddItems.add(storeViewAddItem);
+                                                                                        if (getIntent().getStringExtra("TYPE").equals(getResources().getString(R.string.store))) {
+                                                                                            if (document3.getId().equals(getIntent().getStringExtra("ID"))) {
+                                                                                                targetQuantity.setText(String.valueOf(item.stores.get(storeId)));
+                                                                                            }
                                                                                         }
                                                                                     }
                                                                                 }
+
+
                                                                             }
-
-
                                                                         }
-                                                                    }
-                                                                });
+                                                                    });
+                                                        }
                                                     }
-                                                }
-                                            });
-                                }
-                                db.collection("StoreList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                                        .get(source)
-                                        .addOnCompleteListener(task2 -> {
-                                            if (task2.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                    StoreList store = document2.toObject(StoreList.class);
-                                                    if (!storeViewAddItems.isEmpty()) {
-                                                        boolean present = false;
-                                                        for (StoreViewAddItem item2 : storeViewAddItems) {
-                                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
-                                                                float[] results = new float[1];
-                                                                Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
-                                                                        Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
-                                                                        results);
-                                                                //Less than 20 meters
-                                                                if (results[0] < 20f) {
+                                                });
+                                    }
+                                    db.collection("StoreList")
+                                            .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                            .get(source)
+                                            .addOnCompleteListener(task2 -> {
+                                                if (task2.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                        StoreList store = document2.toObject(StoreList.class);
+                                                        if (!storeViewAddItems.isEmpty()) {
+                                                            boolean present = false;
+                                                            for (StoreViewAddItem item2 : storeViewAddItems) {
+                                                                if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                                                    float[] results = new float[1];
+                                                                    Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
+                                                                            Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
+                                                                            results);
+                                                                    //Less than 20 meters
+                                                                    if (results[0] < 20f) {
+                                                                        present = true;
+                                                                    }
+                                                                } else if (item2.storeId.equals(document2.getId())) {
                                                                     present = true;
                                                                 }
                                                             }
-                                                            else if (item2.storeId.equals(document2.getId())) {
-                                                                present = true;
+                                                            if (!present) {
+                                                                StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document2.getId(), store.name, 0f);
+                                                                storeViewAddItem.latitude = store.latitude;
+                                                                storeViewAddItem.longitude = store.longitude;
+                                                                storeViewAddItems.add(storeViewAddItem);
                                                             }
-                                                        }
-                                                        if (!present) {
-                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
+                                                        } else {
+                                                            StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document2.getId(), store.name, 0f);
                                                             storeViewAddItem.latitude = store.latitude;
                                                             storeViewAddItem.longitude = store.longitude;
                                                             storeViewAddItems.add(storeViewAddItem);
                                                         }
-                                                    } else {
-                                                        StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f);
-                                                        storeViewAddItem.latitude = store.latitude;
-                                                        storeViewAddItem.longitude = store.longitude;
-                                                        storeViewAddItems.add(storeViewAddItem);
                                                     }
+                                                } else {
+                                                    Log.d("TAG", "Error getting documents: ", task.getException());
                                                 }
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task.getException());
-                                            }
-                                        });
+                                            });
+                                }
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
                             }
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
-                        }
-                    });
+                        });
+            }
         }
     }
 }
