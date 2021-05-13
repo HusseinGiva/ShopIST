@@ -104,6 +104,9 @@ public class StoreItemActivity extends AppCompatActivity {
         if (language.equals("pt")) {
             TextView textViewCartQuantity = findViewById(R.id.textView2);
             textViewCartQuantity.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
+
+            TextView textViewYourRating = findViewById(R.id.yourRatingTextStore);
+            textViewYourRating.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
         }
         barcodeNumber = findViewById(R.id.barcodeNumberStoreItem);
         price = findViewById(R.id.priceStoreItem);
@@ -321,16 +324,55 @@ public class StoreItemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        if(newRating != null && !newRating.equals(previousRating)){
-            db.collection("Item").document(id).update(
-                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
-            );
-        }
-
-
         finish();
     }
 
 
+    public void onSubmitClick(View view) {
+        if(newRating != null && !newRating.equals(previousRating)){
+            db.collection("Item").document(id).update(
+                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
+            ).addOnCompleteListener(task -> {
+                db.collection("Item").document(id)
+                        .get(source)
+                        .addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                DocumentSnapshot document = task1.getResult();
+                                if (document.exists()) {
+                                    item = document.toObject(Item.class);
+
+                                    float[] votes = {0, 0, 0, 0, 0};
+                                    float totalRatings = 0;
+                                    float totalVotes = 0;
+
+                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                                        previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
+                                    }
+
+
+                                    for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                        votes[entry.getValue() - 1]++;
+                                        totalRatings += entry.getValue();
+                                        totalVotes++;
+                                    }
+
+                                    if (totalVotes == 0)
+                                        totalVotes = 1;
+
+                                    avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                            String.format("%.1f", (totalRatings / totalVotes)));
+                                    rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                                    rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                                    rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                                    rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                                    rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+
+                                }
+                            }
+                        });
+            });
+        }
+
+
+    }
 }
