@@ -157,15 +157,15 @@
         android:text="@string/yourRating"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
     <RadioGroup
         android:id="@+id/storeRadioGroup"
-        android:layout_width="263dp"
+        android:layout_width="wrap_content"
         android:layout_height="36dp"
-        android:layout_marginStart="143dp"
+        android:layout_marginStart="120dp"
         android:layout_marginTop="564dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
@@ -200,6 +200,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="5" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/submit"
+            android:onClick="onSubmitClick"/>
     </RadioGroup>
 
     <TextView

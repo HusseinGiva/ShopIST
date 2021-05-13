@@ -2,10 +2,12 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -18,11 +20,14 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -94,6 +99,13 @@ public class PantryItemActivity extends AppCompatActivity {
         rating_1 = findViewById(R.id.star1Text);
 
         RadioGroup radioGroup = findViewById(R.id.pantryRadioGroup);
+
+        SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
+        String language = sharedPref.getString("language", "en");
+        if (language.equals("pt")) {
+            TextView textViewYourRating = findViewById(R.id.yourRatingText);
+            textViewYourRating.setTextSize(TypedValue.COMPLEX_UNIT_SP, 21);
+        }
 
         if (isConnected(getApplicationContext()))
             source = Source.DEFAULT;
@@ -272,15 +284,55 @@ public class PantryItemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        if(newRating != null && !newRating.equals(previousRating)){
-            db.collection("Item").document(id).update(
-                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
-            );
-        }
-
         finish();
     }
 
 
+    public void onSubmitClick(View view) {
+        if(newRating != null && !newRating.equals(previousRating)){
+            db.collection("Item").document(id).update(
+                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
+            ).addOnCompleteListener(task -> {
+                db.collection("Item").document(id)
+                        .get(source)
+                        .addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                DocumentSnapshot document = task1.getResult();
+                                if (document.exists()) {
+                                    item = document.toObject(Item.class);
+
+                                    float[] votes = {0, 0, 0, 0, 0};
+                                    float totalRatings = 0;
+                                    float totalVotes = 0;
+
+                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                                        previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
+                                    }
+
+
+                                    for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                        votes[entry.getValue() - 1]++;
+                                        totalRatings += entry.getValue();
+                                        totalVotes++;
+                                    }
+
+                                    if (totalVotes == 0)
+                                        totalVotes = 1;
+
+                                    avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                            String.format("%.1f", (totalRatings / totalVotes)));
+                                    rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                                    rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                                    rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                                    rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                                    rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+
+                                }
+                            }
+                        });
+            });
+        }
+
+
+    }
 }
