@@ -313,6 +313,7 @@ public class ListFragment extends Fragment {
                                                     FirebaseFunctionsException.Code code = ffe.getCode();
                                                     Object details = ffe.getDetails();
                                                 }
+                                                d.queue_time = -1.0;
                                             } else {
                                                 d.queue_time = Double.parseDouble(task1.getResult());
                                             }

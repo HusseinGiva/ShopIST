@@ -65,7 +65,7 @@ public class ListAdapter extends ArrayAdapter<String> {
         } else if (position < queue_times.size()) {
             holder.queue_wait_time_text.setVisibility(View.VISIBLE);
             holder.queue_wait_time.setVisibility(View.VISIBLE);
-            if(queue_times.get(position) == -1)
+            if(queue_times.get(position) < 0)
                 holder.queue_wait_time.setText(R.string.queueWaitTimeInvalid);
             else{
                 double p1 = queue_times.get(position) % 60;
