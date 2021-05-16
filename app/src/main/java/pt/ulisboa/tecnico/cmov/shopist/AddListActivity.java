@@ -336,7 +336,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 if (m != null)
                     db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("name", e.getText().toString(), "latitude", String.valueOf(m.getPosition().latitude), "longitude", String.valueOf(m.getPosition().longitude));
                 else
-                    db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("name", e.getText().toString(), "latitude", "", "longitude", "");
+                    db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("name", e.getText().toString(), "latitude", null, "longitude", null);
 
             } else if (getIntent().getStringExtra("MODE").equals("add")) {
                 PantryList l;
