@@ -69,12 +69,19 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        JSONObject jsonObject;
+        JSONObject jsonObject = null;
         String driveTime = null;
+        String status = null;
 
         try {
             jsonObject = new JSONObject(s);
-            driveTime = jsonObject.getJSONArray("rows").getJSONObject(0).getJSONArray("elements").getJSONObject(0).getJSONObject("duration").getString("text");
+            status = jsonObject.getJSONArray("rows").getJSONObject(0).getJSONArray("elements")
+                    .getJSONObject(0).getString("status");
+            if(status.equals("OK")) {
+                driveTime = jsonObject.getJSONArray("rows").getJSONObject(0).getJSONArray("elements")
+                        .getJSONObject(0).getJSONObject("duration").getString("text");
+            }
+            else driveTime = "-1";
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -247,7 +247,7 @@ public class ListFragment extends Fragment {
                                         @Override
                                         public void run() {
                                             if (pantry.driveTime != null) {
-                                                d.drive_time = pantry.driveTime;
+                                                if(!pantry.driveTime.equals("-1")) d.drive_time = pantry.driveTime;
                                                 async_operations[0]--;
                                             } else {
                                                 timerHandler.postDelayed(this, 100);
@@ -337,7 +337,7 @@ public class ListFragment extends Fragment {
                                         @Override
                                         public void run() {
                                             if (store.driveTime != null) {
-                                                d.drive_time = store.driveTime;
+                                                if(!store.driveTime.equals("-1")) d.drive_time = store.driveTime;
                                                 async_operations[0]--;
 
                                                 timerHandler.removeCallbacks(this);
