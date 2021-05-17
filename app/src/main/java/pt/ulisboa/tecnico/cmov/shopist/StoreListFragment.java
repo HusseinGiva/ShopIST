@@ -43,13 +43,20 @@ public class StoreListFragment extends Fragment {
     private Source source;
 
     private List<Data> data = new ArrayList<>();
-    private class Data {
+    private class Data implements Comparable<Data> {
         String itemId;
         String store_item_name;
         Integer store_item_quantity;
         Integer cart_item_quantity;
         Float item_price;
         String imageId;
+
+        @Override
+        public int compareTo(Data d) {
+            if(this.cart_item_quantity < d.cart_item_quantity) return -1;
+            else if(this.cart_item_quantity > d.cart_item_quantity) return 1;
+            else return this.store_item_name.compareTo(d.store_item_name);
+        }
     }
 
     public StoreListFragment() {
@@ -242,7 +249,7 @@ public class StoreListFragment extends Fragment {
 
     public void sort() {
 
-        data.sort(Comparator.comparing(i -> i.store_item_name.toLowerCase()));
+        data.sort(null);
 
         itemIds.clear();
         store_item_names.clear();
