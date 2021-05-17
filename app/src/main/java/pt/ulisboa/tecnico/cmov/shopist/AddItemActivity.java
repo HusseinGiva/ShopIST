@@ -54,7 +54,6 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.io.File;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -76,10 +75,6 @@ public class AddItemActivity extends AppCompatActivity {
     EditText pantryQuantity;
     EditText targetQuantity;
     String itemId;
-    long dirSize = 0;
-    String lruLocation = "";
-    FileTime lruFileTime;
-    File storageDirGlobal = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     ArrayList<String> photoPaths = new ArrayList<>();
     ArrayList<StoreViewAddItem> storeViewAddItems = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
@@ -1469,17 +1464,42 @@ public class AddItemActivity extends AppCompatActivity {
                                     item.stores.put(store.storeId, store.price);
                                     db.collection("Item").document(itemId).update("stores", item.stores);
                                 }
-                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).get(source).addOnCompleteListener(task19 -> {
+                                db.collection("StoreItem").whereEqualTo("itemId", getIntent().getStringExtra("ItemId")).whereEqualTo("storeId", store.storeId).get(source).addOnCompleteListener(task19 -> {
                                     if (task19.isSuccessful()) {
                                         if (task19.getResult().size() != 0) {
                                             for (QueryDocumentSnapshot document17 : task19.getResult()) {
                                                 StoreItem storeItem = document17.toObject(StoreItem.class);
-                                                int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
-                                                int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
-                                                if (newQuantity < 0) {
-                                                    newQuantity = 0;
-                                                }
-                                                db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity, "itemId", itemId);
+                                                db.collection("StoreItem").whereEqualTo("itemId", itemId).whereEqualTo("storeId", storeItem.storeId).get(source).addOnCompleteListener(task1119 -> {
+                                                    int oldQuantity = pantryItem.idealQuantity - pantryItem.quantity;
+                                                    int newQuantity = storeItem.quantity - oldQuantity + (Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                    if (newQuantity < 0) {
+                                                        newQuantity = 0;
+                                                    }
+                                                    if (task1119.isSuccessful()) {
+                                                        if (task1119.getResult().size() != 0) {
+                                                            for (QueryDocumentSnapshot document1119 : task1119.getResult()) {
+                                                                StoreItem storeItem1 = document1119.toObject(StoreItem.class);
+                                                                db.collection("StoreItem").document(document1119.getId()).update("quantity", storeItem1.quantity + newQuantity, "cartQuantity", storeItem1.cartQuantity + storeItem.cartQuantity);
+                                                                db.collection("StoreItem").document(document17.getId()).delete();
+                                                                db.collection("StoreList").document(store.storeId)
+                                                                        .get(source)
+                                                                        .addOnCompleteListener(task1814 -> {
+                                                                            if (task1814.isSuccessful()) {
+                                                                                DocumentSnapshot document1612 = task1814.getResult();
+                                                                                if (document1612.exists()) {
+                                                                                    StoreList storeList = document1612.toObject(StoreList.class);
+                                                                                    db.collection("StoreList").document(store.storeId).update("number_of_items", storeList.number_of_items - 1);
+                                                                                }
+                                                                            }
+                                                                        });
+                                                            }
+                                                        } else {
+                                                            db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity, "itemId", itemId);
+                                                        }
+                                                    } else {
+                                                        db.collection("StoreItem").document(document17.getId()).update("quantity", newQuantity, "itemId", itemId);
+                                                    }
+                                                });
                                             }
                                         } else {
                                             StoreItem storeItem = new StoreItem(store.storeId, itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
@@ -1584,7 +1604,7 @@ public class AddItemActivity extends AppCompatActivity {
                                 if (task20.isSuccessful()) {
                                     if (task20.getResult().size() != 0) {
                                         for (QueryDocumentSnapshot document20 : task20.getResult()) {
-                                            db.collection("StoreItem").whereEqualTo("itemId", document20.getId()).get(source).addOnCompleteListener(task19 -> {
+                                            db.collection("StoreItem").whereEqualTo("itemId", document20.getId()).whereEqualTo("storeId", store.storeId).get(source).addOnCompleteListener(task19 -> {
                                                 if (task19.isSuccessful()) {
                                                     if (task19.getResult().size() != 0) {
                                                         for (QueryDocumentSnapshot document17 : task19.getResult()) {
