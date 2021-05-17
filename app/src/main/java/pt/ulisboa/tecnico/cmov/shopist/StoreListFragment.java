@@ -151,7 +151,13 @@ public class StoreListFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         Data d = new Data();
-                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                            d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        else
+                                                            d.store_item_name = i.users.entrySet().iterator().next().getValue();
+
+
+
                                                         d.store_item_quantity = si.quantity;
                                                         d.cart_item_quantity = si.cartQuantity;
                                                         d.itemId = document112.getId();
@@ -180,7 +186,10 @@ public class StoreListFragment extends Fragment {
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         Data d = new Data();
-                                                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                                                            d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        else
+                                                                                            d.store_item_name = i.users.entrySet().iterator().next().getValue();
                                                                                         d.store_item_quantity = si.quantity;
                                                                                         d.cart_item_quantity = si.cartQuantity;
                                                                                         d.itemId = document112.getId();

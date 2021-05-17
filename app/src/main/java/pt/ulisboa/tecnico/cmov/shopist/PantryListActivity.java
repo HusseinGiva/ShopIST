@@ -143,7 +143,10 @@ public class PantryListActivity extends AppCompatActivity {
                                                     Item i = document11.toObject(Item.class);
 
                                                     Data d = new Data();
-                                                    d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                    if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                        d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                    else
+                                                        d.pantry_item_name = i.users.get(pantry.users.get(0));
                                                     d.pantry_item_quantity = pi.quantity;
                                                     d.pantry_item_ideal_quantity = pi.idealQuantity;
                                                     d.itemId = pi.itemId;

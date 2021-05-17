@@ -668,12 +668,52 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                 StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
 
                                 db.collection("StoreList").add(newStore).addOnSuccessListener(documentReference -> {
-                                    Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
-                                    intent.putExtra("ID", documentReference.getId());
-                                    intent.putExtra("SENDER", "start");
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                    startActivity(intent);
-                                    finish();
+
+                                    String newStoreId = documentReference.getId();
+
+                                    db.collection("PantryList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task1 -> {
+                                        if(task1.isSuccessful()){
+                                            for (QueryDocumentSnapshot document1 : task1.getResult()) {
+                                                String pantryId = document1.getId();
+                                                PantryList p = document1.toObject(PantryList.class);
+
+                                                db.collection("PantryItem").whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(task2 -> {
+                                                   if(task2.isSuccessful()){
+                                                       for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                           PantryItem pi = document2.toObject(PantryItem.class);
+
+                                                           db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task3 -> {
+                                                               if(task3.isSuccessful()){
+                                                                   DocumentSnapshot document3 = task3.getResult();
+                                                                   Item i = document3.toObject(Item.class);
+                                                                   String itemId = document3.getId();
+
+                                                                   if(i.barcode.equals("")){
+                                                                        StoreItem si = new StoreItem(newStoreId, itemId, pi.idealQuantity - pi.quantity);
+
+                                                                        db.collection("StoreItem").add(si);
+                                                                   }
+                                                               }
+                                                           });
+                                                       }
+
+                                                   }
+                                                });
+
+                                            }
+
+                                            Intent intent = new Intent(AddListActivity.this, StoreListActivity.class);
+                                            intent.putExtra("ID", documentReference.getId());
+                                            intent.putExtra("SENDER", "start");
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+
+                                        }
+                                    });
+
+
+
 
                                 });
 
