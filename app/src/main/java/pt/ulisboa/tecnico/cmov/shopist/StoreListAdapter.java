@@ -156,6 +156,10 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         if (cart) {
             view.findViewById(R.id.moveToCart).setVisibility(View.INVISIBLE);
         }
+        else {
+            TextView t = (TextView) view.findViewById(R.id.moveToCartQuantity);
+            t.setText(String.valueOf(this.cart_item_quantities.get(position)));
+        }
 
         view.findViewById(R.id.decrement_item_quantity).setOnClickListener(v -> {
             db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))

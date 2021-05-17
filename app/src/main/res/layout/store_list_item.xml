@@ -103,13 +103,29 @@
 
     </LinearLayout>
 
-    <ImageView
+    <LinearLayout
         android:id="@+id/moveToCart"
-        android:layout_width="34dp"
-        android:layout_height="34dp"
-        android:layout_marginStart="25dp"
-        android:layout_marginTop="30dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/baseline_shopping_cart_24" />
+        android:layout_width="50dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/moveToCartQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="0"
+            android:textSize="20sp"/>
+
+        <ImageView
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="8dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/baseline_shopping_cart_24" />
+
+    </LinearLayout>
 
 </LinearLayout>
