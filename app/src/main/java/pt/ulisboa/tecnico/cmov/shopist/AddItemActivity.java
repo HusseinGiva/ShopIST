@@ -876,6 +876,24 @@ public class AddItemActivity extends AppCompatActivity {
                                                             if (document.exists()) {
                                                                 PantryList pantry = document.toObject(PantryList.class);
                                                                 db.collection("PantryList").document(getIntent().getStringExtra("ID")).update("number_of_items", pantry.number_of_items + 1);
+                                                                for (String user : pantry.users) {
+                                                                    if (!user.equals(mAuth.getCurrentUser().getUid())) {
+                                                                        db.collection("StoreList").whereArrayContains("users", user).get(source).addOnCompleteListener(task117 -> {
+                                                                            if (task117.isSuccessful()) {
+                                                                                if (task117.getResult().size() != 0) {
+                                                                                    for (QueryDocumentSnapshot document117 : task117.getResult()) {
+                                                                                        StoreList storeList = document117.toObject(StoreList.class);
+                                                                                        StoreItem storeItem = new StoreItem(document117.getId(), itemId, Integer.parseInt(targetQuantity.getText().toString()) - Integer.parseInt(pantryQuantity.getText().toString()));
+                                                                                        db.collection("StoreItem").add(storeItem);
+                                                                                        db.collection("StoreList").document(document117.getId()).update("number_of_items", storeList.number_of_items + 1);
+                                                                                        item.stores.put(document117.getId(), 0f);
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                                db.collection("Item").document(itemId).update("stores", item.stores);
                                                             }
                                                         }
                                                     });
