@@ -33,6 +33,7 @@ public class StoreListFragment extends Fragment {
     List<String> itemIds = new ArrayList<>();
     List<String> store_item_names = new ArrayList<>();
     List<Integer> store_item_quantities = new ArrayList<>();
+    List<Integer> cart_item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
     List<String> imageIds = new ArrayList<>();
     private String id;
@@ -46,6 +47,7 @@ public class StoreListFragment extends Fragment {
         String itemId;
         String store_item_name;
         Integer store_item_quantity;
+        Integer cart_item_quantity;
         Float item_price;
         String imageId;
     }
@@ -98,7 +100,9 @@ public class StoreListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_store_list, container, false);
         list = view.findViewById(R.id.store_list);
 
-        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, false, id, itemIds, imageIds, list, (StoreListActivity) getActivity(), null);
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices,
+                false, id, itemIds, imageIds, list, (StoreListActivity) getActivity(), null,
+                cart_item_quantities);
         list.setAdapter(a);
 
         return view;
@@ -142,6 +146,7 @@ public class StoreListFragment extends Fragment {
                                                         Data d = new Data();
                                                         d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                         d.store_item_quantity = si.quantity;
+                                                        d.cart_item_quantity = si.cartQuantity;
                                                         d.itemId = document112.getId();
                                                         d.item_price = i.stores.get(storeId);
                                                         if (i.barcode.equals("")) d.imageId = si.itemId;
@@ -170,6 +175,7 @@ public class StoreListFragment extends Fragment {
                                                                                         Data d = new Data();
                                                                                         d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                                                         d.store_item_quantity = si.quantity;
+                                                                                        d.cart_item_quantity = si.cartQuantity;
                                                                                         d.itemId = document112.getId();
                                                                                         d.item_price = i.stores.get(s);
                                                                                         if (i.barcode.equals("")) d.imageId = si.itemId;
@@ -241,6 +247,7 @@ public class StoreListFragment extends Fragment {
         itemIds.clear();
         store_item_names.clear();
         store_item_quantities.clear();
+        cart_item_quantities.clear();
         item_prices.clear();
         imageIds.clear();
 
@@ -248,6 +255,7 @@ public class StoreListFragment extends Fragment {
             itemIds.add(d.itemId);
             store_item_names.add(d.store_item_name);
             store_item_quantities.add(d.store_item_quantity);
+            cart_item_quantities.add(d.cart_item_quantity);
             item_prices.add(d.item_price);
             imageIds.add(d.imageId);
         }

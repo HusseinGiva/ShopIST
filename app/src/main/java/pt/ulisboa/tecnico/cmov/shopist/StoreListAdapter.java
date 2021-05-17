@@ -50,10 +50,11 @@ public class StoreListAdapter extends ArrayAdapter<String> {
     ListView list;
     boolean cart;
     TextView totalCost;
+    List<Integer> cart_item_quantities;
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
                             boolean cart, String storeId, List<String> itemIds, List<String> imageIds, ListView list,
-                            StoreListActivity activity, TextView totalCost) {
+                            StoreListActivity activity, TextView totalCost, List<Integer> cart_item_quantities) {
         super(context, R.layout.store_list_item, R.id.store_list_item_name, item_names);
         this.context = context;
 
@@ -76,6 +77,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
 
         this.activity = activity;
         this.totalCost = totalCost;
+        this.cart_item_quantities = cart_item_quantities;
     }
 
     public static boolean isConnected(Context getApplicationContext) {
@@ -247,6 +249,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
             EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
+            if(!cart) e.setText(String.valueOf(this.cart_item_quantities.get(position)));
             e.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {

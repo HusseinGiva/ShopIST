@@ -123,7 +123,9 @@ public class CartFragment extends Fragment {
 
         list = view.findViewById(R.id.store_list);
 
-        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices, true, id, itemIds, imageIds, list, (StoreListActivity) getActivity(), (TextView) view.findViewById(R.id.total_cost));
+        StoreListAdapter a = new StoreListAdapter(getContext(), store_item_names, store_item_quantities, item_prices,
+                true, id, itemIds, imageIds, list, (StoreListActivity) getActivity(),
+                (TextView) view.findViewById(R.id.total_cost), null);
         list.setAdapter(a);
 
         view.findViewById(R.id.checkout).setOnClickListener(v -> {
