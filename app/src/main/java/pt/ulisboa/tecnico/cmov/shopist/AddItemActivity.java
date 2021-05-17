@@ -54,6 +54,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.io.File;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -75,6 +76,10 @@ public class AddItemActivity extends AppCompatActivity {
     EditText pantryQuantity;
     EditText targetQuantity;
     String itemId;
+    long dirSize = 0;
+    String lruLocation = "";
+    FileTime lruFileTime;
+    File storageDirGlobal = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     ArrayList<String> photoPaths = new ArrayList<>();
     ArrayList<StoreViewAddItem> storeViewAddItems = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
@@ -445,7 +450,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                     }
                                                     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                     for (File f : storageDir.listFiles()) {
-                                                        deleteRecursive(f);
+                                                        if (!f.isDirectory()) {
+                                                            f.delete();
+                                                        }
                                                     }
                                                     finish();
                                                 }
@@ -473,7 +480,9 @@ public class AddItemActivity extends AppCompatActivity {
                                             }
                                             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                             for (File f : storageDir.listFiles()) {
-                                                deleteRecursive(f);
+                                                if (!f.isDirectory()) {
+                                                    f.delete();
+                                                }
                                             }
                                             finish();
                                         });
@@ -529,7 +538,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 }
                                                                 File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                                 for (File f : storageDir.listFiles()) {
-                                                                    deleteRecursive(f);
+                                                                    if (!f.isDirectory()) {
+                                                                        f.delete();
+                                                                    }
                                                                 }
                                                                 finish();
                                                             }
@@ -557,7 +568,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                         }
                                                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                         for (File f : storageDir.listFiles()) {
-                                                            deleteRecursive(f);
+                                                            if (!f.isDirectory()) {
+                                                                f.delete();
+                                                            }
                                                         }
                                                         finish();
                                                     });
@@ -686,7 +699,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                             }
                                                             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                             for (File f : storageDir.listFiles()) {
-                                                                deleteRecursive(f);
+                                                                if (!f.isDirectory()) {
+                                                                    f.delete();
+                                                                }
                                                             }
                                                             finish();
                                                         }
@@ -714,7 +729,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                     }
                                                     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                     for (File f : storageDir.listFiles()) {
-                                                        deleteRecursive(f);
+                                                        if (!f.isDirectory()) {
+                                                            f.delete();
+                                                        }
                                                     }
                                                     finish();
                                                 });
@@ -804,7 +821,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                         }
                                                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                         for (File f : storageDir.listFiles()) {
-                                                            deleteRecursive(f);
+                                                            if (!f.isDirectory()) {
+                                                                f.delete();
+                                                            }
                                                         }
                                                         finish();
                                                     }
@@ -850,7 +869,9 @@ public class AddItemActivity extends AppCompatActivity {
                                             }
                                             File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                             for (File f : storageDir.listFiles()) {
-                                                deleteRecursive(f);
+                                                if (!f.isDirectory()) {
+                                                    f.delete();
+                                                }
                                             }
                                             db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                     .get(source)
@@ -948,7 +969,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     }
                                                                     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                                     for (File f : storageDir.listFiles()) {
-                                                                        deleteRecursive(f);
+                                                                        if (!f.isDirectory()) {
+                                                                            f.delete();
+                                                                        }
                                                                     }
                                                                     finish();
                                                                 }
@@ -994,7 +1017,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                         }
                                                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                         for (File f : storageDir.listFiles()) {
-                                                            deleteRecursive(f);
+                                                            if (!f.isDirectory()) {
+                                                                f.delete();
+                                                            }
                                                         }
                                                         db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                                 .get(source)
@@ -1151,7 +1176,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                                 }
                                                                 File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                                 for (File f : storageDir.listFiles()) {
-                                                                    deleteRecursive(f);
+                                                                    if (!f.isDirectory()) {
+                                                                        f.delete();
+                                                                    }
                                                                 }
                                                                 finish();
                                                             }
@@ -1262,7 +1289,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                     }
                                                     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                                     for (File f : storageDir.listFiles()) {
-                                                        deleteRecursive(f);
+                                                        if (!f.isDirectory()) {
+                                                            f.delete();
+                                                        }
                                                     }
                                                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                                                             .get(source)
@@ -1284,12 +1313,6 @@ public class AddItemActivity extends AppCompatActivity {
             }
         }
 
-    }
-
-    void deleteRecursive(File fileOrDirectory) {
-        if (!fileOrDirectory.isDirectory()) {
-            fileOrDirectory.delete();
-        }
     }
 
     public void onClickAddPictures() {
@@ -1498,7 +1521,9 @@ public class AddItemActivity extends AppCompatActivity {
                         }
                         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                         for (File f : storageDir.listFiles()) {
-                            deleteRecursive(f);
+                            if (!f.isDirectory()) {
+                                f.delete();
+                            }
                         }
                         finish();
                     }
@@ -1642,7 +1667,9 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                     File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                     for (File f : storageDir.listFiles()) {
-                        deleteRecursive(f);
+                        if (!f.isDirectory()) {
+                            f.delete();
+                        }
                     }
                     db.collection("PantryList").document(getIntent().getStringExtra("ID"))
                             .get(source)
@@ -1766,7 +1793,9 @@ public class AddItemActivity extends AppCompatActivity {
         }
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         for (File f : storageDir.listFiles()) {
-            deleteRecursive(f);
+            if (!f.isDirectory()) {
+                f.delete();
+            }
         }
         finish();
     }

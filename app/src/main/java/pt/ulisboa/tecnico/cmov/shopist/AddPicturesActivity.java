@@ -28,6 +28,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 
 public class AddPicturesActivity extends AppCompatActivity implements PicturesFragment.OnListFragmentInteractionListener {
@@ -37,6 +40,10 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
     ActivityResultLauncher<Intent> cameraResultLauncher;
     ActivityResultLauncher<Intent> galleryResultLauncher;
     String currentPhotoPath;
+    long dirSize = 0;
+    String lruLocation = "";
+    FileTime lruFileTime;
+    File storageDirGlobal;
     ArrayList<String> photoPaths = new ArrayList<>();
     private RecyclerView.Adapter recyclerViewAdapter;
 
@@ -58,6 +65,8 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         }
         PictureContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
+        storageDirGlobal = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        getDirSize(storageDirGlobal);
         if (getIntent().getStringExtra("MODE").equals("read")) {
             addNewPicture.setVisibility(View.INVISIBLE);
             browsePicturesButton.setVisibility(View.INVISIBLE);
@@ -91,6 +100,15 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                                 item.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                                     PictureContent.loadImage(new File(currentPhotoPath));
                                     recyclerViewAdapter.notifyItemInserted(0);
+                                    while (dirSize > 10000) {
+                                        try {
+                                            findLRU(storageDirGlobal);
+                                            deleteLRU(lruLocation);
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                        getDirSize(storageDirGlobal);
+                                    }
                                 });
                             }
                         }
@@ -105,6 +123,15 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                             photoPaths.add(currentPhotoPath);
                             PictureContent.loadImage(new File(currentPhotoPath));
                             recyclerViewAdapter.notifyItemInserted(0);
+                            while (dirSize > 10000) {
+                                try {
+                                    findLRU(storageDirGlobal);
+                                    deleteLRU(lruLocation);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                getDirSize(storageDirGlobal);
+                            }
                         }
                     });
             browsePicturesButton.setOnClickListener(v -> onClickBrowseButton());
@@ -132,6 +159,15 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                                 photoPaths.add(file.getAbsolutePath());
                                 PictureContent.loadImage(file);
                                 recyclerViewAdapter.notifyItemInserted(0);
+                                while (dirSize > 10000) {
+                                    try {
+                                        findLRU(storageDirGlobal);
+                                        deleteLRU(lruLocation);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                    getDirSize(storageDirGlobal);
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -142,6 +178,36 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                     PictureContent.loadImage(new File(s));
                     recyclerViewAdapter.notifyItemInserted(0);
                 }
+            }
+        }
+    }
+
+    void getDirSize(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                getDirSize(child);
+
+        dirSize += (fileOrDirectory.length() / 1024);
+    }
+
+    void deleteLRU(String path) {
+        if (!path.equals("")) {
+            File file = new File(path);
+            file.delete();
+        }
+    }
+
+    void findLRU(File fileOrDirectory) throws IOException {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles()) {
+                findLRU(child);
+            }
+        else {
+            if (lruLocation.equals("") || Files.readAttributes(fileOrDirectory.toPath(),
+                    BasicFileAttributes.class).lastAccessTime().compareTo(lruFileTime) < 0) {
+                lruLocation = fileOrDirectory.getAbsolutePath();
+                lruFileTime = Files.readAttributes(fileOrDirectory.toPath(),
+                        BasicFileAttributes.class).lastAccessTime();
             }
         }
     }
