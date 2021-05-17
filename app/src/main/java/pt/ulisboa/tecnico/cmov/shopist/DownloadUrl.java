@@ -84,6 +84,7 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
             else driveTime = "-1";
         } catch (JSONException e) {
             e.printStackTrace();
+            driveTime = "-1";
         }
 
         if (pantryList == null) storeList.driveTime = driveTime;
