@@ -364,122 +364,108 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 else
                     l = new StoreList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
+                String[] new_store_list_id = { "" };
+                int[] n_new_items = {0};
+                int[] async_operations = {0};
+
+                async_operations[0]++;
                 db.collection("StoreList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentReference> task) {
-                        if (task.isSuccessful()) {
+                        if(task.isSuccessful()) {
                             DocumentReference document_1 = task.getResult();
+                            new_store_list_id[0] = document_1.getId();
+
+                            async_operations[0]++;
                             db.collection("PantryList")
                                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                                     .get(source)
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                int[] n_new_items = {0};
-                                                List<String> unique_barcodes = new ArrayList<>();
-                                                List<PantryList> pantries = new ArrayList<>();
-                                                List<String> pantry_ids = new ArrayList<>();
-                                                for (QueryDocumentSnapshot document_2 : task.getResult()) {
-                                                    PantryList pantry = document_2.toObject(PantryList.class);
-                                                    pantries.add(pantry);
-                                                    pantry_ids.add(document_2.getId());
-                                                }
+                                            if(task.isSuccessful()) {
+                                                for(QueryDocumentSnapshot document_2 : task.getResult()) {
+                                                    PantryList p = document_2.toObject(PantryList.class);
 
-                                                int[] async_operations = {0};
-                                                int[] pantry_index = {-1};
-                                                Handler timerHandler = new Handler();
-                                                Runnable timerRunnable = new Runnable() {
+                                                    async_operations[0]++;
+                                                    db.collection("PantryItem")
+                                                            .whereEqualTo("pantryId", document_2.getId()).get(source)
+                                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                            if(task.isSuccessful()) {
+                                                                for(QueryDocumentSnapshot document_3 : task.getResult()) {
+                                                                    PantryItem pi = document_3.toObject(PantryItem.class);
 
-                                                    @Override
-                                                    public void run() {
-                                                        if (async_operations[0] == 0) {
-                                                            pantry_index[0]++;
-                                                            if (pantry_index[0] >= pantries.size()) {
-                                                                db.collection("StoreList").document(document_1.getId())
-                                                                        .update("number_of_items", n_new_items[0])
-                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                if(task.isSuccessful()) {
-                                                                                    finish();
-                                                                                }
-                                                                            }
-                                                                        });
-                                                                return;
-                                                            }
+                                                                    async_operations[0]++;
+                                                                    db.collection("Item")
+                                                                            .document(pi.itemId).get(source)
+                                                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                                @Override
+                                                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                    if(task.isSuccessful()) {
+                                                                                        DocumentSnapshot document_4 = task.getResult();
+                                                                                        Item i = document_4.toObject(Item.class);
+                                                                                        if(i.barcode.equals("")) {
+                                                                                            StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
+                                                                                            if (pi.idealQuantity - pi.quantity > 0)
+                                                                                                n_new_items[0]++;
 
-                                                            async_operations[0]++;
-                                                            timerHandler.postDelayed(this, 100);
-
-                                                            db.collection("PantryItem").whereEqualTo("pantryId", pantry_ids.get(pantry_index[0])).get(source).addOnCompleteListener(task14 -> {
-                                                                if (task14.isSuccessful()) {
-                                                                    for (QueryDocumentSnapshot document_3 : task14.getResult()) {
-                                                                        PantryItem pi = document_3.toObject(PantryItem.class);
-                                                                        async_operations[0]++;
-                                                                        db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task141 -> {
-                                                                            if (task141.isSuccessful()) {
-                                                                                DocumentSnapshot document_4 = task141.getResult();
-                                                                                if (document_4.exists()) {
-                                                                                    Item i = document_4.toObject(Item.class);
-                                                                                    if (!unique_barcodes.contains(i.barcode)) {
-                                                                                        if (!i.barcode.equals("")) {
-                                                                                            unique_barcodes.add(i.barcode);
-                                                                                        }
-                                                                                        StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
-                                                                                        if (pi.idealQuantity - pi.quantity > 0)
-                                                                                            n_new_items[0]++;
-                                                                                        async_operations[0]++;
-                                                                                        db.collection("StoreItem").add(si).addOnCompleteListener(task1 -> {
-                                                                                            if (task1.isSuccessful())
-                                                                                                async_operations[0]--;
-                                                                                        });
-                                                                                        i.stores.put(document_1.getId(), 0f);
-                                                                                        async_operations[0]++;
-                                                                                        db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(task12 -> {
-                                                                                            if (task12.isSuccessful())
-                                                                                                async_operations[0]--;
-                                                                                        });
-                                                                                    } else {
-                                                                                        if (pi.idealQuantity - pi.quantity > 0) {
                                                                                             async_operations[0]++;
-                                                                                            db.collection("StoreItem").whereEqualTo("itemId", pi.itemId)
-                                                                                                    .whereEqualTo("storeId", document_1.getId()).get(source).addOnCompleteListener(task13 -> {
-                                                                                                if (task13.isSuccessful()) {
-                                                                                                    for (QueryDocumentSnapshot document_5 : task13.getResult()) {
-                                                                                                        StoreItem si = document_5.toObject(StoreItem.class);
-                                                                                                        async_operations[0]++;
-                                                                                                        db.collection("StoreItem").document(document_5.getId()).update("quantity", si.quantity + pi.idealQuantity - pi.quantity)
-                                                                                                                .addOnCompleteListener(task131 -> {
-                                                                                                                    if (task131.isSuccessful())
-                                                                                                                        async_operations[0]--;
-                                                                                                                });
-                                                                                                    }
+                                                                                            db.collection("StoreItem").add(si).addOnCompleteListener(task1 -> {
+                                                                                                if (task1.isSuccessful()) {
+                                                                                                    i.stores.put(document_1.getId(), 0f);
+
+                                                                                                    async_operations[0]++;
+                                                                                                    db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(task12 -> {
+                                                                                                        if (task12.isSuccessful())
+                                                                                                            async_operations[0]--;
+                                                                                                    });
                                                                                                     async_operations[0]--;
                                                                                                 }
                                                                                             });
                                                                                         }
+                                                                                        async_operations[0]--;
                                                                                     }
-                                                                                    async_operations[0]--;
                                                                                 }
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                    async_operations[0]--;
+                                                                            });
                                                                 }
-                                                            });
-                                                        } else {
-                                                            timerHandler.postDelayed(this, 100);
+                                                                async_operations[0]--;
+                                                            }
                                                         }
-                                                    }
-                                                };
-                                                timerHandler.postDelayed(timerRunnable, 0);
+                                                    });
+                                                }
+                                                async_operations[0]--;
                                             }
                                         }
                                     });
+                            async_operations[0]--;
                         }
                     }
                 });
+
+                Handler timerHandler = new Handler();
+                Runnable timerRunnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (async_operations[0] == 0) {
+                            db.collection("StoreList").document(new_store_list_id[0])
+                                    .update("number_of_items", n_new_items[0])
+                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if(task.isSuccessful()) {
+                                                finish();
+                                            }
+                                        }
+                                    });
+                        } else {
+                            timerHandler.postDelayed(this, 100);
+                        }
+                    }
+                };
+                timerHandler.postDelayed(timerRunnable, 0);
             }
         }
 
