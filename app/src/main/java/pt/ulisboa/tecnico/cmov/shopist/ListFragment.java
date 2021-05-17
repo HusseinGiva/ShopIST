@@ -300,10 +300,11 @@ public class ListFragment extends Fragment {
                                 d.name = store.name;
                                 d.n_items = (int) store.number_of_items;
                                 d.storeId = document.getId();
+                                // -2 symbolizes that it's still loading
+                                d.queue_time = -2.0;
                                 data.add(d);
 
                                 //add queue time
-                                async_operations[0]++;
                                 computeQueueWaitTime(document.getId())
                                         .addOnCompleteListener(task1 -> {
                                             if (!task1.isSuccessful()) {
@@ -317,7 +318,6 @@ public class ListFragment extends Fragment {
                                             } else {
                                                 d.queue_time = Double.parseDouble(task1.getResult());
                                             }
-                                            async_operations[0]--;
                                         });
 
                                 store.driveTime = null;
@@ -356,6 +356,7 @@ public class ListFragment extends Fragment {
                     }
                 });
 
+        boolean[] invalidated_first_time = { false };
         Handler timerHandler = new Handler();
         Runnable timerRunnable = new Runnable() {
 
@@ -364,12 +365,34 @@ public class ListFragment extends Fragment {
                 if (async_operations[0] == 0) {
                     sort();
                     list.invalidateViews();
+                    invalidated_first_time[0] = true;
                 } else {
                     timerHandler.postDelayed(this, 100);
                 }
             }
         };
         timerHandler.postDelayed(timerRunnable, 0);
+
+        Handler timerHandler_2 = new Handler();
+        Runnable timerRunnable_2 = new Runnable() {
+
+            @Override
+            public void run() {
+                if (invalidated_first_time[0]) {
+                    for(Data d : data) {
+                        if(d.queue_time == -2) {
+                            timerHandler_2.postDelayed(this, 100);
+                            return;
+                        }
+                    }
+                    sort();
+                    list.invalidateViews();
+                } else {
+                    timerHandler_2.postDelayed(this, 100);
+                }
+            }
+        };
+        timerHandler_2.postDelayed(timerRunnable_2, 0);
     }
 
     public void sort() {
