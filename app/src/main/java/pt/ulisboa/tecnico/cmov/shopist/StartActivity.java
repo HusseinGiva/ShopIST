@@ -83,6 +83,7 @@ public class StartActivity extends AppCompatActivity {
 
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setCacheSizeBytes(10000000)
+                .setPersistenceEnabled(true)
                 .build();
         db.setFirestoreSettings(settings);
 
