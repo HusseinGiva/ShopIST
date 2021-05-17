@@ -76,10 +76,6 @@ public class AddItemActivity extends AppCompatActivity {
     EditText pantryQuantity;
     EditText targetQuantity;
     String itemId;
-    long dirSize = 0;
-    String lruLocation = "";
-    FileTime lruFileTime;
-    File storageDirGlobal = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     ArrayList<String> photoPaths = new ArrayList<>();
     ArrayList<StoreViewAddItem> storeViewAddItems = new ArrayList<>();
     ActivityResultLauncher<Intent> picturesResultLauncher;
