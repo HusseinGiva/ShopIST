@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -291,15 +292,14 @@ public class CheckoutActivity extends AppCompatActivity {
                 if (!everything_loaded) return;
 
                 int[] async_operations = {0};
-                int[] complete_store_items = {0};
+                Map<String, PantryList> pantryLists = new HashMap<>();
 
                 for (Map.Entry<String, Map<String, String>> entry_1 : quantitiesPerPantry.entrySet()) {
                     String itemId = entry_1.getKey();
-                    int[] total_quantity = {0};
+
                     for (Map.Entry<String, String> entry_2 : entry_1.getValue().entrySet()) {
                         String pantryId = entry_2.getKey();
                         int quantity = Integer.parseInt(entry_2.getValue());
-                        total_quantity[0] += quantity;
                         if (quantity > 0) {
                             async_operations[0]++;
                             db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
@@ -348,62 +348,144 @@ public class CheckoutActivity extends AppCompatActivity {
                                     async_operations[0]--;
                                 }
                             });
+
+                            async_operations[0]++;
+                            db.collection("PantryList").document(pantryId).get(source)
+                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                DocumentSnapshot document_1 = task.getResult();
+                                                PantryList p = document_1.toObject(PantryList.class);
+                                                if(!pantryLists.containsKey(document_1.getId()))
+                                                    pantryLists.put(document_1.getId(), p);
+                                                async_operations[0]--;
+                                            }
+                                        }
+                                    });
                         }
                     }
-
-                    async_operations[0]++;
-                    db.collection("StoreItem").whereEqualTo("storeId", id)
-                            .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                StoreItem si = document_1.toObject(StoreItem.class);
-                                async_operations[0]++;
-                                db.collection("StoreItem").document(document_1.getId())
-                                        .update("cartQuantity", si.cartQuantity - total_quantity[0]).addOnCompleteListener(task16 -> {
-                                    if (task16.isSuccessful()) async_operations[0]--;
-                                });
-                                int sq = si.quantity - total_quantity[0];
-                                if (sq <= 0) {
-                                    sq = 0;
-                                    complete_store_items[0]++;
-                                }
-                                async_operations[0]++;
-                                db.collection("StoreItem").document(document_1.getId())
-                                        .update("quantity", sq).addOnCompleteListener(task17 -> {
-                                    if (task17.isSuccessful()) async_operations[0]--;
-                                });
-                            }
-                            async_operations[0]--;
-                        }
-                    });
                 }
+
+                Map<String, Integer> completeItemsPerStoreList = new HashMap<>();
+                Boolean[] entered_once = { false };
+                Boolean[] entered_twice = { false };
 
                 Handler timerHandler = new Handler();
                 Runnable timerRunnable = new Runnable() {
 
                     @Override
                     public void run() {
-                        if (async_operations[0] == 0) {
-                            db.collection("StoreList").document(id).get(source)
-                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        if (async_operations[0] == 0 && !entered_once[0]) {
+                            entered_once[0] = true;
+
+                            for (Map.Entry<String, Map<String, String>> entry_1 : quantitiesPerPantry.entrySet()) {
+                                String itemId = entry_1.getKey();
+                                Map<String, Integer> totalQuantitiesPerUser = new HashMap<>();
+                                for (Map.Entry<String, String> entry_2 : entry_1.getValue().entrySet()) {
+                                    String pantryId = entry_2.getKey();
+                                    int quantity = Integer.parseInt(entry_2.getValue());
+                                    if(quantity > 0) {
+                                        PantryList p = pantryLists.get(pantryId);
+                                        for (String user : p.users) {
+                                            int q = 0;
+                                            if (totalQuantitiesPerUser.containsKey(user))
+                                                q = totalQuantitiesPerUser.get(user);
+                                            totalQuantitiesPerUser.put(user, q + quantity);
+                                        }
+                                    }
+                                }
+
+                                for (Map.Entry<String, Integer> entry_2 : totalQuantitiesPerUser.entrySet()) {
+                                    String user = entry_2.getKey();
+                                    int quantity = entry_2.getValue();
+
+                                    async_operations[0]++;
+                                    db.collection("StoreList").whereArrayContains("users", user)
+                                            .get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                             if (task.isSuccessful()) {
-                                                DocumentSnapshot d = task.getResult();
-                                                StoreList s = d.toObject(StoreList.class);
-                                                db.collection("StoreList").document(id)
-                                                        .update("number_of_items", s.number_of_items - complete_store_items[0])
-                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    finish();
+                                                for (QueryDocumentSnapshot document_2 : task.getResult()) {
+                                                    StoreList s = document_2.toObject(StoreList.class);
+                                                    async_operations[0]++;
+                                                    db.collection("StoreItem").whereEqualTo("storeId", document_2.getId())
+                                                            .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                            if (task.isSuccessful()) {
+                                                                for (QueryDocumentSnapshot document_3 : task.getResult()) {
+                                                                    StoreItem si = document_3.toObject(StoreItem.class);
+
+                                                                    if(si.storeId.equals(id)) {
+                                                                        async_operations[0]++;
+                                                                        db.collection("StoreItem").document(document_3.getId())
+                                                                                .update("cartQuantity", si.cartQuantity - quantity).addOnCompleteListener(task16 -> {
+                                                                            if (task16.isSuccessful())
+                                                                                async_operations[0]--;
+                                                                        });
+                                                                    }
+                                                                    int sq = si.quantity - quantity;
+                                                                    if (sq <= 0) {
+                                                                        sq = 0;
+                                                                        int ci = 1;
+                                                                        if(completeItemsPerStoreList.containsKey(si.storeId))
+                                                                            ci = completeItemsPerStoreList.get(si.storeId);
+                                                                        completeItemsPerStoreList.put(si.storeId, ci);
+                                                                    }
+                                                                    async_operations[0]++;
+                                                                    db.collection("StoreItem").document(document_3.getId())
+                                                                            .update("quantity", sq).addOnCompleteListener(task17 -> {
+                                                                        if (task17.isSuccessful()) async_operations[0]--;
+                                                                    });
                                                                 }
+                                                                async_operations[0]--;
                                                             }
-                                                        });
+                                                        }
+                                                    });
+                                                }
+                                                async_operations[0]--;
                                             }
                                         }
                                     });
+                                }
+                            }
+                            timerHandler.postDelayed(this, 100);
+                        } else if (async_operations[0] == 0 && !entered_twice[0]) {
+                            entered_twice[0] = true;
+
+                            for(Map.Entry<String, Integer> entry : completeItemsPerStoreList.entrySet()) {
+                                String storeId = entry.getKey();
+                                int ci = entry.getValue();
+
+                                async_operations[0]++;
+                                db.collection("StoreList").document(storeId).get(source)
+                                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    DocumentSnapshot d = task.getResult();
+                                                    StoreList s = d.toObject(StoreList.class);
+                                                    async_operations[0]++;
+                                                    db.collection("StoreList").document(storeId)
+                                                            .update("number_of_items", s.number_of_items - ci)
+                                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        async_operations[0]--;
+                                                                    }
+                                                                }
+                                                            });
+                                                    async_operations[0]--;
+                                                }
+                                            }
+                                        });
+                            }
+
+                            timerHandler.postDelayed(this, 100);
+                        } else if (async_operations[0] == 0) {
+                            finish();
                         } else {
                             timerHandler.postDelayed(this, 100);
                         }
