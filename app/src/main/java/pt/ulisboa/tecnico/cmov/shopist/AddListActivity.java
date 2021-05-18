@@ -604,11 +604,28 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                             if(task2.isSuccessful()){
 
                                                 Item i = task2.getResult().toObject(Item.class);
+                                                String itemId = task2.getResult().getId();
 
                                                 if(!i.users.containsKey(mAuth.getCurrentUser().getUid())){
                                                     Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
                                                     db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
                                                 }
+
+                                                db.collection("StoreList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task3 -> {
+                                                   if(task3.isSuccessful()){
+                                                       for (QueryDocumentSnapshot document2 : task3.getResult()) {
+                                                           StoreList s = document2.toObject(StoreList.class);
+                                                           String storeId = document2.getId();
+
+                                                           if(i.barcode.equals("")){
+                                                               StoreItem si = new StoreItem(storeId, itemId, pi.idealQuantity - pi.quantity);
+                                                               db.collection("StoreItem").add(si);
+                                                           }
+
+
+                                                       }
+                                                   }
+                                                });
 
                                             }else {
                                                 Log.d("TAG", "Error getting documents: ", task2.getException());
@@ -678,6 +695,8 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                                                         StoreItem si = new StoreItem(newStoreId, itemId, pi.idealQuantity - pi.quantity);
 
                                                                         db.collection("StoreItem").add(si);
+
+                                                                        db.collection("Item").document(itemId).update("stores." + newStoreId, 0);
                                                                    }
                                                                }
                                                            });
