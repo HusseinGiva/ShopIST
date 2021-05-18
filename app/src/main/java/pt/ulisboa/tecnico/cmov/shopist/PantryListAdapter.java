@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -27,6 +28,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.List;
 
+import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
@@ -147,7 +149,8 @@ public class PantryListAdapter extends ArrayAdapter<String> {
             });
         });
 
-        view.findViewById(R.id.increment_p_item_quantity).setOnClickListener(v -> db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
+        view.findViewById(R.id.increment_p_item_quantity).setOnClickListener(v ->
+                db.collection("PantryItem").whereEqualTo("pantryId", pantryId)
                 .whereEqualTo("itemId", itemIds.get(position)).get(source).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document_1 : task.getResult()) {
@@ -179,37 +182,49 @@ public class PantryListAdapter extends ArrayAdapter<String> {
     }
 
     public void updateStoreLists(String itemId, int v) {
-        db.collection("StoreList")
-                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
-                .get(source)
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("PantryList").document(pantryId).get(source)
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                StoreList s = document_1.toObject(StoreList.class);
-                                db.collection("StoreItem").whereEqualTo("storeId", document_1.getId())
-                                        .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                        if (task.isSuccessful()) {
-                                            for (QueryDocumentSnapshot document_2 : task.getResult()) {
-                                                StoreItem si = document_2.toObject(StoreItem.class);
-                                                if (!(v == -1 && si.quantity == 0)) {
-                                                    db.collection("StoreItem").document(document_2.getId())
-                                                            .update("quantity", si.quantity + v);
-                                                    if (si.quantity + v == 0) {
-                                                        db.collection("StoreList").document(document_1.getId())
-                                                                .update("number_of_items", s.number_of_items - 1);
-                                                    } else if (si.quantity == 0 && v == 1) {
-                                                        db.collection("StoreList").document(document_1.getId())
-                                                                .update("number_of_items", s.number_of_items + 1);
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()) {
+                            DocumentSnapshot d1 = task.getResult();
+                            PantryList p = d1.toObject(PantryList.class);
+                            for(String user : p.users) {
+                                db.collection("StoreList")
+                                        .whereArrayContains("users", user)
+                                        .get(source)
+                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                if (task.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                                                        StoreList s = document_1.toObject(StoreList.class);
+                                                        db.collection("StoreItem").whereEqualTo("storeId", document_1.getId())
+                                                                .whereEqualTo("itemId", itemId).get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    for (QueryDocumentSnapshot document_2 : task.getResult()) {
+                                                                        StoreItem si = document_2.toObject(StoreItem.class);
+                                                                        if (!(v == -1 && si.quantity == 0)) {
+                                                                            db.collection("StoreItem").document(document_2.getId())
+                                                                                    .update("quantity", si.quantity + v);
+                                                                            if (si.quantity + v == 0) {
+                                                                                db.collection("StoreList").document(document_1.getId())
+                                                                                        .update("number_of_items", s.number_of_items - 1);
+                                                                            } else if (si.quantity == 0 && v == 1) {
+                                                                                db.collection("StoreList").document(document_1.getId())
+                                                                                        .update("number_of_items", s.number_of_items + 1);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
                                                     }
                                                 }
                                             }
-                                        }
-                                    }
-                                });
+                                        });
                             }
                         }
                     }
