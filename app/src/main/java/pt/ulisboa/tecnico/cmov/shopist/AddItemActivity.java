@@ -932,6 +932,7 @@ public class AddItemActivity extends AppCompatActivity {
                                                                                         db.collection("StoreItem").add(storeItem);
                                                                                         db.collection("StoreList").document(document117.getId()).update("number_of_items", storeList.number_of_items + 1);
                                                                                         item.stores.put(document117.getId(), 0f);
+                                                                                        db.collection("Item").document(itemId).update("stores", item.stores);
                                                                                     }
                                                                                 }
                                                                             }
@@ -1514,6 +1515,8 @@ public class AddItemActivity extends AppCompatActivity {
         if (getIntent().getStringExtra("MODE").equals("update")) {
             intent.putExtra("MODE", "update");
             intent.putExtra("ID", getIntent().getStringExtra("ItemId"));
+            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
+            storesResultLauncher.launch(intent);
             db.collection("StoreList")
                     .whereArrayContains("users", mAuth.getCurrentUser().getUid())
                     .get(source)
@@ -1524,7 +1527,9 @@ public class AddItemActivity extends AppCompatActivity {
                                 if (!storeViewAddItems.isEmpty()) {
                                     boolean present = false;
                                     for (StoreViewAddItem item : storeViewAddItems) {
-                                        if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
+                                        if (item.storeId.equals(document.getId())) {
+                                            present = true;
+                                        } else if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
                                             float[] results = new float[1];
                                             Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
                                                     Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
@@ -1533,8 +1538,6 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (results[0] < 20f) {
                                                 present = true;
                                             }
-                                        } else if (item.storeId.equals(document.getId())) {
-                                            present = true;
                                         }
                                     }
                                     if (!present) {
@@ -1543,7 +1546,6 @@ public class AddItemActivity extends AppCompatActivity {
                                         storeViewAddItem.longitude = store.longitude;
                                         storeViewAddItems.add(storeViewAddItem);
                                     }
-
                                 } else {
                                     StoreViewAddItem storeViewAddItem = new StoreViewAddItem(document.getId(), store.name, 0f, false);
                                     storeViewAddItem.latitude = store.latitude;
@@ -1551,8 +1553,7 @@ public class AddItemActivity extends AppCompatActivity {
                                     storeViewAddItems.add(storeViewAddItem);
                                 }
                             }
-                            intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
-                            storesResultLauncher.launch(intent);
+
                         }
                     });
         } else if (getIntent().getStringExtra("MODE").equals("add")) {
@@ -1567,7 +1568,10 @@ public class AddItemActivity extends AppCompatActivity {
                                 if (!storeViewAddItems.isEmpty()) {
                                     boolean present = false;
                                     for (StoreViewAddItem item : storeViewAddItems) {
-                                        if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
+                                        if (item.storeId.equals(document.getId())) {
+                                            present = true;
+                                        }
+                                        else if (store.latitude != null && store.longitude != null && item.latitude != null && item.longitude != null) {
                                             float[] results = new float[1];
                                             Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
                                                     Double.parseDouble(item.latitude), Double.parseDouble(item.longitude),
@@ -1576,8 +1580,6 @@ public class AddItemActivity extends AppCompatActivity {
                                             if (results[0] < 20f) {
                                                 present = true;
                                             }
-                                        } else if (item.storeId.equals(document.getId())) {
-                                            present = true;
                                         }
                                     }
                                     if (!present) {
@@ -2112,7 +2114,9 @@ public class AddItemActivity extends AppCompatActivity {
                                     if (!storeViewAddItems.isEmpty()) {
                                         boolean present = false;
                                         for (StoreViewAddItem item2 : storeViewAddItems) {
-                                            if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                            if (item2.storeId.equals(document2.getId())) {
+                                                present = true;
+                                            } else if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
                                                 float[] results = new float[1];
                                                 Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
                                                         Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
@@ -2121,8 +2125,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                 if (results[0] < 20f) {
                                                     present = true;
                                                 }
-                                            } else if (item2.storeId.equals(document2.getId())) {
-                                                present = true;
                                             }
                                         }
                                         if (!present) {
@@ -2214,7 +2216,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                         if (!storeViewAddItems.isEmpty()) {
                                                             boolean present = false;
                                                             for (StoreViewAddItem item2 : storeViewAddItems) {
-                                                                if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
+                                                                if (item2.storeId.equals(document2.getId())) {
+                                                                    present = true;
+                                                                } else if (store.latitude != null && store.longitude != null && item2.latitude != null && item2.longitude != null) {
                                                                     float[] results = new float[1];
                                                                     Location.distanceBetween(Double.parseDouble(store.latitude), Double.parseDouble(store.longitude),
                                                                             Double.parseDouble(item2.latitude), Double.parseDouble(item2.longitude),
@@ -2223,8 +2227,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                                     if (results[0] < 20f) {
                                                                         present = true;
                                                                     }
-                                                                } else if (item2.storeId.equals(document2.getId())) {
-                                                                    present = true;
                                                                 }
                                                             }
                                                             if (!present) {
