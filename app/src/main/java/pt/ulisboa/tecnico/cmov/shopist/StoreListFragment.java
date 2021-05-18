@@ -180,9 +180,10 @@ public class StoreListFragment extends Fragment {
                                                                                 if (document2.exists()) {
                                                                                     StoreList sl2 = document2.toObject(StoreList.class);
                                                                                     float[] results = new float[1];
-                                                                                    Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                            Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
-                                                                                            results);
+                                                                                    if(sl.latitude != null && sl.longitude != null && sl2.latitude != null && sl2.longitude != null)
+                                                                                        Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
+                                                                                                results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         Data d = new Data();
