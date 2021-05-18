@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -138,8 +139,10 @@ public class PantryListActivity extends AppCompatActivity {
                                                     Data d = new Data();
                                                     if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
                                                         d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
-                                                    else
-                                                        d.pantry_item_name = i.users.get(pantry.users.get(0));
+                                                    else {
+                                                        Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                        d.pantry_item_name = entry.getValue();
+                                                    }
                                                     d.pantry_item_quantity = pi.quantity;
                                                     d.pantry_item_ideal_quantity = pi.idealQuantity;
                                                     d.itemId = pi.itemId;

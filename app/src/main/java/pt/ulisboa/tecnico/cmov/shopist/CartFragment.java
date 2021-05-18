@@ -26,6 +26,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
@@ -173,7 +174,12 @@ public class CartFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         Data d = new Data();
-                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                            d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                        else{
+                                                            Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                            d.store_item_name = entry.getValue();
+                                                        }
                                                         d.store_item_quantity = si.cartQuantity;
                                                         d.itemId = si.itemId;
                                                         d.item_price = i.stores.get(storeId);
@@ -210,16 +216,22 @@ public class CartFragment extends Fragment {
                                                                                 if (document2.exists()) {
                                                                                     StoreList sl2 = document2.toObject(StoreList.class);
                                                                                     float[] results = new float[1];
-                                                                                    Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
-                                                                                            Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
-                                                                                            results);
+                                                                                    if (sl.latitude != null && sl.longitude != null && sl2.latitude != null && sl2.longitude != null)
+                                                                                        Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                                                                Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
+                                                                                                results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         Data d = new Data();
-                                                                                        d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                                                            d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                                                                        else{
+                                                                                            Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                                                            d.store_item_name = entry.getValue();
+                                                                                        }
                                                                                         d.store_item_quantity = si.cartQuantity;
                                                                                         d.itemId = si.itemId;
-                                                                                        d.item_price = i.stores.get(storeId);
+                                                                                        d.item_price = i.stores.get(s);
                                                                                         if (i.barcode.equals(""))
                                                                                             d.imageId = si.itemId;
                                                                                         else

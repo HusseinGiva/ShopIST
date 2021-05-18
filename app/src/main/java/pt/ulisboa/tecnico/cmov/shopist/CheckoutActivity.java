@@ -144,7 +144,12 @@ public class CheckoutActivity extends AppCompatActivity {
                                     if (i.stores.containsKey(id)) p = i.stores.get(id);
 
                                     ItemData iData = new ItemData();
-                                    iData.item_name = i.users.get(mAuth.getUid());
+                                    if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                        iData.item_name = i.users.get(mAuth.getCurrentUser().getUid());
+                                    else{
+                                        Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                        iData.item_name = entry.getValue();
+                                    }
                                     iData.item_quantity = si.cartQuantity;
                                     iData.item_price = p;
                                     iData.itemId = si.itemId;
