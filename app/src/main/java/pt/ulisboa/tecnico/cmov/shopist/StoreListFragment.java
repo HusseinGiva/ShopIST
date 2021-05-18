@@ -3,7 +3,9 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.content.Context;
 import android.location.Location;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +20,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +44,8 @@ public class StoreListFragment extends Fragment {
     private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
+    FirebaseStorage storage;
+    StorageReference storageRef;
     private Source source;
 
     private List<Data> data = new ArrayList<>();
@@ -82,6 +89,8 @@ public class StoreListFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
     }
 
     @Override
@@ -149,6 +158,25 @@ public class StoreListFragment extends Fragment {
                                                             d.imageId = si.itemId;
                                                         else d.imageId = i.barcode;
                                                         data.add(d);
+
+                                                        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
+                                                        File[] files = storageDir.listFiles();
+                                                        if(files.length == 0) {
+                                                            StorageReference imagesRef = storageRef.child(d.imageId);
+                                                            async_operations[0]++;
+                                                            imagesRef.listAll()
+                                                                    .addOnSuccessListener(listResult -> {
+                                                                        List<StorageReference> pics = listResult.getItems();
+                                                                        if (pics.size() != 0) {
+                                                                            File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId).getAbsolutePath() + "/" + pics.get(0).getName());
+                                                                            async_operations[0]++;
+                                                                            pics.get(0).getFile(localFile)
+                                                                                    .addOnSuccessListener(taskSnapshot -> async_operations[0]--);
+                                                                        }
+                                                                        async_operations[0]--;
+                                                                    });
+                                                        }
+
                                                     } else {
                                                         async_operations[0]++;
                                                         db.collection("StoreList").document(storeId).get(source).addOnCompleteListener(task11 -> {
@@ -184,6 +212,24 @@ public class StoreListFragment extends Fragment {
                                                                                         else
                                                                                             d.imageId = i.barcode;
                                                                                         data.add(d);
+
+                                                                                        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
+                                                                                        File[] files = storageDir.listFiles();
+                                                                                        if(files.length == 0) {
+                                                                                            StorageReference imagesRef = storageRef.child(d.imageId);
+                                                                                            async_operations[0]++;
+                                                                                            imagesRef.listAll()
+                                                                                                    .addOnSuccessListener(listResult -> {
+                                                                                                        List<StorageReference> pics = listResult.getItems();
+                                                                                                        if (pics.size() != 0) {
+                                                                                                            File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId).getAbsolutePath() + "/" + pics.get(0).getName());
+                                                                                                            async_operations[0]++;
+                                                                                                            pics.get(0).getFile(localFile)
+                                                                                                                    .addOnSuccessListener(taskSnapshot -> async_operations[0]--);
+                                                                                                        }
+                                                                                                        async_operations[0]--;
+                                                                                                    });
+                                                                                        }
                                                                                     }
                                                                                     async_operations[0]--;
                                                                                 }

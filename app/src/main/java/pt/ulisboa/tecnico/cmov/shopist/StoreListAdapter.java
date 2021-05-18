@@ -123,27 +123,13 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         }
 
         File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position));
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference();
-        StorageReference imagesRef = storageRef.child(imageIds.get(position));
-
         File[] files = storageDir.listFiles();
-        ImageView i = view.findViewById(R.id.store_list_item_image);
-
         assert files != null;
-        if (files.length == 0) {
-            imagesRef.listAll()
-                    .addOnSuccessListener(listResult -> {
-                        List<StorageReference> pics = listResult.getItems();
-                        if (pics.size() != 0) {
-                            String currentPhotoPath;
-                            File localFile = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + imageIds.get(position)).getAbsolutePath() + "/" + pics.get(0).getName());
-                            currentPhotoPath = localFile.getAbsolutePath();
-                            pics.get(0).getFile(localFile).addOnSuccessListener(taskSnapshot -> i.setImageURI(Uri.fromFile(new File(currentPhotoPath))));
-                        }
-                    });
-        } else {
-            i.setImageURI(Uri.fromFile(files[0]));
+        if (files.length != 0) {
+            holder.image.setImageURI(Uri.fromFile(files[0]));
+        }
+        else {
+            holder.image.setImageResource(R.drawable.ist_logo);
         }
 
         view.setOnClickListener(v -> {

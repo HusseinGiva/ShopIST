@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class StoreListViewHolder {
@@ -9,6 +10,7 @@ public class StoreListViewHolder {
     TextView storeListItemQuantity;
     TextView itemPrice;
     TextView euro;
+    ImageView image;
 
     StoreListViewHolder(View v) {
         storeListPosition = v.findViewById(R.id.store_list_position);
@@ -16,5 +18,6 @@ public class StoreListViewHolder {
         storeListItemQuantity = v.findViewById(R.id.store_list_item_quantity);
         itemPrice = v.findViewById(R.id.item_price);
         euro = v.findViewById(R.id.textView6);
+        image = v.findViewById(R.id.store_list_item_image);
     }
 }
