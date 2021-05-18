@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
@@ -37,18 +37,17 @@ public class PantryListActivity extends AppCompatActivity {
 
     private static String latitude = null;
     private static String longitude = null;
-    List<String> itemIds = new ArrayList<>();
-    List<String> pantry_item_names = new ArrayList<>();
-    List<Integer> pantry_item_quantities = new ArrayList<>();
-    List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
-    List<String> imageIds = new ArrayList<>();
+    final List<String> itemIds = new ArrayList<>();
+    final List<String> pantry_item_names = new ArrayList<>();
+    final List<Integer> pantry_item_quantities = new ArrayList<>();
+    final List<Integer> pantry_item_ideal_quantities = new ArrayList<>();
+    final List<String> imageIds = new ArrayList<>();
+    private final List<Data> data = new ArrayList<>();
     private ListView list;
     private String id;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
-
-    private List<Data> data = new ArrayList<>();
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -115,12 +114,11 @@ public class PantryListActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             PantryList pantry = document.toObject(PantryList.class);
-                            server_n_items[0] = pantry.number_of_items;
+                            server_n_items[0] = Objects.requireNonNull(pantry).number_of_items;
                             latitude = pantry.latitude;
                             longitude = pantry.longitude;
-                            getSupportActionBar().setTitle(pantry.name);
+                            Objects.requireNonNull(getSupportActionBar()).setTitle(pantry.name);
 
                             async_operations[0]++;
                             db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
@@ -137,10 +135,10 @@ public class PantryListActivity extends AppCompatActivity {
                                                     Item i = document11.toObject(Item.class);
 
                                                     Data d = new Data();
-                                                    if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                    if (Objects.requireNonNull(i).users.containsKey(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()))
                                                         d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                     else {
-                                                        Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                        Map.Entry<String, String> entry = i.users.entrySet().iterator().next();
                                                         d.pantry_item_name = entry.getValue();
                                                     }
                                                     d.pantry_item_quantity = pi.quantity;
@@ -151,31 +149,17 @@ public class PantryListActivity extends AppCompatActivity {
                                                     data.add(d);
 
                                                     async_operations[0]--;
-                                                } else {
-                                                    Log.d("TAG", "No such document");
                                                 }
-
-
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task11.getException());
                                             }
                                         });
                                     }
 
                                     async_operations[0]--;
-                                } else {
-                                    Log.d("TAG", "Error getting documents: ", task1.getException());
                                 }
-
                             });
 
                             async_operations[0]--;
-                        } else {
-                            Log.d("TAG", "No such document");
                         }
-
-                    } else {
-                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -279,7 +263,7 @@ public class PantryListActivity extends AppCompatActivity {
         }
     }
 
-    private class Data {
+    private static class Data {
         String itemId;
         String pantry_item_name;
         Integer pantry_item_quantity;

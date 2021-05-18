@@ -11,17 +11,18 @@ import android.widget.EditText;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class CheckoutListAdapter extends ArrayAdapter<String> {
 
-    Context context;
-    List<String> pantryIds;
-    List<String> pantryNames;
-    List<Integer> quantitiesNeeded;
-    List<String> pantryQuantities;
-    Map<String, Map<String, String>> quantitiesPerPantry;
-    List<String> itemIds;
-    List<Integer> item_quantities;
+    final Context context;
+    final List<String> pantryIds;
+    final List<String> pantryNames;
+    final List<Integer> quantitiesNeeded;
+    final List<String> pantryQuantities;
+    final Map<String, Map<String, String>> quantitiesPerPantry;
+    final List<String> itemIds;
+    final List<Integer> item_quantities;
     int item_position = 0;
 
     public CheckoutListAdapter(Context context, List<String> pantryIds, List<String> pantryNames, List<Integer> quantitiesNeeded, List<String> pantryQuantities,
@@ -60,7 +61,7 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
             holder.pantryQuantity.setText(pantryQuantities.get(position));
         }
 
-        EditText et = (EditText) view.findViewById(R.id.checkout_pantry_quantity);
+        EditText et = view.findViewById(R.id.checkout_pantry_quantity);
         et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -72,7 +73,7 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
                 Map<String, String> m = quantitiesPerPantry.get(itemIds.get(item_position));
                 String str = s.toString();
                 try {
-                    int previous_n = Integer.parseInt(m.get(pantryIds.get(position)));
+                    int previous_n = Integer.parseInt(Objects.requireNonNull(Objects.requireNonNull(m).get(pantryIds.get(position))));
                     int n = Integer.parseInt(str);
                     if (n < 0) {
                         m.put(pantryIds.get(position), "0");
@@ -102,11 +103,11 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
             String s = et.getText().toString();
             if (s.equals("") || s.equals("0")) {
                 et.setText("0");
-                m.put(pantryIds.get(position), "0");
+                Objects.requireNonNull(m).put(pantryIds.get(position), "0");
             } else {
                 int n = Integer.parseInt(s);
                 et.setText(String.valueOf(n - 1));
-                m.put(pantryIds.get(position), String.valueOf(n - 1));
+                Objects.requireNonNull(m).put(pantryIds.get(position), String.valueOf(n - 1));
             }
         });
 
@@ -115,12 +116,12 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
             String s = et.getText().toString();
             if (s.equals("")) {
                 et.setText("0");
-                m.put(pantryIds.get(position), "0");
+                Objects.requireNonNull(m).put(pantryIds.get(position), "0");
             } else {
                 int n = Integer.parseInt(s);
                 if (quantity_sum() < item_quantities.get(item_position)) {
                     et.setText(String.valueOf(n + 1));
-                    m.put(pantryIds.get(position), String.valueOf(n + 1));
+                    Objects.requireNonNull(m).put(pantryIds.get(position), String.valueOf(n + 1));
                 }
             }
         });
@@ -131,8 +132,8 @@ public class CheckoutListAdapter extends ArrayAdapter<String> {
     public int quantity_sum() {
         int sum = 0;
         for (int i = 0; i < pantryIds.size(); i++) {
-            String s = quantitiesPerPantry.get(itemIds.get(item_position)).get(pantryIds.get(i));
-            sum += Integer.parseInt(s);
+            String s = Objects.requireNonNull(quantitiesPerPantry.get(itemIds.get(item_position))).get(pantryIds.get(i));
+            sum += Integer.parseInt(Objects.requireNonNull(s));
         }
         return sum;
     }

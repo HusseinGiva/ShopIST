@@ -5,11 +5,11 @@ import android.widget.TextView;
 
 public class ListViewHolder {
 
-    TextView listName;
-    TextView driveTime;
-    TextView n_items;
-    TextView queue_wait_time_text;
-    TextView queue_wait_time;
+    final TextView listName;
+    final TextView driveTime;
+    final TextView n_items;
+    final TextView queue_wait_time_text;
+    final TextView queue_wait_time;
 
     ListViewHolder(View v) {
         listName = v.findViewById(R.id.list_name);

@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.WindowManager;
@@ -21,8 +20,6 @@ import androidmads.library.qrgenearator.QRGEncoder;
 
 public class ShareListActivity extends AppCompatActivity {
 
-    private static final String TAG = "SHARE_LIST";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +36,7 @@ public class ShareListActivity extends AppCompatActivity {
 
         String list_code = listType + "_" + id;
 
-        TextView text = (TextView) findViewById(R.id.shareText);
+        TextView text = findViewById(R.id.shareText);
         text.setText(list_code);
 
         //Get screen dimension
@@ -58,10 +55,9 @@ public class ShareListActivity extends AppCompatActivity {
             // Getting QR-Code as Bitmap
             Bitmap bitmap = qrgEncoder.encodeAsBitmap();
             // Setting Bitmap to ImageView
-            ImageView qrcodeImg = (ImageView) findViewById(R.id.shareImage);
+            ImageView qrcodeImg = findViewById(R.id.shareImage);
             qrcodeImg.setImageBitmap(bitmap);
-        } catch (WriterException e) {
-            Log.v(TAG, e.toString());
+        } catch (WriterException ignored) {
         }
 
     }

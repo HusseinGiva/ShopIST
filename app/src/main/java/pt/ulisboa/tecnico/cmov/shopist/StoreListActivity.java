@@ -6,25 +6,20 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
@@ -32,9 +27,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryItem;
-import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
@@ -99,11 +94,11 @@ public class StoreListActivity extends AppCompatActivity {
                 .add(R.id.fragment_container_view, StoreListFragment.class, bundle)
                 .commit();
 
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        tabLayout = findViewById(R.id.tabLayout);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getText().equals(getResources().getString(R.string.items))) {
+                if (Objects.requireNonNull(tab.getText()).equals(getResources().getString(R.string.items))) {
                     getSupportFragmentManager().beginTransaction()
                             .setReorderingAllowed(true)
                             .replace(R.id.fragment_container_view, StoreListFragment.class, bundle)
@@ -138,23 +133,17 @@ public class StoreListActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             StoreList store = document.toObject(StoreList.class);
-                            latitude = store.latitude;
+                            latitude = Objects.requireNonNull(store).latitude;
                             longitude = store.longitude;
-                            getSupportActionBar().setTitle(store.name);
-                        } else {
-                            Log.d("TAG", "No such document");
+                            Objects.requireNonNull(getSupportActionBar()).setTitle(store.name);
                         }
-
-                    } else {
-                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
     }
 
     public void goToStore() {
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
         TabLayout.Tab tab = tabLayout.getTabAt(0);
         assert tab != null;
         tab.select();
@@ -167,7 +156,7 @@ public class StoreListActivity extends AppCompatActivity {
     }
 
     public void goToCart() {
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        TabLayout tabLayout = findViewById(R.id.tabLayout);
         TabLayout.Tab tab = tabLayout.getTabAt(1);
         assert tab != null;
         tab.select();
@@ -253,49 +242,39 @@ public class StoreListActivity extends AppCompatActivity {
 
         async_operations[0]++;
         db.collection("StoreItem").whereEqualTo("storeId", id).get(source)
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                                StoreItem si = document_1.toObject(StoreItem.class);
-                                m1.put(si.itemId, 0);
-                                m2.put(si.itemId, document_1.getId());
-                            }
-
-                            async_operations[0]++;
-                            db.collection("PantryList")
-                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source)
-                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if (task.isSuccessful()) {
-                                                for (QueryDocumentSnapshot document_2 : task.getResult()) {
-                                                    PantryList p = document_2.toObject(PantryList.class);
-                                                    async_operations[0]++;
-                                                    db.collection("PantryItem")
-                                                            .whereEqualTo("pantryId", document_2.getId())
-                                                            .get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                for (QueryDocumentSnapshot document_3 : task.getResult()) {
-                                                                    PantryItem pi = document_3.toObject(PantryItem.class);
-                                                                    pis.add(pi);
-                                                                }
-                                                                async_operations[0]--;
-                                                            }
-                                                        }
-                                                    });
-                                                }
-
-                                                async_operations[0]--;
-                                            }
-                                        }
-                                    });
-
-                            async_operations[0]--;
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                            StoreItem si = document_1.toObject(StoreItem.class);
+                            m1.put(si.itemId, 0);
+                            m2.put(si.itemId, document_1.getId());
                         }
+
+                        async_operations[0]++;
+                        db.collection("PantryList")
+                                .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).get(source)
+                                .addOnCompleteListener(task12 -> {
+                                    if (task12.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document_2 : task12.getResult()) {
+                                            async_operations[0]++;
+                                            db.collection("PantryItem")
+                                                    .whereEqualTo("pantryId", document_2.getId())
+                                                    .get(source).addOnCompleteListener(task1 -> {
+                                                if (task1.isSuccessful()) {
+                                                    for (QueryDocumentSnapshot document_3 : task1.getResult()) {
+                                                        PantryItem pi = document_3.toObject(PantryItem.class);
+                                                        pis.add(pi);
+                                                    }
+                                                    async_operations[0]--;
+                                                }
+                                            });
+                                        }
+
+                                        async_operations[0]--;
+                                    }
+                                });
+
+                        async_operations[0]--;
                     }
                 });
 
@@ -319,12 +298,9 @@ public class StoreListActivity extends AppCompatActivity {
                         if (q > 0) n_items[0]++;
 
                         async_operations[0]++;
-                        db.collection("StoreItem").document(siId).update("quantity", q)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) async_operations[0]--;
-                                    }
+                        db.collection("StoreItem").document(Objects.requireNonNull(siId)).update("quantity", q)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) async_operations[0]--;
                                 });
                     }
 
@@ -335,12 +311,7 @@ public class StoreListActivity extends AppCompatActivity {
                         public void run() {
                             if (async_operations[0] == 0) {
                                 db.collection("StoreList").document(id).update("number_of_items", n_items[0])
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                goToStore();
-                                            }
-                                        });
+                                        .addOnCompleteListener(task -> goToStore());
                             } else {
                                 timerHandler.postDelayed(this, 100);
                             }

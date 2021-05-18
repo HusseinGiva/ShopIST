@@ -5,7 +5,7 @@
     <item
         android:id="@+id/recenterLocation"
         android:icon="@drawable/baseline_center_24"
-        android:title="Recenter"
+        android:title="@string/recenterLocation"
         app:showAsAction="ifRoom" />
 
 </menu>

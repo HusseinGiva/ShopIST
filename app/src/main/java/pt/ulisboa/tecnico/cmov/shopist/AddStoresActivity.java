@@ -22,6 +22,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -63,8 +64,8 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
             source = Source.CACHE;
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.storesFragment);
-            RecyclerView recyclerView = (RecyclerView) currentFragment.getView();
-            recyclerViewAdapter = ((RecyclerView) currentFragment.getView()).getAdapter();
+            assert currentFragment != null;
+            recyclerViewAdapter = ((RecyclerView) currentFragment.requireView()).getAdapter();
         }
         StoreContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
@@ -93,7 +94,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 Item item = document.toObject(Item.class);
-                                for (String storeId : item.stores.keySet()) {
+                                for (String storeId : Objects.requireNonNull(item).stores.keySet()) {
                                     db.collection("StoreList")
                                             .document(storeId)
                                             .get(source)
@@ -101,7 +102,7 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
                                                 if (task2.isSuccessful()) {
                                                     DocumentSnapshot document2 = task2.getResult();
                                                     StoreList item2 = document2.toObject(StoreList.class);
-                                                    if (item2.users.contains(mAuth.getCurrentUser().getUid())) {
+                                                    if (Objects.requireNonNull(item2).users.contains(Objects.requireNonNull(mAuth.getCurrentUser()).getUid())) {
                                                         StoreViewAddItem storeViewAddItem = new StoreViewAddItem(storeId, item2.name, item.stores.get(storeId), true);
                                                         storeViewAddItem.latitude = item2.latitude;
                                                         storeViewAddItem.longitude = item2.longitude;

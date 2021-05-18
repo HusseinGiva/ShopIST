@@ -23,13 +23,6 @@ public class StoreViewAddItem implements Parcelable {
     public String longitude;
     public Boolean isChecked;
 
-    public StoreViewAddItem(String storeId, String name, Float price) {
-        this.storeId = storeId;
-        this.name = name;
-        this.price = price;
-        this.isChecked = false;
-    }
-
     public StoreViewAddItem() {
         this.isChecked = false;
     }

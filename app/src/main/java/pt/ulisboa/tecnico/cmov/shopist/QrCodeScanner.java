@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +17,7 @@ import com.google.firebase.firestore.Source;
 import com.google.zxing.Result;
 
 import java.util.Map;
+import java.util.Objects;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
@@ -90,7 +90,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                 if (!isConnected(getApplicationContext()))
                     Toast.makeText(getApplicationContext(), R.string.noInternetConnection, Toast.LENGTH_SHORT).show();
 
-                db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(mAuth.getCurrentUser().getUid())).addOnCompleteListener(task -> {
+                db.collection("PantryList").document(id).update("users", FieldValue.arrayUnion(Objects.requireNonNull(mAuth.getCurrentUser()).getUid())).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
 
                         db.collection("PantryItem").whereEqualTo("pantryId", id).get(source).addOnCompleteListener(task1 -> {
@@ -108,7 +108,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                             Item i = task2.getResult().toObject(Item.class);
                                             String itemId = task2.getResult().getId();
 
-                                            if (!i.users.containsKey(mAuth.getCurrentUser().getUid())) {
+                                            if (!Objects.requireNonNull(i).users.containsKey(mAuth.getCurrentUser().getUid())) {
                                                 Map.Entry<String, String> entry = i.users.entrySet().iterator().next();
                                                 db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
                                             }
@@ -138,19 +138,12 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                                 }
                                             });
 
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task2.getException());
                                         }
-
                                     });
 
                                     count++;
                                 }
-                            } else {
-                                Log.d("TAG", "Error getting documents: ", task1.getException());
                             }
-
-
                         });
 
 
@@ -176,7 +169,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                         if (document.exists()) {
                             StoreList s = document.toObject(StoreList.class);
 
-                            StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
+                            StoreList newStore = new StoreList(Objects.requireNonNull(s).name, s.latitude, s.longitude, Objects.requireNonNull(mAuth.getCurrentUser()).getUid());
 
                             db.collection("StoreList").add(newStore).addOnSuccessListener(documentReference -> {
 
@@ -203,7 +196,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                                                 Item i = document3.toObject(Item.class);
                                                                 String itemId = document3.getId();
 
-                                                                if (i.barcode.equals("")) {
+                                                                if (Objects.requireNonNull(i).barcode.equals("")) {
                                                                     StoreItem si = new StoreItem(newStoreId, itemId, pi.idealQuantity - pi.quantity);
 
                                                                     db.collection("StoreItem").add(si);

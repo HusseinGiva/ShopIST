@@ -11,15 +11,15 @@ import java.util.List;
 
 public class ListAdapter extends ArrayAdapter<String> {
 
-    Context context;
-    List<String> list_names;
-    List<String> drive_times;
-    List<Integer> n_items;
-    List<Double> queue_times;
-    String list_type;
+    final Context context;
+    final List<String> list_names;
+    final List<String> drive_times;
+    final List<Integer> n_items;
+    final List<Double> queue_times;
+    final String list_type;
+    final List<String> pantryIds;
+    final List<String> storeIds;
     String tabSelected;
-    List<String> pantryIds;
-    List<String> storeIds;
 
     public ListAdapter(Context context, String list_type, List<String> list_names, List<String> drive_times, List<Integer> n_items, List<Double> queue_times,
                        String tabSelected, List<String> pantryIds, List<String> storeIds) {

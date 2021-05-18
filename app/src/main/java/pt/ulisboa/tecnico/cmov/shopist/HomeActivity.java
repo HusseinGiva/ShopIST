@@ -42,8 +42,6 @@ public class HomeActivity extends AppCompatActivity {
                     .add(R.id.fragment_container_view, ListFragment.class, null)
                     .commit();
         }
-        //language = ContextUtils.getSystemLocale(getResources().getConfiguration()).getLanguage();
-        //Toast.makeText(this, language, Toast.LENGTH_LONG).show();
         Toolbar myToolbar = findViewById(R.id.homeToolbar);
         setSupportActionBar(myToolbar);
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);

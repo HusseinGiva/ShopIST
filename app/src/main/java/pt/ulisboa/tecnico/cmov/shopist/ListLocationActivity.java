@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -61,7 +60,7 @@ public class ListLocationActivity extends AppCompatActivity implements GoogleMap
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
         map.setOnMyLocationButtonClickListener(this);
         LatLng marker = new LatLng(latitude, longitude);
@@ -89,8 +88,6 @@ public class ListLocationActivity extends AppCompatActivity implements GoogleMap
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     map.setMyLocationEnabled(true);
                 }
-            } else {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }

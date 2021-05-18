@@ -5,9 +5,9 @@ import android.widget.TextView;
 
 public class PantryListViewHolder {
 
-    TextView pantryListPosition;
-    TextView pantryListItemName;
-    TextView pantryListItemQuantity;
+    final TextView pantryListPosition;
+    final TextView pantryListItemName;
+    final TextView pantryListItemQuantity;
 
     PantryListViewHolder(View v) {
         pantryListPosition = v.findViewById(R.id.pantry_list_position);

@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,9 +68,9 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
 
     @Override
     protected void onPostExecute(String s) {
-        JSONObject jsonObject = null;
-        String driveTime = null;
-        String status = null;
+        JSONObject jsonObject;
+        String driveTime;
+        String status;
 
         try {
             jsonObject = new JSONObject(s);
@@ -88,10 +87,6 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
 
         if (pantryList == null) storeList.driveTime = driveTime;
         else if (storeList == null) pantryList.driveTime = driveTime;
-        if (driveTime != null)
-            Log.d("SHIT", driveTime);
-        else
-            Log.d("SHIT", "driveTime is NULL");
 
     }
 

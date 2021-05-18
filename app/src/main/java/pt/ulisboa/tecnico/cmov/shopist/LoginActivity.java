@@ -9,7 +9,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -30,18 +29,13 @@ import com.google.firebase.firestore.Source;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
-/*import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
-import pt.inesc.termite.wifidirect.SimWifiP2pManager;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;*/
-
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TAG = "MAIN";
     private FirebaseAuth mAuth;
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -80,13 +74,6 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        //Termite Test - DELETE LATER
-        /*SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
-        SimWifiP2pManager mManager = null;
-        SimWifiP2pManager.Channel mChanell = null;
-        SimWifiP2pSocketServer mSrvSocket = null;
-        SimWifiP2pSocket mCliSocket = null;*/
-
         email = findViewById(R.id.emailTextBox);
         password = findViewById(R.id.passwordTextBox);
 
@@ -106,17 +93,15 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInAnonymously:success");
                         String language = "auto";
                         SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString("language", language);
                         editor.commit();
-                        addUserToFirestore(task.getResult().getUser(), language);
+                        addUserToFirestore(Objects.requireNonNull(task.getResult().getUser()), language);
                         updateUI();
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInAnonymously:failure", task.getException());
                         Toast.makeText(LoginActivity.this, R.string.somethingWentWrongNoInternetConnection,
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -138,14 +123,13 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // Sign in success, update UI with the signed-in user's information
-                        Log.d(TAG, "signInWithEmail:success");
-                        db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task2 -> {
+                        db.collection("user").document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).get(source).addOnCompleteListener(task2 -> {
                             if (task2.isSuccessful()) {
                                 DocumentSnapshot document = task2.getResult();
                                 if (document.exists()) {
                                     SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                     SharedPreferences.Editor editor = sharedPref.edit();
-                                    String language = document.getData().get("language").toString();
+                                    String language = Objects.requireNonNull(document.getData().get("language")).toString();
                                     editor.putString("language", language);
                                     editor.commit();
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
@@ -156,7 +140,6 @@ public class LoginActivity extends AppCompatActivity {
                         });
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInWithEmail:failure", task.getException());
                         Toast.makeText(LoginActivity.this, R.string.authenticationFailed,
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -174,8 +157,6 @@ public class LoginActivity extends AppCompatActivity {
                     .addOnSuccessListener(this, location -> {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            Log.d("ADD_LIST", "Latitude : " + location.getLatitude() + ", Longitude : " +
-                                    location.getLongitude());
 
                             final int[] loaded = {2};
 
@@ -184,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                             ArrayList<String> stores = new ArrayList<>();
 
                             db.collection("PantryList")
-                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                    .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                                     .get(source)
                                     .addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
@@ -207,8 +188,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
                                             }
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
                                         }
                                         loaded[0]--;
                                     });
@@ -235,8 +214,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
                                             }
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
                                         }
                                         loaded[0]--;
                                     });
@@ -316,8 +293,6 @@ public class LoginActivity extends AppCompatActivity {
         userInfo.put("language", language);
 
         db.collection("user").document(user.getUid())
-                .set(userInfo)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                .set(userInfo);
     }
 }

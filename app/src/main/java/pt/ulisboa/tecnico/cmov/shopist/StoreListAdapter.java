@@ -13,20 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -37,20 +30,20 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class StoreListAdapter extends ArrayAdapter<String> {
 
+    final Context context;
+    final List<String> item_names;
+    final List<Integer> item_quantities;
+    final List<Float> item_prices;
+    final String storeId;
+    final List<String> itemIds;
+    final List<String> imageIds;
+    final ListView list;
+    final boolean cart;
+    final TextView totalCost;
+    final List<Integer> cart_item_quantities;
     private final FirebaseFirestore db;
     private final StoreListActivity activity;
     private final Source source;
-    Context context;
-    List<String> item_names;
-    List<Integer> item_quantities;
-    List<Float> item_prices;
-    String storeId;
-    List<String> itemIds;
-    List<String> imageIds;
-    ListView list;
-    boolean cart;
-    TextView totalCost;
-    List<Integer> cart_item_quantities;
 
     public StoreListAdapter(Context context, List<String> item_names, List<Integer> item_quantities, List<Float> item_prices,
                             boolean cart, String storeId, List<String> itemIds, List<String> imageIds, ListView list,
@@ -127,8 +120,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         assert files != null;
         if (files.length != 0) {
             holder.image.setImageURI(Uri.fromFile(files[0]));
-        }
-        else {
+        } else {
             holder.image.setImageResource(R.drawable.ist_logo);
         }
 
@@ -142,64 +134,57 @@ public class StoreListAdapter extends ArrayAdapter<String> {
         if (cart) {
             view.findViewById(R.id.moveToCart).setVisibility(View.INVISIBLE);
         } else {
-            TextView t = (TextView) view.findViewById(R.id.moveToCartQuantity);
+            TextView t = view.findViewById(R.id.moveToCartQuantity);
             t.setText(String.valueOf(this.cart_item_quantities.get(position)));
         }
 
-        view.findViewById(R.id.decrement_item_quantity).setOnClickListener(v -> {
-            db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
-                    .get(source).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document_1 : task.getResult()) {
-                        String field;
-                        if (cart) field = "cartQuantity";
-                        else field = "quantity";
-                        db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) - 1)
-                                .addOnCompleteListener(task1 -> {
-                                    if (task1.isSuccessful()) {
-                                        if (cart) {
-                                            String s_total_cost = (String) totalCost.getText();
-                                            String[] a_total_cost = s_total_cost.split(" ");
-                                            float total_cost = Float.parseFloat(a_total_cost[0]);
-                                            total_cost -= item_prices.get(position);
-                                            Double value2 = Math.round(total_cost * 100.0) / 100.0;
-                                            totalCost.setText(String.valueOf(df.format(value2)));
-                                            if (item_quantities.get(position) == 1) {
-                                                activity.goToCart();
-                                                return;
-                                            }
-                                        } else if (item_quantities.get(position) == 1) {
-                                            db.collection("StoreList").document(storeId).get(source)
-                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                            if (task.isSuccessful()) {
-                                                                DocumentSnapshot document_2 = task.getResult();
+        view.findViewById(R.id.decrement_item_quantity).setOnClickListener(v -> db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
+                .get(source).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document_1 : task.getResult()) {
+                            String field;
+                            if (cart) field = "cartQuantity";
+                            else field = "quantity";
+                            db.collection("StoreItem").document(document_1.getId()).update(field, item_quantities.get(position) - 1)
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            if (cart) {
+                                                String s_total_cost = (String) totalCost.getText();
+                                                String[] a_total_cost = s_total_cost.split(" ");
+                                                float total_cost = Float.parseFloat(a_total_cost[0]);
+                                                total_cost -= item_prices.get(position);
+                                                Double value2 = Math.round(total_cost * 100.0) / 100.0;
+                                                totalCost.setText(String.valueOf(df.format(value2)));
+                                                if (item_quantities.get(position) == 1) {
+                                                    activity.goToCart();
+                                                    return;
+                                                }
+                                            } else if (item_quantities.get(position) == 1) {
+                                                db.collection("StoreList").document(storeId).get(source)
+                                                        .addOnCompleteListener(task22 -> {
+                                                            if (task22.isSuccessful()) {
+                                                                DocumentSnapshot document_2 = task22.getResult();
                                                                 StoreList s = document_2.toObject(StoreList.class);
+                                                                assert s != null;
                                                                 db.collection("StoreList").document(storeId)
                                                                         .update("number_of_items", s.number_of_items - 1)
-                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                if (task.isSuccessful()) {
-                                                                                    activity.goToStore();
-                                                                                }
+                                                                        .addOnCompleteListener(task2 -> {
+                                                                            if (task2.isSuccessful()) {
+                                                                                activity.goToStore();
                                                                             }
                                                                         });
                                                             }
-                                                        }
-                                                    });
-                                            return;
+                                                        });
+                                                return;
+                                            }
+                                            item_quantities.set(position, item_quantities.get(position) - 1);
+                                            list.invalidateViews();
                                         }
-                                        item_quantities.set(position, item_quantities.get(position) - 1);
-                                        list.invalidateViews();
-                                    }
-                                });
-                        return;
+                                    });
+                            return;
+                        }
                     }
-                }
-            });
-        });
+                }));
 
         view.findViewById(R.id.increment_item_quantity).setOnClickListener(v -> db.collection("StoreItem").whereEqualTo("storeId", storeId).whereEqualTo("itemId", itemIds.get(position))
                 .get(source).addOnCompleteListener(task -> {
@@ -237,7 +222,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
-            EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
+            EditText e = view1.findViewById(R.id.move_to_cart_quantity);
             if (!cart) e.setText(String.valueOf(this.cart_item_quantities.get(position)));
             e.addTextChangedListener(new TextWatcher() {
                 @Override

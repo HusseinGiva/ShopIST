@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,8 +23,6 @@ import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
 
-
-    private static final String TAG = "REGISTER";
     private EditText email;
     private EditText firstName;
     private EditText lastName;
@@ -112,15 +109,11 @@ public class RegisterActivity extends AppCompatActivity {
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             addUserToFirestore(user, firstNameText, lastNameText, language);
                             updateUI(user, false);
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
                             updateUI(null, false);
                         }
                     });
@@ -132,15 +125,11 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.getCurrentUser().linkWithCredential(credential)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "linkWithCredential:success");
                             FirebaseUser user = task.getResult().getUser();
                             assert user != null;
                             addUserToFirestore(user, firstNameText, lastNameText, language);
                             updateUI(user, true);
                         } else {
-                            Log.w(TAG, "linkWithCredential:failure", task.getException());
-                            Toast.makeText(RegisterActivity.this, task.getException().getMessage(),
-                                    Toast.LENGTH_SHORT).show();
                             updateUI(null, true);
                         }
                     });
@@ -158,9 +147,7 @@ public class RegisterActivity extends AppCompatActivity {
         userInfo.put("language", language);
 
         db.collection("user").document(user.getUid())
-                .set(userInfo)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+                .set(userInfo);
     }
 
     private void updateUI(FirebaseUser user, boolean isAnonymousConnect) {

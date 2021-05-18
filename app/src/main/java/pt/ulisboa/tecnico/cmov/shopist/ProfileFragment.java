@@ -25,6 +25,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.io.File;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
@@ -32,7 +33,6 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "PROFILE";
     public String language;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -58,7 +58,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (isConnected(getContext().getApplicationContext()))
+        if (isConnected(requireContext().getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -85,7 +85,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         btnCreateAccount.setOnClickListener(this);
         btnLogout.setOnClickListener(this);
         RadioGroup radioGroup = view.findViewById(R.id.radioGroup3);
-        SharedPreferences sharedPref = getActivity().getSharedPreferences("language", Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = requireActivity().getSharedPreferences("language", Context.MODE_PRIVATE);
         String language = sharedPref.getString("language", "en");
         if (language.equals("en")) {
             radioGroup.check(R.id.english);
@@ -97,21 +97,21 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == view.findViewById(R.id.english).getId()) {
                 FirebaseUser currentUser = mAuth.getCurrentUser();
-                db.collection("user").document(currentUser.getUid()).update("language", "en").addOnSuccessListener(aVoid -> {
+                db.collection("user").document(Objects.requireNonNull(currentUser).getUid()).update("language", "en").addOnSuccessListener(aVoid -> {
                     Intent intent = new Intent(getContext(), StartActivity.class);
                     startActivity(intent);
                     getActivity().finish();
                 });
             } else if (checkedId == view.findViewById(R.id.portuguese).getId()) {
                 FirebaseUser currentUser = mAuth.getCurrentUser();
-                db.collection("user").document(currentUser.getUid()).update("language", "pt").addOnSuccessListener(aVoid -> {
+                db.collection("user").document(Objects.requireNonNull(currentUser).getUid()).update("language", "pt").addOnSuccessListener(aVoid -> {
                     Intent intent = new Intent(getContext(), StartActivity.class);
                     startActivity(intent);
                     getActivity().finish();
                 });
             } else if (checkedId == view.findViewById(R.id.auto).getId()) {
                 FirebaseUser currentUser = mAuth.getCurrentUser();
-                db.collection("user").document(currentUser.getUid()).update("language", "auto").addOnSuccessListener(aVoid -> {
+                db.collection("user").document(Objects.requireNonNull(currentUser).getUid()).update("language", "auto").addOnSuccessListener(aVoid -> {
                     Intent intent = new Intent(getContext(), StartActivity.class);
                     startActivity(intent);
                     getActivity().finish();
@@ -127,14 +127,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if (!currentUser.isAnonymous()) {
+        if (!Objects.requireNonNull(currentUser).isAnonymous()) {
 
             DocumentReference docRef = db.collection("user").document(currentUser.getUid());
             docRef.get(source).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        firstName.setText((CharSequence) document.getData().get("firstName"));
+                        firstName.setText((CharSequence) Objects.requireNonNull(document.getData()).get("firstName"));
                         lastName.setText((CharSequence) document.getData().get("lastName"));
                     }
                 }
@@ -156,7 +156,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 FirebaseUser currentUser = mAuth.getCurrentUser();
 
-                if (currentUser.isAnonymous()) {
+                if (Objects.requireNonNull(currentUser).isAnonymous()) {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setCancelable(true);
@@ -214,7 +214,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                 user.delete();
                                 mAuth.signOut();
 
-                                File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                                File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                                 deleteRecursive(storageDir);
                                 Intent intent1 = new Intent(getActivity(), LoginActivity.class);
                                 intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -228,7 +228,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
                 } else {
                     FirebaseAuth.getInstance().signOut();
-                    File storageDir = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                    File storageDir = requireActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                     deleteRecursive(storageDir);
                     intent = new Intent(getActivity(), LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -242,7 +242,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     void deleteRecursive(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
+            for (File child : Objects.requireNonNull(fileOrDirectory.listFiles()))
                 deleteRecursive(child);
 
         fileOrDirectory.delete();

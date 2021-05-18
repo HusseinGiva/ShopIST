@@ -5,12 +5,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 public class StoreListViewHolder {
-    TextView storeListPosition;
-    TextView storeListItemName;
-    TextView storeListItemQuantity;
-    TextView itemPrice;
-    TextView euro;
-    ImageView image;
+    final TextView storeListPosition;
+    final TextView storeListItemName;
+    final TextView storeListItemQuantity;
+    final TextView itemPrice;
+    final TextView euro;
+    final ImageView image;
 
     StoreListViewHolder(View v) {
         storeListPosition = v.findViewById(R.id.store_list_position);

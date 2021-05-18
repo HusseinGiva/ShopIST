@@ -5,9 +5,9 @@ import android.widget.TextView;
 
 public class CheckoutListViewHolder {
 
-    TextView pantryName;
-    TextView quantityNeeded;
-    TextView pantryQuantity;
+    final TextView pantryName;
+    final TextView quantityNeeded;
+    final TextView pantryQuantity;
 
     public CheckoutListViewHolder(View v) {
         pantryName = v.findViewById(R.id.checkout_pantry_name);

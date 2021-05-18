@@ -3,11 +3,9 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.content.Context;
 import android.location.Location;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +24,7 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
@@ -34,21 +33,20 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 public class StoreListFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "ID";
-    List<String> itemIds = new ArrayList<>();
-    List<String> store_item_names = new ArrayList<>();
-    List<Integer> store_item_quantities = new ArrayList<>();
-    List<Integer> cart_item_quantities = new ArrayList<>();
-    List<Float> item_prices = new ArrayList<>();
-    List<String> imageIds = new ArrayList<>();
+    final List<String> itemIds = new ArrayList<>();
+    final List<String> store_item_names = new ArrayList<>();
+    final List<Integer> store_item_quantities = new ArrayList<>();
+    final List<Integer> cart_item_quantities = new ArrayList<>();
+    final List<Float> item_prices = new ArrayList<>();
+    final List<String> imageIds = new ArrayList<>();
+    private final List<Data> data = new ArrayList<>();
+    FirebaseStorage storage;
+    StorageReference storageRef;
     private String id;
     private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    FirebaseStorage storage;
-    StorageReference storageRef;
     private Source source;
-
-    private List<Data> data = new ArrayList<>();
 
     public StoreListFragment() {
     }
@@ -82,7 +80,7 @@ public class StoreListFragment extends Fragment {
             id = getArguments().getString(ARG_PARAM1);
         }
 
-        if (isConnected(getActivity().getApplicationContext()))
+        if (isConnected(requireActivity().getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -123,9 +121,8 @@ public class StoreListFragment extends Fragment {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d("TAG", "DocumentSnapshot data: " + document.getData());
                             StoreList store = document.toObject(StoreList.class);
-                            server_n_items[0] = store.number_of_items;
+                            server_n_items[0] = Objects.requireNonNull(store).number_of_items;
 
                             async_operations[0]++;
                             db.collection("StoreItem").whereEqualTo("storeId", id).get(source).addOnCompleteListener(task1 -> {
@@ -142,9 +139,9 @@ public class StoreListFragment extends Fragment {
                                                 if (document112.exists()) {
                                                     Item i = document112.toObject(Item.class);
                                                     String storeId = si.storeId;
-                                                    if (i.stores.containsKey(storeId)) {
+                                                    if (Objects.requireNonNull(i).stores.containsKey(storeId)) {
                                                         Data d = new Data();
-                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                        if (i.users.containsKey(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()))
                                                             d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                         else
                                                             d.store_item_name = i.users.entrySet().iterator().next().getValue();
@@ -159,9 +156,9 @@ public class StoreListFragment extends Fragment {
                                                         else d.imageId = i.barcode;
                                                         data.add(d);
 
-                                                        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
+                                                        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
                                                         File[] files = storageDir.listFiles();
-                                                        if(files.length == 0) {
+                                                        if (Objects.requireNonNull(files).length == 0) {
                                                             StorageReference imagesRef = storageRef.child(d.imageId);
                                                             async_operations[0]++;
                                                             imagesRef.listAll()
@@ -192,14 +189,14 @@ public class StoreListFragment extends Fragment {
                                                                                 if (document2.exists()) {
                                                                                     StoreList sl2 = document2.toObject(StoreList.class);
                                                                                     float[] results = new float[1];
-                                                                                    if (sl.latitude != null && sl.longitude != null && sl2.latitude != null && sl2.longitude != null)
+                                                                                    if (Objects.requireNonNull(sl).latitude != null && sl.longitude != null && Objects.requireNonNull(sl2).latitude != null && sl2.longitude != null)
                                                                                         Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
                                                                                                 Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
                                                                                                 results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         Data d = new Data();
-                                                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                                                        if (i.users.containsKey(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()))
                                                                                             d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                                                         else
                                                                                             d.store_item_name = i.users.entrySet().iterator().next().getValue();
@@ -213,9 +210,9 @@ public class StoreListFragment extends Fragment {
                                                                                             d.imageId = i.barcode;
                                                                                         data.add(d);
 
-                                                                                        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
+                                                                                        File storageDir = requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/" + d.imageId);
                                                                                         File[] files = storageDir.listFiles();
-                                                                                        if(files.length == 0) {
+                                                                                        if (Objects.requireNonNull(files).length == 0) {
                                                                                             StorageReference imagesRef = storageRef.child(d.imageId);
                                                                                             async_operations[0]++;
                                                                                             imagesRef.listAll()
@@ -242,31 +239,16 @@ public class StoreListFragment extends Fragment {
                                                         });
                                                     }
                                                     async_operations[0]--;
-                                                } else {
-                                                    Log.d("TAG", "No such document");
                                                 }
-
-
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task112.getException());
                                             }
                                         });
                                     }
-
                                     async_operations[0]--;
-                                } else {
-                                    Log.d("TAG", "Error getting documents: ", task1.getException());
                                 }
-
                             });
 
                             async_operations[0]--;
-                        } else {
-                            Log.d("TAG", "No such document");
                         }
-
-                    } else {
-                        Log.d("TAG", "Error getting documents: ", task.getException());
                     }
                 });
 
@@ -310,7 +292,7 @@ public class StoreListFragment extends Fragment {
         }
     }
 
-    private class Data implements Comparable<Data> {
+    private static class Data implements Comparable<Data> {
         String itemId;
         String store_item_name;
         Integer store_item_quantity;

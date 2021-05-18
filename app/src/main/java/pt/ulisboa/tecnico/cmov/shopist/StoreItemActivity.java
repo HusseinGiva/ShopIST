@@ -35,6 +35,7 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreItem;
@@ -116,9 +117,7 @@ public class StoreItemActivity extends AppCompatActivity {
 
         editResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                result -> {
-                    finish();
-                });
+                result -> finish());
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -129,7 +128,7 @@ public class StoreItemActivity extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             item = document.toObject(Item.class);
-                            getSupportActionBar().setTitle(item.users.get(mAuth.getCurrentUser().getUid()));
+                            getSupportActionBar().setTitle(item.users.get(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()));
                             barcodeNumber.setText(item.barcode);
 
                             float[] votes = {0, 0, 0, 0, 0};
@@ -137,7 +136,7 @@ public class StoreItemActivity extends AppCompatActivity {
                             float totalVotes = 0;
 
                             if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
-                                previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
+                                previousRating = Objects.requireNonNull(item.ratings.get(mAuth.getCurrentUser().getUid())).toString();
                                 ((RadioButton) radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
                             }
 
@@ -175,8 +174,8 @@ public class StoreItemActivity extends AppCompatActivity {
                                                         DocumentSnapshot document11 = task11.getResult();
                                                         if (document11.exists()) {
                                                             StoreList storeList = document11.toObject(StoreList.class);
-                                                            Location.distanceBetween(Double.parseDouble(storeList.latitude), Double.parseDouble(storeList.longitude),
-                                                                    Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
+                                                            Location.distanceBetween(Double.parseDouble(Objects.requireNonNull(storeList).latitude), Double.parseDouble(storeList.longitude),
+                                                                    Double.parseDouble(Objects.requireNonNull(sl).latitude), Double.parseDouble(sl.longitude),
                                                                     results);
                                                             //Less than 20 meters
                                                             if (results[0] < 20f) {
@@ -239,11 +238,11 @@ public class StoreItemActivity extends AppCompatActivity {
                         if (document.exists()) {
                             StoreList storeList = document.toObject(StoreList.class);
                             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-                            String shareable = getString(R.string.checkoutThisProduct) + item.users.get(mAuth.getCurrentUser().getUid());
+                            String shareable = getString(R.string.checkoutThisProduct) + item.users.get(Objects.requireNonNull(mAuth.getCurrentUser()).getUid());
                             if (item.barcode != null && !item.barcode.equals("")) {
                                 shareable += getString(R.string.itHasTheBarcode) + item.barcode;
                             }
-                            shareable += getString(R.string.andIsSoldAt) + storeList.name;
+                            shareable += getString(R.string.andIsSoldAt) + Objects.requireNonNull(storeList).name;
                             if (price.getText().toString().equals("") || Float.parseFloat(price.getText().toString()) == 0) {
                                 shareable += ".";
                             } else {
@@ -272,7 +271,7 @@ public class StoreItemActivity extends AppCompatActivity {
                                         } else {
                                             for (StorageReference item : listResult.getItems()) {
                                                 boolean exists = false;
-                                                for (File f : storageDir.listFiles()) {
+                                                for (File f : Objects.requireNonNull(storageDir.listFiles())) {
                                                     if (f.getName().equals(item.getName())) {
                                                         exists = true;
                                                         sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -330,46 +329,44 @@ public class StoreItemActivity extends AppCompatActivity {
     public void onSubmitClick(View view) {
         if (newRating != null && !newRating.equals(previousRating)) {
             db.collection("Item").document(id).update(
-                    "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
-            ).addOnCompleteListener(task -> {
-                db.collection("Item").document(id)
-                        .get(source)
-                        .addOnCompleteListener(task1 -> {
-                            if (task1.isSuccessful()) {
-                                DocumentSnapshot document = task1.getResult();
-                                if (document.exists()) {
-                                    item = document.toObject(Item.class);
+                    "ratings." + Objects.requireNonNull(mAuth.getCurrentUser()).getUid(), Integer.parseInt(newRating)
+            ).addOnCompleteListener(task -> db.collection("Item").document(id)
+                    .get(source)
+                    .addOnCompleteListener(task1 -> {
+                        if (task1.isSuccessful()) {
+                            DocumentSnapshot document = task1.getResult();
+                            if (document.exists()) {
+                                item = document.toObject(Item.class);
 
-                                    float[] votes = {0, 0, 0, 0, 0};
-                                    float totalRatings = 0;
-                                    float totalVotes = 0;
+                                float[] votes = {0, 0, 0, 0, 0};
+                                float totalRatings = 0;
+                                float totalVotes = 0;
 
-                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
-                                        previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
-                                    }
-
-
-                                    for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
-                                        votes[entry.getValue() - 1]++;
-                                        totalRatings += entry.getValue();
-                                        totalVotes++;
-                                    }
-
-                                    if (totalVotes == 0)
-                                        totalVotes = 1;
-
-                                    avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
-                                            String.format("%.1f", (totalRatings / totalVotes)));
-                                    rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
-                                    rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
-                                    rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
-                                    rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
-                                    rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
-
+                                if (Objects.requireNonNull(item).ratings.containsKey(mAuth.getCurrentUser().getUid())) {
+                                    previousRating = Objects.requireNonNull(item.ratings.get(mAuth.getCurrentUser().getUid())).toString();
                                 }
+
+
+                                for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
+                                    votes[entry.getValue() - 1]++;
+                                    totalRatings += entry.getValue();
+                                    totalVotes++;
+                                }
+
+                                if (totalVotes == 0)
+                                    totalVotes = 1;
+
+                                avgRating.setText(getResources().getString(R.string.averageRating) + " : " +
+                                        String.format("%.1f", (totalRatings / totalVotes)));
+                                rating_5.setText(getResources().getString(R.string.votes5star) + ": " + (int) votes[4] + " (" + Math.round((votes[4] / totalVotes) * 100) + "%)");
+                                rating_4.setText(getResources().getString(R.string.votes4star) + ": " + (int) votes[3] + " (" + Math.round((votes[3] / totalVotes) * 100) + "%)");
+                                rating_3.setText(getResources().getString(R.string.votes3star) + ": " + (int) votes[2] + " (" + Math.round((votes[2] / totalVotes) * 100) + "%)");
+                                rating_2.setText(getResources().getString(R.string.votes2star) + ": " + (int) votes[1] + " (" + Math.round((votes[1] / totalVotes) * 100) + "%)");
+                                rating_1.setText(getResources().getString(R.string.votes1star) + ": " + (int) votes[0] + " (" + Math.round((votes[0] / totalVotes) * 100) + "%)");
+
                             }
-                        });
-            });
+                        }
+                    }));
         }
 
 

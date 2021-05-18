@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
         mListener = listener;
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
@@ -70,8 +72,7 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
         return mValues.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public final TextView mNameView;
         public final TextView mPriceView;
         public final CheckBox mChecked;
@@ -79,7 +80,6 @@ public class StoresRecyclerViewAdapter extends RecyclerView.Adapter<StoresRecycl
 
         public ViewHolder(View view, boolean isRead) {
             super(view);
-            mView = view;
             mNameView = view.findViewById(R.id.storeName);
             mPriceView = view.findViewById(R.id.price);
             mChecked = view.findViewById(R.id.checkBox);

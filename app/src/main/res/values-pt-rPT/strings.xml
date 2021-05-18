@@ -85,7 +85,7 @@
     <string name="moveProductToCart">Mover Produto Para Carrinho</string>
     <string name="cartQuantity">Quantidade Carrinho</string>
     <string name="yourRating">O Teu Rating</string>
-    <string name="insertRating">Insere Rating (1-5)</string>
+    <string name="insertRating">Insere Rating (1–5)</string>
     <string name="submit">Submeter</string>
     <string name="averageRating">Rating Médio</string>
     <string name="votes5star">Votos 5 Estrelas</string>

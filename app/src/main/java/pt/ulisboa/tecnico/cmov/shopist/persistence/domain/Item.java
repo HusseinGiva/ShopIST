@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Item {
+    public final Map<String, String> users = new HashMap<>();
+    public final Map<String, Float> stores = new HashMap<>();
+    public final Map<String, Integer> ratings = new HashMap<>();
     public String barcode;
-    public Map<String, String> users = new HashMap<>();
-    public Map<String, Float> stores = new HashMap<>();
-    public Map<String, Integer> ratings = new HashMap<>();
 
     public Item(String name, String barcode, String userId, String id, Float price) {
         this.barcode = barcode;

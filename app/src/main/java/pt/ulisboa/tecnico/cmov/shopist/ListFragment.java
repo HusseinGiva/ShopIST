@@ -7,7 +7,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
@@ -58,16 +58,14 @@ public class ListFragment extends Fragment {
     private final List<String> drive_times = new ArrayList<>();
     private final List<Integer> n_items = new ArrayList<>();
     private final List<Double> queue_times = new ArrayList<>();
+    private final List<Data> data = new ArrayList<>();
     ListAdapter listAdapter = null;
     private ListView list;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private Source source;
-
     private Location lastKnownLocation = null;
     private FirebaseFunctions mFunctions;
-
-    private List<Data> data = new ArrayList<>();
 
     public ListFragment() {
         // Required empty public constructor
@@ -107,13 +105,8 @@ public class ListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            // TODO: Rename and change types of parameters
-            String mParam1 = getArguments().getString(ARG_PARAM1);
-            String mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
-        if (isConnected(getActivity().getApplicationContext()))
+        if (isConnected(requireActivity().getApplicationContext()))
             source = Source.DEFAULT;
         else
             source = Source.CACHE;
@@ -130,14 +123,6 @@ public class ListFragment extends Fragment {
             locationResult.addOnCompleteListener(getActivity(), task -> {
                 if (task.isSuccessful()) {
                     lastKnownLocation = task.getResult();
-                    if (lastKnownLocation != null) {
-                        Log.d("ADD_LIST", "Latitude : " + lastKnownLocation.getLatitude() + ", Longitude : " +
-                                lastKnownLocation.getLongitude());
-                    } else {
-                        Log.d("ADD_LIST", "Current location is null. Using defaults.");
-                    }
-                } else {
-                    Log.d("ADD_LIST", "Current location is null. Using defaults.");
                 }
             });
         } else {
@@ -156,15 +141,15 @@ public class ListFragment extends Fragment {
         listAdapter = new ListAdapter(getContext(), LIST, names, drive_times, n_items, queue_times, getResources().getString(R.string.pantry), pantryIds, storeIds);
         list.setAdapter(listAdapter);
 
-        TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
+        TabLayout tabLayout = view.findViewById(R.id.tabLayout);
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 
-                listAdapter.tabSelected = tab.getText().toString();
+                listAdapter.tabSelected = Objects.requireNonNull(tab.getText()).toString();
                 HomeActivity ha = (HomeActivity) getActivity();
-                ha.setTypeSelected(tab.getText().toString());
+                Objects.requireNonNull(ha).setTypeSelected(tab.getText().toString());
 
                 if (tab.getText().equals(getResources().getString(R.string.pantry))) {
                     loadPantryLists();
@@ -193,7 +178,7 @@ public class ListFragment extends Fragment {
 
         HomeActivity ha = (HomeActivity) getActivity();
 
-        if (ha.getTypeSelected().equals(getResources().getString(R.string.pantry))) {
+        if (Objects.requireNonNull(ha).getTypeSelected().equals(getResources().getString(R.string.pantry))) {
             loadPantryLists();
         } else if (ha.getTypeSelected().equals(getResources().getString(R.string.store))) {
             loadStoreLists();
@@ -207,7 +192,7 @@ public class ListFragment extends Fragment {
 
         async_operations[0]++;
         db.collection("PantryList")
-                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                 .get(source)
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -251,8 +236,6 @@ public class ListFragment extends Fragment {
                                 }
                             }
                             async_operations[0]--;
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
                     }
                 });
@@ -280,7 +263,7 @@ public class ListFragment extends Fragment {
 
         async_operations[0]++;
         db.collection("StoreList")
-                .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                 .get(source)
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -344,8 +327,6 @@ public class ListFragment extends Fragment {
                                 }
                             }
                             async_operations[0]--;
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
                     }
                 });
@@ -423,11 +404,11 @@ public class ListFragment extends Fragment {
                     // has failed then getResult() will throw an Exception which will be
                     // propagated down.
                     HashMap result = (HashMap) task.getResult().getData();
-                    return String.valueOf(result.get("result"));
+                    return String.valueOf(Objects.requireNonNull(result).get("result"));
                 });
     }
 
-    private class Data {
+    private static class Data {
         String pantryId = null;
         String storeId = null;
         String name = null;

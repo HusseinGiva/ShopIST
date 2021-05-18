@@ -10,8 +10,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,13 +29,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
-import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.service.SimWifiP2pService;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.PantryList;
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
@@ -88,12 +84,6 @@ public class StartActivity extends AppCompatActivity {
         db.setFirestoreSettings(settings);
 
         //Termite Test - DELETE LATER
-        SimWifiP2pBroadcast a = new SimWifiP2pBroadcast();
-        SimWifiP2pManager mManager = null;
-        SimWifiP2pManager.Channel mChanell = null;
-        SimWifiP2pSocketServer mSrvSocket = null;
-        SimWifiP2pSocket mCliSocket = null;
-
         // initialize the WDSim API
         SimWifiP2pSocketManager.Init(getApplicationContext());
 
@@ -127,8 +117,6 @@ public class StartActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     }
-                } else {
-                    Log.d("ADD_LIST", "Current location is null. Using defaults.");
                 }
             });
 
@@ -156,8 +144,6 @@ public class StartActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-                        } else {
-                            Log.d("ADD_LIST", "Current location is null. Using defaults.");
                         }
                     });
                 }
@@ -171,7 +157,6 @@ public class StartActivity extends AppCompatActivity {
                 }
                 startActivity(intent);
                 finish();
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -186,8 +171,6 @@ public class StartActivity extends AppCompatActivity {
                     .addOnSuccessListener(this, location -> {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            Log.d("ADD_LIST", "Latitude : " + location.getLatitude() + ", Longitude : " +
-                                    location.getLongitude());
 
                             final int[] loaded = {2};
 
@@ -196,7 +179,7 @@ public class StartActivity extends AppCompatActivity {
                             ArrayList<String> stores = new ArrayList<>();
 
                             db.collection("PantryList")
-                                    .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                    .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                                     .get(source)
                                     .addOnCompleteListener(task -> {
                                         if (task.isSuccessful()) {
@@ -219,8 +202,6 @@ public class StartActivity extends AppCompatActivity {
 
 
                                             }
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
                                         }
                                         loaded[0]--;
                                     });
@@ -247,8 +228,6 @@ public class StartActivity extends AppCompatActivity {
 
 
                                             }
-                                        } else {
-                                            Log.d("TAG", "Error getting documents: ", task.getException());
                                         }
                                         loaded[0]--;
                                     });
@@ -274,7 +253,7 @@ public class StartActivity extends AppCompatActivity {
                                                         if (document.exists()) {
                                                             SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                             SharedPreferences.Editor editor = sharedPref.edit();
-                                                            String language = document.getData().get("language").toString();
+                                                            String language = Objects.requireNonNull(document.getData().get("language")).toString();
                                                             editor.putString("language", language);
                                                             editor.commit();
                                                             Intent intent = new Intent(StartActivity.this, PantryListActivity.class);
@@ -297,7 +276,7 @@ public class StartActivity extends AppCompatActivity {
                                                         if (document.exists()) {
                                                             SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                             SharedPreferences.Editor editor = sharedPref.edit();
-                                                            String language = document.getData().get("language").toString();
+                                                            String language = Objects.requireNonNull(document.getData().get("language")).toString();
                                                             editor.putString("language", language);
                                                             editor.commit();
                                                             Intent intent = new Intent(StartActivity.this, StoreListActivity.class);
@@ -319,7 +298,7 @@ public class StartActivity extends AppCompatActivity {
                                                     if (document.exists()) {
                                                         SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                                         SharedPreferences.Editor editor = sharedPref.edit();
-                                                        String language = document.getData().get("language").toString();
+                                                        String language = Objects.requireNonNull(document.getData().get("language")).toString();
                                                         editor.putString("language", language);
                                                         editor.commit();
                                                         Intent intent = new Intent(StartActivity.this, HomeActivity.class);
@@ -341,13 +320,13 @@ public class StartActivity extends AppCompatActivity {
 
 
                         } else {
-                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task -> {
+                            StartActivity.this.runOnUiThread(() -> db.collection("user").document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).get(source).addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     DocumentSnapshot document = task.getResult();
                                     if (document.exists()) {
                                         SharedPreferences sharedPref = getSharedPreferences("language", Context.MODE_PRIVATE);
                                         SharedPreferences.Editor editor = sharedPref.edit();
-                                        String language = document.getData().get("language").toString();
+                                        String language = Objects.requireNonNull(document.getData().get("language")).toString();
                                         editor.putString("language", language);
                                         editor.commit();
                                         Intent intent = new Intent(StartActivity.this, HomeActivity.class);

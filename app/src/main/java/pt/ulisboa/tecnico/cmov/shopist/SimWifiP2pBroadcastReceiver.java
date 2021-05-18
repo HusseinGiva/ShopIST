@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 
@@ -21,6 +20,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
 import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
@@ -96,7 +96,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
 
                                 db.collection("StoreList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                                         .get(source)
                                         .addOnCompleteListener(task -> {
                                             if (task.isSuccessful()) {
@@ -170,22 +170,12 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
                                                                         db.collection("StoreList").document(storesId.get(i)).update("nQueueItems", queueItemsQuantity);
                                                                     }
 
-                                                                } else {
-                                                                    Log.d("TAG", "Error getting documents: ", task2.getException());
                                                                 }
-
                                                             });
-
-
-                                                        } else {
-                                                            Log.d("TAG", "Error getting documents: ", task1.getException());
                                                         }
-
                                                     });
 
                                                 }
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task.getException());
                                             }
                                         });
                             }
@@ -212,7 +202,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
 
 
                                 db.collection("StoreList")
-                                        .whereArrayContains("users", mAuth.getCurrentUser().getUid())
+                                        .whereArrayContains("users", Objects.requireNonNull(mAuth.getCurrentUser()).getUid())
                                         .get(source)
                                         .addOnCompleteListener(task -> {
                                             if (task.isSuccessful()) {
@@ -279,7 +269,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
                                                                     }
 
                                                                     store.nCartItemsAtArrival.add(store.usersQueueItemsAtArrival.get(mAuth.getCurrentUser().getUid()));
-                                                                    store.timeInQueue.add(Timestamp.now().getSeconds() - store.usersArriveTime.get(mAuth.getCurrentUser().getUid()).getSeconds());
+                                                                    store.timeInQueue.add(Timestamp.now().getSeconds() - Objects.requireNonNull(store.usersArriveTime.get(mAuth.getCurrentUser().getUid())).getSeconds());
                                                                     db.collection("StoreList").document(storeId).update("nCartItemsAtArrival", store.nCartItemsAtArrival);
                                                                     db.collection("StoreList").document(storeId).update("timeInQueue", store.timeInQueue);
 
@@ -287,22 +277,14 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver {
                                                                         db.collection("StoreList").document(storesId.get(i)).update("nQueueItems", FieldValue.increment(userCartItems * -1));
                                                                     }
 
-                                                                } else {
-                                                                    Log.d("TAG", "Error getting documents: ", task2.getException());
                                                                 }
-
                                                             });
 
 
-                                                        } else {
-                                                            Log.d("TAG", "Error getting documents: ", task1.getException());
                                                         }
-
                                                     });
 
                                                 }
-                                            } else {
-                                                Log.d("TAG", "Error getting documents: ", task.getException());
                                             }
                                         });
                             }

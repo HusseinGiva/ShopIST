@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class AddPicturesActivity extends AppCompatActivity implements PicturesFragment.OnListFragmentInteractionListener {
 
@@ -60,8 +61,8 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
         browsePicturesButton = findViewById(R.id.browsePicturesButton);
         if (recyclerViewAdapter == null) {
             Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.picturesFragment);
-            RecyclerView recyclerView = (RecyclerView) currentFragment.getView();
-            recyclerViewAdapter = recyclerView.getAdapter();
+            RecyclerView recyclerView = (RecyclerView) Objects.requireNonNull(currentFragment).getView();
+            recyclerViewAdapter = Objects.requireNonNull(recyclerView).getAdapter();
         }
         PictureContent.emptyList();
         recyclerViewAdapter.notifyDataSetChanged();
@@ -84,7 +85,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                     .addOnSuccessListener(listResult -> {
                         for (StorageReference item : listResult.getItems()) {
                             boolean exists = false;
-                            for (File f : storageDir.listFiles()) {
+                            for (File f : Objects.requireNonNull(storageDir.listFiles())) {
                                 if (f.getName().equals(item.getName())) {
                                     currentPhotoPath = f.getAbsolutePath();
                                     photoPaths.add(currentPhotoPath);
@@ -139,7 +140,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == Activity.RESULT_OK) {
-                            Uri selectedImageUri = result.getData().getData();
+                            Uri selectedImageUri = Objects.requireNonNull(result.getData()).getData();
                             try {
                                 String id = getIntent().getStringExtra("ID");
                                 File file;
@@ -184,7 +185,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     void getDirSize(File fileOrDirectory) {
         if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles())
+            for (File child : Objects.requireNonNull(fileOrDirectory.listFiles()))
                 getDirSize(child);
 
         dirSize += (fileOrDirectory.length() / 1024);
@@ -199,7 +200,7 @@ public class AddPicturesActivity extends AppCompatActivity implements PicturesFr
 
     void findLRU(File fileOrDirectory) throws IOException {
         if (fileOrDirectory.isDirectory())
-            for (File child : fileOrDirectory.listFiles()) {
+            for (File child : Objects.requireNonNull(fileOrDirectory.listFiles())) {
                 findLRU(child);
             }
         else {
