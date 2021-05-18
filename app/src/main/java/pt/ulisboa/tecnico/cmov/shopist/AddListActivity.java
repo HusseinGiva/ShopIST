@@ -53,9 +53,7 @@ import com.google.firebase.firestore.Source;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -364,7 +362,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 else
                     l = new StoreList(e.getText().toString(), mAuth.getCurrentUser().getUid());
 
-                String[] new_store_list_id = { "" };
+                String[] new_store_list_id = {""};
                 int[] n_new_items = {0};
                 int[] async_operations = {0};
 
@@ -372,7 +370,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                 db.collection("StoreList").add(l).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentReference> task) {
-                        if(task.isSuccessful()) {
+                        if (task.isSuccessful()) {
                             DocumentReference document_1 = task.getResult();
                             new_store_list_id[0] = document_1.getId();
 
@@ -383,57 +381,57 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if(task.isSuccessful()) {
-                                                for(QueryDocumentSnapshot document_2 : task.getResult()) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document_2 : task.getResult()) {
                                                     PantryList p = document_2.toObject(PantryList.class);
 
                                                     async_operations[0]++;
                                                     db.collection("PantryItem")
                                                             .whereEqualTo("pantryId", document_2.getId()).get(source)
                                                             .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if(task.isSuccessful()) {
-                                                                for(QueryDocumentSnapshot document_3 : task.getResult()) {
-                                                                    PantryItem pi = document_3.toObject(PantryItem.class);
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                                    if (task.isSuccessful()) {
+                                                                        for (QueryDocumentSnapshot document_3 : task.getResult()) {
+                                                                            PantryItem pi = document_3.toObject(PantryItem.class);
 
-                                                                    async_operations[0]++;
-                                                                    db.collection("Item")
-                                                                            .document(pi.itemId).get(source)
-                                                                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                                                    if(task.isSuccessful()) {
-                                                                                        DocumentSnapshot document_4 = task.getResult();
-                                                                                        Item i = document_4.toObject(Item.class);
-                                                                                        if(i.barcode.equals("")) {
-                                                                                            StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
-                                                                                            if (pi.idealQuantity - pi.quantity > 0)
-                                                                                                n_new_items[0]++;
-
-                                                                                            async_operations[0]++;
-                                                                                            db.collection("StoreItem").add(si).addOnCompleteListener(task1 -> {
-                                                                                                if (task1.isSuccessful()) {
-                                                                                                    i.stores.put(document_1.getId(), 0f);
+                                                                            async_operations[0]++;
+                                                                            db.collection("Item")
+                                                                                    .document(pi.itemId).get(source)
+                                                                                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                                                        @Override
+                                                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                                                            if (task.isSuccessful()) {
+                                                                                                DocumentSnapshot document_4 = task.getResult();
+                                                                                                Item i = document_4.toObject(Item.class);
+                                                                                                if (i.barcode.equals("")) {
+                                                                                                    StoreItem si = new StoreItem(document_1.getId(), pi.itemId, pi.idealQuantity - pi.quantity);
+                                                                                                    if (pi.idealQuantity - pi.quantity > 0)
+                                                                                                        n_new_items[0]++;
 
                                                                                                     async_operations[0]++;
-                                                                                                    db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(task12 -> {
-                                                                                                        if (task12.isSuccessful())
+                                                                                                    db.collection("StoreItem").add(si).addOnCompleteListener(task1 -> {
+                                                                                                        if (task1.isSuccessful()) {
+                                                                                                            i.stores.put(document_1.getId(), 0f);
+
+                                                                                                            async_operations[0]++;
+                                                                                                            db.collection("Item").document(pi.itemId).update("stores", i.stores).addOnCompleteListener(task12 -> {
+                                                                                                                if (task12.isSuccessful())
+                                                                                                                    async_operations[0]--;
+                                                                                                            });
                                                                                                             async_operations[0]--;
+                                                                                                        }
                                                                                                     });
-                                                                                                    async_operations[0]--;
                                                                                                 }
-                                                                                            });
+                                                                                                async_operations[0]--;
+                                                                                            }
                                                                                         }
-                                                                                        async_operations[0]--;
-                                                                                    }
-                                                                                }
-                                                                            });
+                                                                                    });
+                                                                        }
+                                                                        async_operations[0]--;
+                                                                    }
                                                                 }
-                                                                async_operations[0]--;
-                                                            }
-                                                        }
-                                                    });
+                                                            });
                                                 }
                                                 async_operations[0]--;
                                             }
@@ -455,7 +453,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            if(task.isSuccessful()) {
+                                            if (task.isSuccessful()) {
                                                 finish();
                                             }
                                         }
@@ -601,33 +599,33 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
                                         db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task2 -> {
 
-                                            if(task2.isSuccessful()){
+                                            if (task2.isSuccessful()) {
 
                                                 Item i = task2.getResult().toObject(Item.class);
                                                 String itemId = task2.getResult().getId();
 
-                                                if(!i.users.containsKey(mAuth.getCurrentUser().getUid())){
-                                                    Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                                if (!i.users.containsKey(mAuth.getCurrentUser().getUid())) {
+                                                    Map.Entry<String, String> entry = i.users.entrySet().iterator().next();
                                                     db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
                                                 }
 
                                                 db.collection("StoreList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task3 -> {
-                                                   if(task3.isSuccessful()){
-                                                       for (QueryDocumentSnapshot document2 : task3.getResult()) {
-                                                           StoreList s = document2.toObject(StoreList.class);
-                                                           String storeId = document2.getId();
+                                                    if (task3.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document2 : task3.getResult()) {
+                                                            StoreList s = document2.toObject(StoreList.class);
+                                                            String storeId = document2.getId();
 
-                                                           if(i.barcode.equals("")){
-                                                               StoreItem si = new StoreItem(storeId, itemId, pi.idealQuantity - pi.quantity);
-                                                               db.collection("StoreItem").add(si);
-                                                           }
+                                                            if (i.barcode.equals("")) {
+                                                                StoreItem si = new StoreItem(storeId, itemId, pi.idealQuantity - pi.quantity);
+                                                                db.collection("StoreItem").add(si);
+                                                            }
 
 
-                                                       }
-                                                   }
+                                                        }
+                                                    }
                                                 });
 
-                                            }else {
+                                            } else {
                                                 Log.d("TAG", "Error getting documents: ", task2.getException());
                                             }
 
@@ -665,7 +663,7 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
 
                             DocumentSnapshot document = task.getResult();
 
-                            if(document.exists()){
+                            if (document.exists()) {
                                 StoreList s = document.toObject(StoreList.class);
 
                                 StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
@@ -675,34 +673,34 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                     String newStoreId = documentReference.getId();
 
                                     db.collection("PantryList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task1 -> {
-                                        if(task1.isSuccessful()){
+                                        if (task1.isSuccessful()) {
                                             for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                                 String pantryId = document1.getId();
                                                 PantryList p = document1.toObject(PantryList.class);
 
                                                 db.collection("PantryItem").whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(task2 -> {
-                                                   if(task2.isSuccessful()){
-                                                       for (QueryDocumentSnapshot document2 : task2.getResult()) {
-                                                           PantryItem pi = document2.toObject(PantryItem.class);
+                                                    if (task2.isSuccessful()) {
+                                                        for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                            PantryItem pi = document2.toObject(PantryItem.class);
 
-                                                           db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task3 -> {
-                                                               if(task3.isSuccessful()){
-                                                                   DocumentSnapshot document3 = task3.getResult();
-                                                                   Item i = document3.toObject(Item.class);
-                                                                   String itemId = document3.getId();
+                                                            db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task3 -> {
+                                                                if (task3.isSuccessful()) {
+                                                                    DocumentSnapshot document3 = task3.getResult();
+                                                                    Item i = document3.toObject(Item.class);
+                                                                    String itemId = document3.getId();
 
-                                                                   if(i.barcode.equals("")){
+                                                                    if (i.barcode.equals("")) {
                                                                         StoreItem si = new StoreItem(newStoreId, itemId, pi.idealQuantity - pi.quantity);
 
                                                                         db.collection("StoreItem").add(si);
 
                                                                         db.collection("Item").document(itemId).update("stores." + newStoreId, 0);
-                                                                   }
-                                                               }
-                                                           });
-                                                       }
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
 
-                                                   }
+                                                    }
                                                 });
 
                                             }
@@ -718,11 +716,9 @@ public class AddListActivity extends AppCompatActivity implements GoogleMap.OnMy
                                     });
 
 
-
-
                                 });
 
-                            }else{
+                            } else {
                                 Toast.makeText(AddListActivity.this, R.string.invalidCode, Toast.LENGTH_SHORT).show();
                                 dialog.cancel();
                             }

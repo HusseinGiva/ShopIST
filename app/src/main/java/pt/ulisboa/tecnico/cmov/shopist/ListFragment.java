@@ -68,14 +68,6 @@ public class ListFragment extends Fragment {
     private FirebaseFunctions mFunctions;
 
     private List<Data> data = new ArrayList<>();
-    private class Data {
-        String pantryId = null;
-        String storeId = null;
-        String name = null;
-        String drive_time = null;
-        Integer n_items = null;
-        Double queue_time = null;
-    }
 
     public ListFragment() {
         // Required empty public constructor
@@ -247,7 +239,8 @@ public class ListFragment extends Fragment {
                                         @Override
                                         public void run() {
                                             if (pantry.driveTime != null) {
-                                                if(!pantry.driveTime.equals("-1")) d.drive_time = pantry.driveTime;
+                                                if (!pantry.driveTime.equals("-1"))
+                                                    d.drive_time = pantry.driveTime;
                                                 async_operations[0]--;
                                             } else {
                                                 timerHandler.postDelayed(this, 100);
@@ -337,7 +330,8 @@ public class ListFragment extends Fragment {
                                         @Override
                                         public void run() {
                                             if (store.driveTime != null) {
-                                                if(!store.driveTime.equals("-1")) d.drive_time = store.driveTime;
+                                                if (!store.driveTime.equals("-1"))
+                                                    d.drive_time = store.driveTime;
                                                 async_operations[0]--;
 
                                                 timerHandler.removeCallbacks(this);
@@ -356,7 +350,7 @@ public class ListFragment extends Fragment {
                     }
                 });
 
-        boolean[] invalidated_first_time = { false };
+        boolean[] invalidated_first_time = {false};
         Handler timerHandler = new Handler();
         Runnable timerRunnable = new Runnable() {
 
@@ -379,8 +373,8 @@ public class ListFragment extends Fragment {
             @Override
             public void run() {
                 if (invalidated_first_time[0]) {
-                    for(Data d : data) {
-                        if(d.queue_time == -2) {
+                    for (Data d : data) {
+                        if (d.queue_time == -2) {
                             timerHandler_2.postDelayed(this, 100);
                             return;
                         }
@@ -406,7 +400,7 @@ public class ListFragment extends Fragment {
         pantryIds.clear();
         storeIds.clear();
 
-        for(Data d : data) {
+        for (Data d : data) {
             pantryIds.add(d.pantryId);
             storeIds.add(d.storeId);
             names.add(d.name);
@@ -431,6 +425,15 @@ public class ListFragment extends Fragment {
                     HashMap result = (HashMap) task.getResult().getData();
                     return String.valueOf(result.get("result"));
                 });
+    }
+
+    private class Data {
+        String pantryId = null;
+        String storeId = null;
+        String name = null;
+        String drive_time = null;
+        Integer n_items = null;
+        Double queue_time = null;
     }
 
 }

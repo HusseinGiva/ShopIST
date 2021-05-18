@@ -48,13 +48,6 @@ public class PantryListActivity extends AppCompatActivity {
     private Source source;
 
     private List<Data> data = new ArrayList<>();
-    private class Data {
-        String itemId;
-        String pantry_item_name;
-        Integer pantry_item_quantity;
-        Integer pantry_item_ideal_quantity;
-        String imageId;
-    }
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -143,7 +136,7 @@ public class PantryListActivity extends AppCompatActivity {
                                                     Item i = document11.toObject(Item.class);
 
                                                     Data d = new Data();
-                                                    if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                    if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
                                                         d.pantry_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                     else
                                                         d.pantry_item_name = i.users.get(pantry.users.get(0));
@@ -189,7 +182,7 @@ public class PantryListActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
-                    if(server_n_items[0] != real_n_items[0]) {
+                    if (server_n_items[0] != real_n_items[0]) {
                         db.collection("PantryList").document(id).update("number_of_items", real_n_items[0]);
                     }
                     sort();
@@ -213,7 +206,7 @@ public class PantryListActivity extends AppCompatActivity {
         pantry_item_ideal_quantities.clear();
         imageIds.clear();
 
-        for(Data d : data) {
+        for (Data d : data) {
             itemIds.add(d.itemId);
             pantry_item_names.add(d.pantry_item_name);
             pantry_item_quantities.add(d.pantry_item_quantity);
@@ -281,5 +274,13 @@ public class PantryListActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    private class Data {
+        String itemId;
+        String pantry_item_name;
+        Integer pantry_item_quantity;
+        Integer pantry_item_ideal_quantity;
+        String imageId;
     }
 }

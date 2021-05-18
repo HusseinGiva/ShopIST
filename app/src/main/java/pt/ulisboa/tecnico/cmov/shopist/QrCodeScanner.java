@@ -7,19 +7,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Source;
 import com.google.zxing.Result;
 
@@ -109,23 +103,23 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                     int finalCount = count;
                                     db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task2 -> {
 
-                                        if(task2.isSuccessful()){
+                                        if (task2.isSuccessful()) {
 
                                             Item i = task2.getResult().toObject(Item.class);
                                             String itemId = task2.getResult().getId();
 
-                                            if(!i.users.containsKey(mAuth.getCurrentUser().getUid())){
-                                                Map.Entry<String,String> entry = i.users.entrySet().iterator().next();
+                                            if (!i.users.containsKey(mAuth.getCurrentUser().getUid())) {
+                                                Map.Entry<String, String> entry = i.users.entrySet().iterator().next();
                                                 db.collection("Item").document(task2.getResult().getId()).update("users." + mAuth.getCurrentUser().getUid(), entry.getValue());
                                             }
 
                                             db.collection("StoreList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task3 -> {
-                                                if(task3.isSuccessful()){
+                                                if (task3.isSuccessful()) {
                                                     for (QueryDocumentSnapshot document2 : task3.getResult()) {
                                                         StoreList s = document2.toObject(StoreList.class);
                                                         String storeId = document2.getId();
 
-                                                        if(i.barcode.equals("")){
+                                                        if (i.barcode.equals("")) {
                                                             StoreItem si = new StoreItem(storeId, itemId, pi.idealQuantity - pi.quantity);
                                                             db.collection("StoreItem").add(si);
                                                         }
@@ -133,7 +127,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
                                                     }
 
-                                                    if(finalCount >= task1.getResult().size() - 1){
+                                                    if (finalCount >= task1.getResult().size() - 1) {
                                                         Intent intent = new Intent(QrCodeScanner.this, PantryListActivity.class);
                                                         intent.putExtra("ID", id);
                                                         intent.putExtra("SENDER", "start");
@@ -144,7 +138,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                                 }
                                             });
 
-                                        }else {
+                                        } else {
                                             Log.d("TAG", "Error getting documents: ", task2.getException());
                                         }
 
@@ -158,7 +152,6 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
 
                         });
-
 
 
                     } else {
@@ -180,7 +173,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
                         DocumentSnapshot document = task.getResult();
 
-                        if(document.exists()){
+                        if (document.exists()) {
                             StoreList s = document.toObject(StoreList.class);
 
                             StoreList newStore = new StoreList(s.name, s.latitude, s.longitude, mAuth.getCurrentUser().getUid());
@@ -190,7 +183,7 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                 String newStoreId = documentReference.getId();
 
                                 db.collection("PantryList").whereArrayContains("users", mAuth.getCurrentUser().getUid()).get(source).addOnCompleteListener(task1 -> {
-                                    if(task1.isSuccessful()){
+                                    if (task1.isSuccessful()) {
                                         int pantryListCount = 0;
                                         for (QueryDocumentSnapshot document1 : task1.getResult()) {
                                             String pantryId = document1.getId();
@@ -198,26 +191,26 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
 
                                             int finalPantryListCount = pantryListCount;
                                             db.collection("PantryItem").whereEqualTo("pantryId", pantryId).get(source).addOnCompleteListener(task2 -> {
-                                                if(task2.isSuccessful()){
+                                                if (task2.isSuccessful()) {
                                                     int pantryItemCount = 0;
                                                     for (QueryDocumentSnapshot document2 : task2.getResult()) {
                                                         PantryItem pi = document2.toObject(PantryItem.class);
 
                                                         int finalPantryItemCount = pantryItemCount;
                                                         db.collection("Item").document(pi.itemId).get(source).addOnCompleteListener(task3 -> {
-                                                            if(task3.isSuccessful()){
+                                                            if (task3.isSuccessful()) {
                                                                 DocumentSnapshot document3 = task3.getResult();
                                                                 Item i = document3.toObject(Item.class);
                                                                 String itemId = document3.getId();
 
-                                                                if(i.barcode.equals("")){
+                                                                if (i.barcode.equals("")) {
                                                                     StoreItem si = new StoreItem(newStoreId, itemId, pi.idealQuantity - pi.quantity);
 
                                                                     db.collection("StoreItem").add(si);
                                                                     db.collection("Item").document(itemId).update("stores." + newStoreId, 0);
                                                                 }
 
-                                                                if(finalPantryListCount >= task1.getResult().size()-1 && finalPantryItemCount >= task2.getResult().size()-1){
+                                                                if (finalPantryListCount >= task1.getResult().size() - 1 && finalPantryItemCount >= task2.getResult().size() - 1) {
                                                                     Intent intent = new Intent(QrCodeScanner.this, StoreListActivity.class);
                                                                     intent.putExtra("ID", documentReference.getId());
                                                                     intent.putExtra("SENDER", "start");
@@ -238,17 +231,13 @@ public class QrCodeScanner extends AppCompatActivity implements ZXingScannerView
                                         }
 
 
-
                                     }
                                 });
 
 
-
-
-
                             });
 
-                        }else{
+                        } else {
                             Toast.makeText(this, R.string.invalidQRCode, Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(this, AddListActivity.class);
                             intent.putExtra("MODE", "add");

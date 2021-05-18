@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -137,9 +136,9 @@ public class StoreItemActivity extends AppCompatActivity {
                             float totalRatings = 0;
                             float totalVotes = 0;
 
-                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
                                 previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
-                                ((RadioButton)radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
+                                ((RadioButton) radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
                             }
 
                             for (Map.Entry<String, Integer> entry : item.ratings.entrySet()) {
@@ -329,7 +328,7 @@ public class StoreItemActivity extends AppCompatActivity {
 
 
     public void onSubmitClick(View view) {
-        if(newRating != null && !newRating.equals(previousRating)){
+        if (newRating != null && !newRating.equals(previousRating)) {
             db.collection("Item").document(id).update(
                     "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
             ).addOnCompleteListener(task -> {
@@ -345,7 +344,7 @@ public class StoreItemActivity extends AppCompatActivity {
                                     float totalRatings = 0;
                                     float totalVotes = 0;
 
-                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
                                         previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
                                     }
 

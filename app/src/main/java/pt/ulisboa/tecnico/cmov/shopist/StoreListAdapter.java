@@ -155,8 +155,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
 
         if (cart) {
             view.findViewById(R.id.moveToCart).setVisibility(View.INVISIBLE);
-        }
-        else {
+        } else {
             TextView t = (TextView) view.findViewById(R.id.moveToCartQuantity);
             t.setText(String.valueOf(this.cart_item_quantities.get(position)));
         }
@@ -188,7 +187,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                                            if(task.isSuccessful()) {
+                                                            if (task.isSuccessful()) {
                                                                 DocumentSnapshot document_2 = task.getResult();
                                                                 StoreList s = document_2.toObject(StoreList.class);
                                                                 db.collection("StoreList").document(storeId)
@@ -196,7 +195,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
                                                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                             @Override
                                                                             public void onComplete(@NonNull Task<Void> task) {
-                                                                                if(task.isSuccessful()) {
+                                                                                if (task.isSuccessful()) {
                                                                                     activity.goToStore();
                                                                                 }
                                                                             }
@@ -253,7 +252,7 @@ public class StoreListAdapter extends ArrayAdapter<String> {
             View view1 = inflater.inflate(R.layout.dialog_move_to_cart, null);
 
             EditText e = (EditText) view1.findViewById(R.id.move_to_cart_quantity);
-            if(!cart) e.setText(String.valueOf(this.cart_item_quantities.get(position)));
+            if (!cart) e.setText(String.valueOf(this.cart_item_quantities.get(position)));
             e.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {

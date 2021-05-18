@@ -44,18 +44,20 @@ import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.StoreList;
 
 public class CheckoutActivity extends AppCompatActivity {
 
+    // { itemId -> { pantryId -> quantity, ... }, ... }
+    private final Map<String, Map<String, String>> quantitiesPerPantry = new HashMap<>();
     List<String> item_names = new ArrayList<>();
     List<Integer> item_quantities = new ArrayList<>();
     List<Float> item_prices = new ArrayList<>();
     List<String> item_ids = new ArrayList<>();
     List<String> imageIds = new ArrayList<>();
-    // { itemId -> { pantryId -> quantity, ... }, ... }
-    private final Map<String, Map<String, String>> quantitiesPerPantry = new HashMap<>();
     List<String> pantryIds = new ArrayList<>();
     List<String> pantryNames = new ArrayList<>();
     List<Integer> quantitiesNeeded = new ArrayList<>();
     List<String> pantryQuantities = new ArrayList<>();
     CheckoutListAdapter adapter;
+    FirebaseStorage storage;
+    StorageReference storageRef;
     private int current_item = 0;
     private String id;
     private TextView pos;
@@ -69,27 +71,11 @@ public class CheckoutActivity extends AppCompatActivity {
     private Button confirm;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    FirebaseStorage storage;
-    StorageReference storageRef;
     private boolean everything_loaded = false;
     private Source source;
 
     private List<ItemData> itemData = new ArrayList<>();
-    private class ItemData {
-        String itemId;
-        String item_name;
-        Integer item_quantity;
-        Float item_price;
-        String imageId;
-    }
-
     private List<PantryData> pantryData = new ArrayList<>();
-    private class PantryData {
-        String pantryId;
-        String pantry_name;
-        Integer quantity_needed;
-        String pantry_quantity;
-    }
 
     public static boolean isConnected(Context getApplicationContext) {
         boolean status = false;
@@ -184,7 +170,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     everything_loaded = true;
 
                     itemData.sort(Comparator.comparing(i -> i.item_name.toLowerCase()));
-                    for(ItemData i : itemData) {
+                    for (ItemData i : itemData) {
                         item_names.add(i.item_name);
                         item_quantities.add(i.item_quantity);
                         item_prices.add(i.item_price);
@@ -372,7 +358,7 @@ public class CheckoutActivity extends AppCompatActivity {
                                     if (task16.isSuccessful()) async_operations[0]--;
                                 });
                                 int sq = si.quantity - total_quantity[0];
-                                if(sq <= 0) {
+                                if (sq <= 0) {
                                     sq = 0;
                                     complete_store_items[0]++;
                                 }
@@ -395,24 +381,24 @@ public class CheckoutActivity extends AppCompatActivity {
                         if (async_operations[0] == 0) {
                             db.collection("StoreList").document(id).get(source)
                                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                    if(task.isSuccessful()) {
-                                        DocumentSnapshot d = task.getResult();
-                                        StoreList s = d.toObject(StoreList.class);
-                                        db.collection("StoreList").document(id)
-                                                .update("number_of_items", s.number_of_items - complete_store_items[0])
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                        if(task.isSuccessful()) {
-                                                            finish();
-                                                        }
-                                                    }
-                                                });
-                                    }
-                                }
-                            });
+                                        @Override
+                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                DocumentSnapshot d = task.getResult();
+                                                StoreList s = d.toObject(StoreList.class);
+                                                db.collection("StoreList").document(id)
+                                                        .update("number_of_items", s.number_of_items - complete_store_items[0])
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    finish();
+                                                                }
+                                                            }
+                                                        });
+                                            }
+                                        }
+                                    });
                         } else {
                             timerHandler.postDelayed(this, 100);
                         }
@@ -509,7 +495,7 @@ public class CheckoutActivity extends AppCompatActivity {
                     pantryQuantities.clear();
 
                     pantryData.sort(Comparator.comparing(i -> i.pantry_name.toLowerCase()));
-                    for(PantryData d : pantryData) {
+                    for (PantryData d : pantryData) {
                         pantryIds.add(d.pantryId);
                         pantryNames.add(d.pantry_name);
                         quantitiesNeeded.add(d.quantity_needed);
@@ -538,5 +524,20 @@ public class CheckoutActivity extends AppCompatActivity {
         }// If we got here, the user's action was not recognized.
         // Invoke the superclass to handle it.
         return super.onOptionsItemSelected(item);
+    }
+
+    private class ItemData {
+        String itemId;
+        String item_name;
+        Integer item_quantity;
+        Float item_price;
+        String imageId;
+    }
+
+    private class PantryData {
+        String pantryId;
+        String pantry_name;
+        Integer quantity_needed;
+        String pantry_quantity;
     }
 }

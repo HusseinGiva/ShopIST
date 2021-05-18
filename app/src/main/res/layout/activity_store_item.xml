@@ -6,287 +6,287 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".StoreItemActivity">
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/storeItemToolbar"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/Theme.ShopIST"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:menu="@menu/item_share_flag"
-        app:theme="@style/Theme.Toolbar" />
+        tools:context=".StoreItemActivity">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginTop="60dp"
-        android:text="@string/storeQuantity"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/storeItemToolbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/Theme.ShopIST"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:menu="@menu/item_share_flag"
+            app:theme="@style/Theme.Toolbar" />
 
-    <EditText
-        android:id="@+id/itemStoreQuantity"
-        android:layout_width="197dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/storeQuantity"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="60dp"
+            android:text="@string/storeQuantity"
+            android:textSize="24sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginTop="60dp"
-        android:text="@string/cartQuantity"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <EditText
+            android:id="@+id/itemStoreQuantity"
+            android:layout_width="197dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="100dp"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/storeQuantity"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <EditText
-        android:id="@+id/itemCartQuantity"
-        android:layout_width="182dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="100dp"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/cartQuantity"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="60dp"
+            android:text="@string/cartQuantity"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="200dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/barcodeNumber"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <EditText
+            android:id="@+id/itemCartQuantity"
+            android:layout_width="182dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="100dp"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/cartQuantity"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <EditText
-        android:id="@+id/barcodeNumberStoreItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="100dp"
-        android:layout_marginEnd="100dp"
-        android:duplicateParentState="false"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/barcodeNumber"
-        android:importantForAutofill="no"
-        android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="200dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/barcodeNumber"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <TextView
-        android:id="@+id/textView5"
-        android:layout_width="197dp"
-        android:layout_height="34dp"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/price"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barcodeNumberStoreItem" />
-
-    <EditText
-        android:id="@+id/priceStoreItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginEnd="100dp"
-        android:duplicateParentState="false"
-        android:ems="10"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:hint="@string/price"
-        android:importantForAutofill="no"
-        android:inputType="numberDecimal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView5" />
-
-    <Button
-        android:id="@+id/viewPicturesStore"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="100dp"
-        android:onClick="onClickViewImages"
-        android:text="@string/viewPictures"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/priceStoreItem" />
-
-    <TextView
-        android:id="@+id/yourRatingTextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="508dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/yourRating"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
-
-    <RadioGroup
-        android:id="@+id/storeRadioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginStart="120dp"
-        android:layout_marginTop="564dp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <RadioButton
-            android:id="@+id/storeRating1selected"
+        <EditText
+            android:id="@+id/barcodeNumberStoreItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="1" />
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="100dp"
+            android:layout_marginEnd="100dp"
+            android:duplicateParentState="false"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/barcodeNumber"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/itemStoreQuantity" />
 
-        <RadioButton
-            android:id="@+id/storeRating2selected"
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="197dp"
+            android:layout_height="34dp"
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/price"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/barcodeNumberStoreItem" />
+
+        <EditText
+            android:id="@+id/priceStoreItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2" />
-
-        <RadioButton
-            android:id="@+id/storeRating3selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="3" />
-
-        <RadioButton
-            android:id="@+id/storeRating4selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="4" />
-
-        <RadioButton
-            android:id="@+id/storeRating5selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="5" />
+            android:layout_marginStart="100dp"
+            android:layout_marginEnd="100dp"
+            android:duplicateParentState="false"
+            android:ems="10"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:hint="@string/price"
+            android:importantForAutofill="no"
+            android:inputType="numberDecimal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/viewPicturesStore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/submit"
-            android:onClick="onSubmitClick"/>
-    </RadioGroup>
+            android:layout_marginStart="100dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginEnd="100dp"
+            android:onClick="onClickViewImages"
+            android:text="@string/viewPictures"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/priceStoreItem" />
 
-    <TextView
-        android:id="@+id/avgRatingTextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="550dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/averageRating"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <TextView
+            android:id="@+id/yourRatingTextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="508dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/yourRating"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
-    <TextView
-        android:id="@+id/star5TextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="590dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes5star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+        <RadioGroup
+            android:id="@+id/storeRadioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="120dp"
+            android:layout_marginTop="564dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/star4TextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="630dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes4star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+            <RadioButton
+                android:id="@+id/storeRating1selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1" />
 
-    <TextView
-        android:id="@+id/star3TextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="670dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes3star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+            <RadioButton
+                android:id="@+id/storeRating2selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2" />
 
-    <TextView
-        android:id="@+id/star2TextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="710dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes2star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+            <RadioButton
+                android:id="@+id/storeRating3selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3" />
 
-    <TextView
-        android:id="@+id/star1TextStore"
-        android:layout_width="wrap_content"
-        android:layout_height="34dp"
-        android:layout_marginTop="750dp"
-        android:layout_marginEnd="100dp"
-        android:text="@string/votes1star"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.085"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+            <RadioButton
+                android:id="@+id/storeRating4selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4" />
+
+            <RadioButton
+                android:id="@+id/storeRating5selected"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5" />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onSubmitClick"
+                android:text="@string/submit" />
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/avgRatingTextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="550dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/averageRating"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+        <TextView
+            android:id="@+id/star5TextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="590dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes5star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+        <TextView
+            android:id="@+id/star4TextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="630dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes4star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+        <TextView
+            android:id="@+id/star3TextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="670dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes3star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+        <TextView
+            android:id="@+id/star2TextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="710dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes2star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
+
+        <TextView
+            android:id="@+id/star1TextStore"
+            android:layout_width="wrap_content"
+            android:layout_height="34dp"
+            android:layout_marginTop="750dp"
+            android:layout_marginEnd="100dp"
+            android:text="@string/votes1star"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.085"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/storeItemToolbar" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

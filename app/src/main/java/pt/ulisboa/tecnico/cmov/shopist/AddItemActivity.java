@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputType;
-import android.util.Log;
 import android.util.Size;
 import android.view.MenuItem;
 import android.view.View;
@@ -1554,8 +1553,6 @@ public class AddItemActivity extends AppCompatActivity {
                             }
                             intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
                             storesResultLauncher.launch(intent);
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
                     });
         } else if (getIntent().getStringExtra("MODE").equals("add")) {
@@ -1599,8 +1596,6 @@ public class AddItemActivity extends AppCompatActivity {
                             }
                             intent.putParcelableArrayListExtra("STORES", storeViewAddItems);
                             storesResultLauncher.launch(intent);
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
                     });
         }
@@ -2079,10 +2074,6 @@ public class AddItemActivity extends AppCompatActivity {
                                     }
                                 }
                             })
-                            .addOnFailureListener(e -> {
-                                Log.e("Error", "exception", e);
-                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                            })
                             .addOnCompleteListener(task -> image.close());
                 });
                 cameraProvider.bindToLifecycle(this, cameraSelector, imageAnalysis, preview);
@@ -2104,8 +2095,6 @@ public class AddItemActivity extends AppCompatActivity {
                         Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                     startCamera();
                 }
-            } else {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -2251,13 +2240,9 @@ public class AddItemActivity extends AppCompatActivity {
                                                             storeViewAddItems.add(storeViewAddItem);
                                                         }
                                                     }
-                                                } else {
-                                                    Log.d("TAG", "Error getting documents: ", task.getException());
                                                 }
                                             });
                                 }
-                            } else {
-                                Log.d("TAG", "Error getting documents: ", task.getException());
                             }
                         });
             }

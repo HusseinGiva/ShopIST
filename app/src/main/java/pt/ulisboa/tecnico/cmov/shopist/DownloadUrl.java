@@ -77,11 +77,10 @@ public class DownloadUrl extends AsyncTask<Object, Void, String> {
             jsonObject = new JSONObject(s);
             status = jsonObject.getJSONArray("rows").getJSONObject(0).getJSONArray("elements")
                     .getJSONObject(0).getString("status");
-            if(status.equals("OK")) {
+            if (status.equals("OK")) {
                 driveTime = jsonObject.getJSONArray("rows").getJSONObject(0).getJSONArray("elements")
                         .getJSONObject(0).getJSONObject("duration").getString("text");
-            }
-            else driveTime = "-1";
+            } else driveTime = "-1";
         } catch (JSONException e) {
             e.printStackTrace();
             driveTime = "-1";

@@ -20,7 +20,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import pt.ulisboa.tecnico.cmov.shopist.persistence.domain.Item;
@@ -43,21 +42,6 @@ public class StoreListFragment extends Fragment {
     private Source source;
 
     private List<Data> data = new ArrayList<>();
-    private class Data implements Comparable<Data> {
-        String itemId;
-        String store_item_name;
-        Integer store_item_quantity;
-        Integer cart_item_quantity;
-        Float item_price;
-        String imageId;
-
-        @Override
-        public int compareTo(Data d) {
-            if(this.cart_item_quantity < d.cart_item_quantity) return -1;
-            else if(this.cart_item_quantity > d.cart_item_quantity) return 1;
-            else return this.store_item_name.compareTo(d.store_item_name);
-        }
-    }
 
     public StoreListFragment() {
     }
@@ -151,18 +135,18 @@ public class StoreListFragment extends Fragment {
                                                     String storeId = si.storeId;
                                                     if (i.stores.containsKey(storeId)) {
                                                         Data d = new Data();
-                                                        if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
                                                             d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                         else
                                                             d.store_item_name = i.users.entrySet().iterator().next().getValue();
-
 
 
                                                         d.store_item_quantity = si.quantity;
                                                         d.cart_item_quantity = si.cartQuantity;
                                                         d.itemId = document112.getId();
                                                         d.item_price = i.stores.get(storeId);
-                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                        if (i.barcode.equals(""))
+                                                            d.imageId = si.itemId;
                                                         else d.imageId = i.barcode;
                                                         data.add(d);
                                                     } else {
@@ -180,14 +164,14 @@ public class StoreListFragment extends Fragment {
                                                                                 if (document2.exists()) {
                                                                                     StoreList sl2 = document2.toObject(StoreList.class);
                                                                                     float[] results = new float[1];
-                                                                                    if(sl.latitude != null && sl.longitude != null && sl2.latitude != null && sl2.longitude != null)
+                                                                                    if (sl.latitude != null && sl.longitude != null && sl2.latitude != null && sl2.longitude != null)
                                                                                         Location.distanceBetween(Double.parseDouble(sl.latitude), Double.parseDouble(sl.longitude),
                                                                                                 Double.parseDouble(sl2.latitude), Double.parseDouble(sl2.longitude),
                                                                                                 results);
                                                                                     //Less than 20 meters
                                                                                     if (results[0] < 20f) {
                                                                                         Data d = new Data();
-                                                                                        if(i.users.containsKey(mAuth.getCurrentUser().getUid()))
+                                                                                        if (i.users.containsKey(mAuth.getCurrentUser().getUid()))
                                                                                             d.store_item_name = i.users.get(mAuth.getCurrentUser().getUid());
                                                                                         else
                                                                                             d.store_item_name = i.users.entrySet().iterator().next().getValue();
@@ -195,8 +179,10 @@ public class StoreListFragment extends Fragment {
                                                                                         d.cart_item_quantity = si.cartQuantity;
                                                                                         d.itemId = document112.getId();
                                                                                         d.item_price = i.stores.get(s);
-                                                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
-                                                                                        else d.imageId = i.barcode;
+                                                                                        if (i.barcode.equals(""))
+                                                                                            d.imageId = si.itemId;
+                                                                                        else
+                                                                                            d.imageId = i.barcode;
                                                                                         data.add(d);
                                                                                     }
                                                                                     async_operations[0]--;
@@ -244,7 +230,7 @@ public class StoreListFragment extends Fragment {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
-                    if(server_n_items[0] != real_n_items[0]) {
+                    if (server_n_items[0] != real_n_items[0]) {
                         db.collection("StoreList").document(id).update("number_of_items", real_n_items[0]);
                     }
                     sort();
@@ -268,13 +254,29 @@ public class StoreListFragment extends Fragment {
         item_prices.clear();
         imageIds.clear();
 
-        for(Data d : data) {
+        for (Data d : data) {
             itemIds.add(d.itemId);
             store_item_names.add(d.store_item_name);
             store_item_quantities.add(d.store_item_quantity);
             cart_item_quantities.add(d.cart_item_quantity);
             item_prices.add(d.item_price);
             imageIds.add(d.imageId);
+        }
+    }
+
+    private class Data implements Comparable<Data> {
+        String itemId;
+        String store_item_name;
+        Integer store_item_quantity;
+        Integer cart_item_quantity;
+        Float item_price;
+        String imageId;
+
+        @Override
+        public int compareTo(Data d) {
+            if (this.cart_item_quantity < d.cart_item_quantity) return -1;
+            else if (this.cart_item_quantity > d.cart_item_quantity) return 1;
+            else return this.store_item_name.compareTo(d.store_item_name);
         }
     }
 }

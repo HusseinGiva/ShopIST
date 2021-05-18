@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -135,14 +134,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                         firstName.setText((CharSequence) document.getData().get("firstName"));
                         lastName.setText((CharSequence) document.getData().get("lastName"));
-                    } else {
-                        Log.d(TAG, "No such document");
                     }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
                 }
             });
 
@@ -195,9 +189,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                                                 db.collection("PantryList").document(document.getId()).update("users", pantry.users);
                                             }
                                         }
-                                    } else {
-                                        Log.d(TAG, "Error getting documents: ", task.getException());
-
                                     }
                                 });
 

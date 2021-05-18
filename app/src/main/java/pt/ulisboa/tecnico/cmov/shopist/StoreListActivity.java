@@ -256,8 +256,8 @@ public class StoreListActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if(task.isSuccessful()) {
-                            for(QueryDocumentSnapshot document_1 : task.getResult()) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document_1 : task.getResult()) {
                                 StoreItem si = document_1.toObject(StoreItem.class);
                                 m1.put(si.itemId, 0);
                                 m2.put(si.itemId, document_1.getId());
@@ -269,8 +269,8 @@ public class StoreListActivity extends AppCompatActivity {
                                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                         @Override
                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                            if(task.isSuccessful()) {
-                                                for(QueryDocumentSnapshot document_2 : task.getResult()) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document_2 : task.getResult()) {
                                                     PantryList p = document_2.toObject(PantryList.class);
                                                     async_operations[0]++;
                                                     db.collection("PantryItem")
@@ -278,8 +278,8 @@ public class StoreListActivity extends AppCompatActivity {
                                                             .get(source).addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                                                            if(task.isSuccessful()) {
-                                                                for(QueryDocumentSnapshot document_3 : task.getResult()) {
+                                                            if (task.isSuccessful()) {
+                                                                for (QueryDocumentSnapshot document_3 : task.getResult()) {
                                                                     PantryItem pi = document_3.toObject(PantryItem.class);
                                                                     pis.add(pi);
                                                                 }
@@ -305,25 +305,25 @@ public class StoreListActivity extends AppCompatActivity {
             @Override
             public void run() {
                 if (async_operations[0] == 0) {
-                    for(PantryItem pi : pis) {
-                        if(m1.containsKey(pi.itemId)) {
+                    for (PantryItem pi : pis) {
+                        if (m1.containsKey(pi.itemId)) {
                             int q = m1.get(pi.itemId);
                             m1.put(pi.itemId, q + pi.idealQuantity - pi.quantity);
                         }
                     }
                     int[] n_items = {0};
-                    for(Map.Entry<String, Integer> kvp : m1.entrySet()) {
+                    for (Map.Entry<String, Integer> kvp : m1.entrySet()) {
                         int q = kvp.getValue();
                         String siId = m2.get(kvp.getKey());
 
-                        if(q > 0) n_items[0]++;
+                        if (q > 0) n_items[0]++;
 
                         async_operations[0]++;
                         db.collection("StoreItem").document(siId).update("quantity", q)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        if(task.isSuccessful()) async_operations[0]--;
+                                        if (task.isSuccessful()) async_operations[0]--;
                                     }
                                 });
                     }

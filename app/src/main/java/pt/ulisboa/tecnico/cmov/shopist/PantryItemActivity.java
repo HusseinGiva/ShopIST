@@ -16,18 +16,14 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -134,9 +130,9 @@ public class PantryItemActivity extends AppCompatActivity {
                             float totalRatings = 0;
                             float totalVotes = 0;
 
-                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                            if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
                                 previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
-                                ((RadioButton)radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
+                                ((RadioButton) radioGroup.getChildAt(item.ratings.get(mAuth.getCurrentUser().getUid()) - 1)).setChecked(true);
                             }
 
 
@@ -289,7 +285,7 @@ public class PantryItemActivity extends AppCompatActivity {
 
 
     public void onSubmitClick(View view) {
-        if(newRating != null && !newRating.equals(previousRating)){
+        if (newRating != null && !newRating.equals(previousRating)) {
             db.collection("Item").document(id).update(
                     "ratings." + mAuth.getCurrentUser().getUid(), Integer.parseInt(newRating)
             ).addOnCompleteListener(task -> {
@@ -305,7 +301,7 @@ public class PantryItemActivity extends AppCompatActivity {
                                     float totalRatings = 0;
                                     float totalVotes = 0;
 
-                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())){
+                                    if (item.ratings.containsKey(mAuth.getCurrentUser().getUid())) {
                                         previousRating = item.ratings.get(mAuth.getCurrentUser().getUid()).toString();
                                     }
 

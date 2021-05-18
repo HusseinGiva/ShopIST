@@ -29,10 +29,9 @@ public class ViewPicturesActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();    //Call the back button's method
+            onBackPressed();
             return true;
-        }// If we got here, the user's action was not recognized.
-        // Invoke the superclass to handle it.
+        }
         return super.onOptionsItemSelected(item);
     }
 

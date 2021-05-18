@@ -55,13 +55,6 @@ public class CartFragment extends Fragment {
     private Source source;
 
     private List<Data> data = new ArrayList<>();
-    private class Data {
-        String itemId;
-        String store_item_name;
-        Integer store_item_quantity;
-        Float item_price;
-        String imageId;
-    }
 
     public CartFragment() {
         // Required empty public constructor
@@ -184,7 +177,8 @@ public class CartFragment extends Fragment {
                                                         d.store_item_quantity = si.cartQuantity;
                                                         d.itemId = si.itemId;
                                                         d.item_price = i.stores.get(storeId);
-                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
+                                                        if (i.barcode.equals(""))
+                                                            d.imageId = si.itemId;
                                                         else d.imageId = i.barcode;
                                                         data.add(d);
 
@@ -226,8 +220,10 @@ public class CartFragment extends Fragment {
                                                                                         d.store_item_quantity = si.cartQuantity;
                                                                                         d.itemId = si.itemId;
                                                                                         d.item_price = i.stores.get(storeId);
-                                                                                        if (i.barcode.equals("")) d.imageId = si.itemId;
-                                                                                        else d.imageId = i.barcode;
+                                                                                        if (i.barcode.equals(""))
+                                                                                            d.imageId = si.itemId;
+                                                                                        else
+                                                                                            d.imageId = i.barcode;
                                                                                         data.add(d);
 
                                                                                         total_cost[0] += si.cartQuantity * i.stores.get(s);
@@ -309,12 +305,20 @@ public class CartFragment extends Fragment {
         item_prices.clear();
         imageIds.clear();
 
-        for(Data d : data) {
+        for (Data d : data) {
             itemIds.add(d.itemId);
             store_item_names.add(d.store_item_name);
             store_item_quantities.add(d.store_item_quantity);
             item_prices.add(d.item_price);
             imageIds.add(d.imageId);
         }
+    }
+
+    private class Data {
+        String itemId;
+        String store_item_name;
+        Integer store_item_quantity;
+        Float item_price;
+        String imageId;
     }
 }

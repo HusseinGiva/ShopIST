@@ -8,7 +8,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -157,10 +156,6 @@ public class AddStoresActivity extends AppCompatActivity implements StoresFragme
 
     @Override
     public void onListFragmentInteraction(StoreViewAddItem mItem) {
-        //Intent intent = new Intent(this, ViewPicturesActivity.class);
-        //intent.putExtra("URI", mItem.toString());
-        //startActivity(intent);
-        Toast.makeText(this, mItem.name, Toast.LENGTH_SHORT).show();
         mItem.isChecked = !mItem.isChecked;
     }
 
